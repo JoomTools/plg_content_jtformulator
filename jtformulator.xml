@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="2.5" type="plugin" group="content" method="upgrade">
+	<name>PLG_JT_FORMULATOR_XML_NAME</name>
+	<creationDate>April 2014</creationDate>
+	<author>Guido De Gobbis</author>
+	<authorEmail>jtformulator@joomtools.de</authorEmail>
+	<authorUrl>http://www.joomtools.de</authorUrl>
+	<copyright>Copyright (C) JoomTools.de. All rights reserved.</copyright>
+	<license>JTL-NN-AE-KW (http://www.joomtools.de/lizenzen.html)</license>
+	<version>1.0.8</version>
+	<description>PLG_JT_FORMULATOR_XML_DESC</description>
+
+	<files>
+		<filename plugin="jtformulator">jtformulator.php</filename>
+		<folder>language</folder>
+		<folder>assets</folder>
+		<folder>tmpl</folder>
+	</files>
+
+	<languages>
+		<language tag="de-DE">language/de-DE/de-DE.plg_content_jtformulator.ini</language>
+		<language tag="de-DE">language/de-DE/de-DE.plg_content_jtformulator.sys.ini</language>
+	</languages>
+
+	<config>
+	  <fields name="params">
+			<fieldset name="basic">
+
+				<field name="captcha"
+						type="list"
+						class="chzn-color-state"
+						default="custom"
+						label="PLG_JT_FORMULATOR_XML_CAPTCHA_LABEL"
+						description="PLG_JT_FORMULATOR_XML_CAPTCHA_DESC">
+					<option value="0">JOPTION_DO_NOT_USE</option>
+					<option value="custom">PLG_JT_FORMULATOR_XML_CAPTCHA_VALUE_CUSTOM</option>
+					<option value="joomla">PLG_JT_FORMULATOR_XML_CAPTCHA_VALUE_JOOMLA</option>
+				</field>
+
+				<field name="error_class"
+						type="text"
+						default=""
+						label="PLG_JT_FORMULATOR_XML_ERROR_CLASS_LABEL"
+						description="PLG_JT_FORMULATOR_XML_ERROR_CLASS_DESC" />
+
+				<field name="debug"
+						type="radio"
+						class="btn-group"
+						default="0"
+						label="PLG_JT_FORMULATOR_XML_DEBUG_LABEL"
+						description="PLG_JT_FORMULATOR_XML_DEBUG_DESC">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+
+			</fieldset>
+	  </fields>    
+	</config>
+
+	<updateservers>
+		<server type="collection" name="joomtools.de - Updateserver">http://updates.joomtools.de/extensions.xml</server>
+	</updateservers>
+
+</extension>

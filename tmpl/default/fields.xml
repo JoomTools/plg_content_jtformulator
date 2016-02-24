@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+	<fieldset>
+		<field name="name"
+			type="text"
+			class="inputbox"
+			size="30"
+			description="JT_FORMULATOR_DEFAULT_FORM_NAME_DESC"
+			label="JT_FORMULATOR_DEFAULT_FORM_NAME_LABEL"
+			filter="string"
+			required="true"
+		/>
+		<field name="email"
+			type="email"
+			class="inputbox"
+			size="30"
+			description="JT_FORMULATOR_DEFAULT_FORM_EMAIL_DESC"
+			label="JT_FORMULATOR_DEFAULT_FORM_EMAIL_LABEL"
+			filter="string"
+			validate="email"
+			required="true"
+		/>
+		<field name="subject"
+			type="text"
+			class="inputbox"
+			size="60"
+			description="JT_FORMULATOR_DEFAULT_FORM_SUBJECT_DESC"
+			label="JT_FORMULATOR_DEFAULT_FORM_SUBJECT_LABEL"
+			filter="string"
+			required="true"
+		/>
+		<field name="message"
+			type="textarea"
+			class="inputbox"
+			cols="50"
+			rows="10"
+			description="JT_FORMULATOR_DEFAULT_FORM_MESSAGE_DESC"
+			label="JT_FORMULATOR_DEFAULT_FORM_MESSAGE_LABEL"
+			filter="safehtml"
+			required="true"
+		/>
+	</fieldset>
+</form>
