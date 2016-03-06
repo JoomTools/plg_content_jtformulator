@@ -69,7 +69,7 @@ class plgContentJtformulator extends JPlugin {
 		$this->key['publickey'] = $this->params->get('publickey','6LfusfASAAAAAEH0QnEZrHjR6xYCG0Z68xVnj2bv');
 		$this->key['privatekey']  = $this->params->get('privatekey','6LfusfASAAAAAH_yfd1UnO3wD-YANEId9aPQLOsS');
 
-		$regex = "@(<(\w+)[^>]*>|){jtformulator(\s.*)?}(</[^>]+>|)@Uis";
+		$regex = "@(<(\\w+)[^>]*>|){jtformulator(\\s.*)?}(</\\2>|)@";
 		if (@preg_match_all( $regex, $row->text, $matches ) <= 0) {
 			if($fb) $fb->error($matches,'ABBRUCH! Pluginaufruf ist fehlerhaft -> $matches');
 			return;
