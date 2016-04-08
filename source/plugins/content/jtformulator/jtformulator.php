@@ -5,10 +5,8 @@
  * @author		Guido De Gobbis
  * @link		http://www.joomtools.de
  *
- * @license		JTL-NN-AE-KW (http://www.joomtools.de/lizenzen.html)
+ * @license		GPL v3
  *
- * You should have received a copy of the JoomTools.de License
- * along with this program. If not, see <http://www.joomtools.de/lizenzen.html>.
  **/
 
 defined( '_JEXEC' ) or die( 'Restricted access' );

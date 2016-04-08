@@ -1,25 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="2.5" type="plugin" group="content" method="upgrade">
 	<name>PLG_JT_FORMULATOR_XML_NAME</name>
-	<creationDate>April 2014</creationDate>
+	<creationDate>##DATE##</creationDate>
 	<author>Guido De Gobbis</author>
-	<authorEmail>jtformulator@joomtools.de</authorEmail>
-	<authorUrl>http://www.joomtools.de</authorUrl>
-	<copyright>Copyright (C) JoomTools.de. All rights reserved.</copyright>
-	<license>JTL-NN-AE-KW (http://www.joomtools.de/lizenzen.html)</license>
-	<version>1.0.9</version>
+	<authorEmail>support@joomtools.de</authorEmail>
+	<authorUrl>www.joomtools.de</authorUrl>
+	<copyright>Copyright (C) ##YEAR## JoomTools.de. All rights reserved.</copyright>
+	<license>GPL v3</license>
+	<version>##VERSION##</version>
 	<description>PLG_JT_FORMULATOR_XML_DESC</description>
 
 	<files>
-		<filename plugin="jtformulator">jtformulator.php</filename>
-		<folder>language</folder>
-		<folder>assets</folder>
-		<folder>tmpl</folder>
+		##FILES##
 	</files>
 
-	<languages>
-		<language tag="de-DE">language/de-DE/de-DE.plg_content_jtformulator.ini</language>
-		<language tag="de-DE">language/de-DE/de-DE.plg_content_jtformulator.sys.ini</language>
+	<languages folder="administrator/language">
+		##LANGUAGE_FILES##
 	</languages>
 
 	<config>
@@ -56,9 +52,4 @@
 			</fieldset>
 	  </fields>    
 	</config>
-
-	<updateservers>
-		<server type="collection" name="joomtools.de - Updateserver">http://updates.joomtools.de/extensions.xml</server>
-	</updateservers>
-
 </extension>

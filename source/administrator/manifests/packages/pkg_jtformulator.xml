@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<extension type="package" version="3.0" method="upgrade">
+	<name>pkg_jtformulator</name>
+	<packagename>JT-Formulator</packagename>
+	<creationDate>##DATE##</creationDate>
+	<packager>JoomTools</packager>
+	<copyright>Copyright (C) ##YEAR## JoomTools.de. All rights reserved.</copyright>
+	<packagerurl>www.joomtools.de</packagerurl>
+	<author>Guido De Gobbis</author>
+	<authorEmail>support@joomtools.de</authorEmail>
+	<authorUrl>www.joomtools.de</authorUrl>
+	<version>##VERSION##</version>
+	<license>GPL v3</license>
+	<description>Plugin to create individual forms</description>
+	<files>
+		<!-- The id for each extension is the element stored in the DB -->
+		<file type="plugin" id="jformulator" group="content">plg_content_jtformulator.zip</file>
+	</files>
+
+	<updateservers>
+		<server type="collection" name="joomtools.de - Updateserver">http://updates.joomtools.de/extensions.xml</server>
+	</updateservers>
+</extension>
