@@ -1,15 +1,12 @@
 <?php
 /**
- * @Copyright	(c) JoomTools.de - All rights reserved.
- * @package		JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
- * @author		Guido De Gobbis
- * @link		http://www.joomtools.de
- *
- * @license		JTL-NN-AE-KW (http://www.joomtools.de/lizenzen.html)
- *
- * You should have received a copy of the JoomTools.de License
- * along with this program. If not, see <http://www.joomtools.de/lizenzen.html>.
- **/
+* @Copyright	(c) JoomTools.de - All rights reserved.
+* @package		JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
+* @author		Guido De Gobbis
+* @link 		http://www.joomtools.de
+*
+* @license		GPL v3
+**/
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 

@@ -29,7 +29,6 @@
 						label="PLG_JT_FORMULATOR_XML_CAPTCHA_LABEL"
 						description="PLG_JT_FORMULATOR_XML_CAPTCHA_DESC">
 					<option value="0">JOPTION_DO_NOT_USE</option>
-					<option value="custom">PLG_JT_FORMULATOR_XML_CAPTCHA_VALUE_CUSTOM</option>
 					<option value="joomla">PLG_JT_FORMULATOR_XML_CAPTCHA_VALUE_JOOMLA</option>
 				</field>
 
@@ -39,17 +38,11 @@
 						label="PLG_JT_FORMULATOR_XML_ERROR_CLASS_LABEL"
 						description="PLG_JT_FORMULATOR_XML_ERROR_CLASS_DESC" />
 
-				<field name="debug"
-						type="radio"
-						class="btn-group"
-						default="0"
-						label="PLG_JT_FORMULATOR_XML_DEBUG_LABEL"
-						description="PLG_JT_FORMULATOR_XML_DEBUG_DESC">
-					<option value="1">JYES</option>
-					<option value="0">JNO</option>
-				</field>
-
 			</fieldset>
 	  </fields>    
 	</config>
+
+	<updateservers>
+		<server type="collection" name="joomtools.de - Updateserver">http://updates.joomtools.de/extensions.xml</server>
+	</updateservers>
 </extension>

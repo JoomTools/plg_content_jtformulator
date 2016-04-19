@@ -37,4 +37,14 @@ class RoboFile extends \Robo\Tasks
 
 		$this->taskBuild($params)->run();
 	}
+
+	/**
+	 * Update copyright headers for this project. (Set the text up in the jorobo.ini)
+	 *
+	 * @return  void
+	 */
+	public function headers()
+	{
+		(new \Joomla\Jorobo\Tasks\CopyrightHeader())->run();
+	}
 }

@@ -1,4 +1,14 @@
-<?php defined('_JEXEC') or die; ?>
+<?php 
+/**
+* @Copyright	(c) JoomTools.de - All rights reserved.
+* @package		JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
+* @author		Guido De Gobbis
+* @link 		http://www.joomtools.de
+*
+* @license		GPL v3
+**/
+defined('_JEXEC') or die;
+?>
 <br />
 <p><?php echo JText::_( 'JT_FORMULATOR_EXTENDED_MESSAGE_INTRO' ); ?></p>
 <br />
