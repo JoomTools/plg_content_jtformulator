@@ -1,6 +1,6 @@
 <?php
 /**
-* @Copyright	(c) JoomTools.de - All rights reserved.
+* @Copyright	(c) 2016 JoomTools.de - All rights reserved.
 * @package		JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
 * @author		Guido De Gobbis
 * @link 		http://www.joomtools.de
