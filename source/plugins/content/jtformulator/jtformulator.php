@@ -1,12 +1,12 @@
 <?php
 /**
-* @Copyright	(c) 2016 JoomTools.de - All rights reserved.
-* @package		JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
-* @author		Guido De Gobbis
-* @link 		http://www.joomtools.de
-*
-* @license		GPL v3
-**/
+ * @Copyright    (c) 2016 JoomTools.de - All rights reserved.
+ * @package        JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
+ * @author         Guido De Gobbis
+ * @link           http://www.joomtools.de
+ *
+ * @license        GPL v3
+ **/
 
 defined('_JEXEC') or die('Restricted access');
 
@@ -16,6 +16,7 @@ class plgContentJtformulator extends JPlugin
 	// Captcha
 	protected $captcha;
 	protected $validCaptcha = true;
+	protected $validField = true;
 
 	// Formular
 	protected $form = array();
@@ -293,92 +294,25 @@ class plgContentJtformulator extends JPlugin
 
 	protected function _validate()
 	{
-		$valid         = JSession::checkToken();
+		$token         = JSession::checkToken();
 		$valid_captcha = true;
-		$errorClass    = $this->params->get('error_class', 'invalid');
-		$data          = $this->form[$this->uParams['theme']]->getData()->toArray();
-		$fieldXML      = $this->form[$this->uParams['theme']]->getXML()->fieldset->children();
+		$fieldXML = $this->form[$this->uParams['theme']]->getXML();
 
-//		echo "<pre>";
-//		print_r($this->form[$this->uParams['theme']]->getField('setter')->value);
-//		echo "</pre>";
-//		die;
-		foreach ($fieldXML as $field)
+		foreach ($fieldXML as $fieldset)
 		{
-			$rule            = '';
-			$value           = '';
-			$fieldClass      = '';
-			$showon_value    = '';
-			$showon          = array();
-			$fieldvalidation = true;
-			$type            = (string) $field['type'];
-			$validate        = (string) $field['validate'];
-			$required        = (string) $field['required'];
-			$name            = (string) $field['name'];
+			$count = count($fieldset->field);
 
-
-			if (isset($data[$name]))
+			if ($count > 1)
 			{
-				$value = $data[$name];
-			}
-
-			if ((string) $field['showon'])
-			{
-				$showon = explode(':', (string) $field['showon']);
-				$showon_value = $this->form[$this->uParams['theme']]->getField($showon[0])->value;
-
-				if ($required && $showon[1] != $showon_value)
+				foreach ($fieldset->field as $field)
 				{
-					$required = false;
+					$this->_validateField($field);
 				}
 			}
-
-			if ($field->option)
+			else
 			{
-				foreach ($field->option as $option)
-				{
-					$option->attributes()->value = JText::_($option->attributes()->value);
-				}
+				$this->_validateField($fieldset->field);
 			}
-
-			if (($required == 'true' || $required == 'required') && !$value)
-			{
-				$fieldvalidation = false;
-			}
-
-			if ($type == 'email' || $validate == 'email')
-			{
-				$validate  = $validate ? $validate : 'email';
-				$emailName = $name;
-			}
-
-			if ($validate && $fieldvalidation)
-			{
-
-				if ($validate == 'email')
-				{
-					$field->addAttribute('tld', 'tld');
-				}
-
-				$rule = JFormHelper::loadRuleType($validate);
-
-			}
-
-			$test = ($rule && $fieldvalidation)
-				? $rule->test($field, $value)
-				: $fieldvalidation;
-
-			if ($test == false)
-			{
-				$fieldClass = $this->form[$this->uParams['theme']]->getFieldAttribute($name, 'class');
-				$fieldClass = $fieldClass
-					? trim(str_replace($errorClass, '', $fieldClass)) . ' '
-					: '';
-
-				$this->form[$this->uParams['theme']]->setFieldAttribute($name, 'class', $fieldClass . $errorClass);
-				$valid = false;
-			}
-
 		} // end foreach
 
 		if ($this->uParams['captcha'] == 'joomla')
@@ -399,7 +333,7 @@ class plgContentJtformulator extends JPlugin
 
 		$this->validCaptcha = $valid_captcha;
 
-		$valid = ($valid && $valid_captcha) ? true : false;
+		$valid = ($token && $valid_captcha && $this->validField) ? true : false;
 
 		if (!$valid)
 		{
@@ -407,21 +341,110 @@ class plgContentJtformulator extends JPlugin
 				->enqueueMessage(
 					JText::_('PLG_JT_FORMULATOR_FIELD_ERROR'), 'error'
 				);
+		}
 
+		return $valid;
+	}
+
+	protected function _validateField($field)
+	{
+		$errorClass      = $this->params->get('error_class', 'invalid');
+		$data            = $this->form[$this->uParams['theme']]->getData()->toArray();
+		$rule            = '';
+		$value           = '';
+		$showon_value    = '';
+		$showon          = array();
+		$fieldvalidation = true;
+		$valid           = true;
+		$type            = (string) $field['type'];
+		$validate        = (string) $field['validate'];
+		$required        = (string) $field['required'];
+		$name            = (string) $field['name'];
+		$class           = (string) $field['class'];
+
+		if (isset($data[$name]))
+		{
+			$value = $data[$name];
+		}
+
+		if ((string) $field['showon'])
+		{
+			$showon       = explode(':', (string) $field['showon']);
+			$showon_value = $this->form[$this->uParams['theme']]->getField($showon[0])->value;
+
+			if ($required && $showon[1] != $showon_value)
+			{
+				$required = false;
+			}
+		}
+
+		if ($field->option)
+		{
+			foreach ($field->option as $option)
+			{
+				$_val = (string) $option->attributes()->value;
+				if ($_val)
+				{
+					$val = $value == JText::_($_val) ? $value : $_val;
+					$option->attributes()->value = $val;
+				}
+			}
+		}
+
+		if ($required && !$value)
+		{
+			$fieldvalidation = false;
+		}
+
+		if ($type == 'email' || $validate == 'email')
+		{
+			$validate  = $validate ? $validate : 'email';
+			$emailName = $name;
+		}
+
+		if ($validate && $fieldvalidation)
+		{
+
+			if ($validate == 'email')
+			{
+				$field->addAttribute('tld', 'tld');
+			}
+
+			$rule = JFormHelper::loadRuleType($validate);
+
+		}
+
+		$test = ($rule && $fieldvalidation)
+			? $rule->test($field, $value)
+			: $fieldvalidation;
+
+		if ($value && $test == false)
+		{
+			$class = $this->form[$this->uParams['theme']]->getFieldAttribute($name, 'class');
+			$class = $class
+				? trim(str_replace($errorClass, '', $class)) . ' '
+				: '';
+
+			$this->form[$this->uParams['theme']]->setFieldAttribute($name, 'class', $class . $errorClass);
+			$valid = false;
+		}
+
+		if (!$valid)
+		{
 			if ($this->uParams['jversion'] <= '2')
 			{
 				$this->form[$this->uParams['theme']]->setValue($emailName, null, '');
 
-				$fieldClass = $this->form[$this->uParams['theme']]->getFieldAttribute($emailName, 'class');
-				$fieldClass = $fieldClass
-					? trim(str_replace($errorClass, '', $fieldClass)) . ' '
+				$class = $this->form[$this->uParams['theme']]->getFieldAttribute($emailName, 'class');
+				$class = $class
+					? trim(str_replace($errorClass, '', $class)) . ' '
 					: '';
 
-				$this->form[$this->uParams['theme']]->setFieldAttribute($emailName, 'class', $fieldClass . $errorClass);
+				$this->form[$this->uParams['theme']]->setFieldAttribute($emailName, 'class', $class . $errorClass);
 			}
-		}
 
-		return $valid;
+			$this->validField = false;
+		}
 	}
 
 	protected function _getCaptcha()

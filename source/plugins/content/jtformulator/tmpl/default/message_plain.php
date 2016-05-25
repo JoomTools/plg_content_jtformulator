@@ -10,6 +10,39 @@
 
 defined('_JEXEC') or die;
 
-echo JText::_('JT_FORMULATOR_DEFAULT_FORM_NAME_LABEL') . ': ' . $form->getValue('name') . "\n\r";
-echo JText::_('JT_FORMULATOR_DEFAULT_FORM_EMAIL_LABEL') . ': ' . $form->getValue('email') . "\n\r\n\r";
-echo JText::_('JT_FORMULATOR_DEFAULT_FORM_MESSAGE_LABEL') . ":\n\r" . $form->getValue('message');
+foreach ($form->getFieldsets() as $fieldset)
+{
+	$fieldsetLabel = $fieldset->label;
+	$fields        = $form->getFieldset($fieldset->name);
+
+	if (count($fields))
+	{
+		if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel))))
+		{
+			echo "====================" . "\n";
+			echo $legend . "\n";
+		}
+		echo "====================" . "\n";
+
+		foreach ($fields as $field)
+		{
+			$label = trim(JText::_($form->getFieldAttribute($field->fieldname, 'label')));
+			$value = $form->getValue($field->fieldname);
+
+			if (is_array($value))
+			{
+				foreach ($value as $_value)
+				{
+					$values[] = trim(JText::_($_value));
+				}
+				 $value = implode(", ", $values);
+				unset($values);
+			}
+
+
+			echo strip_tags($label) . ": ";
+			echo $value ? strip_tags($value) : '--';
+			echo "\n\r";
+		}
+	}
+}
