@@ -139,7 +139,7 @@ class plgContentJtformulator extends JPlugin
 			if ($checkTheme)
 			{
 				$this->captcha = '<input type="text"';
-				$this->captcha .= ' name="' . $uParams['theme'] . '[information_number]"';
+				$this->captcha .= ' name="' . $uParams['theme'] . $cIndex . '[information_number]"';
 				$this->captcha .= ' style="position: absolute;top:-999em;left:-999em;height: 0;width: 0;"';
 				$this->captcha .= ' value="" />';
 
@@ -154,27 +154,27 @@ class plgContentJtformulator extends JPlugin
 
 				if ($this->uParams['jversion'] >= '3')
 				{
-					$field = new JForm($this->uParams['theme'], array('control' => $uParams['theme']));
+					$field = new JForm($this->uParams['theme'] . $cIndex, array('control' => $uParams['theme'] . $cIndex));
 				}
 				else
 				{
 					require_once('assets/joomla25.jformextended.class.php');
-					$field = new JFormExtended($this->uParams['theme'], array('control' => $uParams['theme']));
+					$field = new JFormExtended($this->uParams['theme'] . $cIndex, array('control' => $uParams['theme'] . $cIndex));
 				}
 
 				// Load Formfields
 				$field->loadFile($formXmlPath);
 
 				// Set Formfields
-				$this->form[$uParams['theme']] = $field;
+				$this->form[$uParams['theme'] . $cIndex] = $field;
 
 				// Get form submit task
 				$task = JFactory::getApplication()->input->get('task', false, 'post');
 
-				if ($task == $this->uParams['theme'] . "_sendmail")
+				if ($task == $this->uParams['theme'] . $cIndex . "_sendmail")
 				{
 					// Get Form values
-					$submitValues = JFactory::getApplication()->input->get($uParams['theme'], array(), 'post', 'array');
+					$submitValues = JFactory::getApplication()->input->get($uParams['theme'] . $cIndex, array(), 'post', 'array');
 
 					foreach ($submitValues as $subKey => $subValue)
 					{
@@ -197,7 +197,7 @@ class plgContentJtformulator extends JPlugin
 							break;
 					}
 
-					$this->form[$uParams['theme']]->bind($submitValues);
+					$this->form[$uParams['theme'] . $cIndex]->bind($submitValues);
 
 					if (!$submitValues['information_number'])
 					{
@@ -219,7 +219,7 @@ class plgContentJtformulator extends JPlugin
 
 				$html .= $this->_getTmpl($formHtmlPath);
 
-				if ($task == $this->uParams['theme'] . "_sendmail")
+				if ($task == $this->uParams['theme'] . $cIndex . "_sendmail")
 				{
 
 					if ($valid)
@@ -243,8 +243,12 @@ class plgContentJtformulator extends JPlugin
 
 			}
 
-			$row->text = str_replace($matchValue, $html, $row->text);
+			$pos = strpos($row->text, $matchValue);
+			$end = strlen($matchValue);
+
+			$row->text = substr_replace($row->text, $html, $pos, $end);
 			$cIndex++;
+			JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js');
 		}
 	}
 
@@ -296,7 +300,8 @@ class plgContentJtformulator extends JPlugin
 	{
 		$token         = JSession::checkToken();
 		$valid_captcha = true;
-		$fieldXML = $this->form[$this->uParams['theme']]->getXML();
+		$index         = $this->uParams['index'];
+		$fieldXML      = $this->form[$this->uParams['theme'] . $index]->getXML();
 
 		foreach ($fieldXML as $fieldset)
 		{
@@ -349,7 +354,8 @@ class plgContentJtformulator extends JPlugin
 	protected function _validateField($field)
 	{
 		$errorClass      = $this->params->get('error_class', 'invalid');
-		$data            = $this->form[$this->uParams['theme']]->getData()->toArray();
+		$index           = $this->uParams['index'];
+		$data            = $this->form[$this->uParams['theme'] . $index]->getData()->toArray();
 		$rule            = '';
 		$value           = '';
 		$showon_value    = '';
@@ -370,7 +376,7 @@ class plgContentJtformulator extends JPlugin
 		if ((string) $field['showon'])
 		{
 			$showon       = explode(':', (string) $field['showon']);
-			$showon_value = $this->form[$this->uParams['theme']]->getField($showon[0])->value;
+			$showon_value = $this->form[$this->uParams['theme'] . $index]->getField($showon[0])->value;
 
 			if ($required && $showon[1] != $showon_value)
 			{
@@ -386,6 +392,7 @@ class plgContentJtformulator extends JPlugin
 				if ($_val)
 				{
 					$val = $value == JText::_($_val) ? $value : $_val;
+
 					$option->attributes()->value = $val;
 				}
 			}
@@ -420,12 +427,12 @@ class plgContentJtformulator extends JPlugin
 
 		if ($value && $test == false)
 		{
-			$class = $this->form[$this->uParams['theme']]->getFieldAttribute($name, 'class');
+			$class = $this->form[$this->uParams['theme'] . $index]->getFieldAttribute($name, 'class');
 			$class = $class
 				? trim(str_replace($errorClass, '', $class)) . ' '
 				: '';
 
-			$this->form[$this->uParams['theme']]->setFieldAttribute($name, 'class', $class . $errorClass);
+			$this->form[$this->uParams['theme'] . $index]->setFieldAttribute($name, 'class', $class . $errorClass);
 			$valid = false;
 		}
 
@@ -433,14 +440,14 @@ class plgContentJtformulator extends JPlugin
 		{
 			if ($this->uParams['jversion'] <= '2')
 			{
-				$this->form[$this->uParams['theme']]->setValue($emailName, null, '');
+				$this->form[$this->uParams['theme'] . $index]->setValue($emailName, null, '');
 
-				$class = $this->form[$this->uParams['theme']]->getFieldAttribute($emailName, 'class');
+				$class = $this->form[$this->uParams['theme'] . $index]->getFieldAttribute($emailName, 'class');
 				$class = $class
 					? trim(str_replace($errorClass, '', $class)) . ' '
 					: '';
 
-				$this->form[$this->uParams['theme']]->setFieldAttribute($emailName, 'class', $class . $errorClass);
+				$this->form[$this->uParams['theme'] . $index]->setFieldAttribute($emailName, 'class', $class . $errorClass);
 			}
 
 			$this->validField = false;
@@ -476,9 +483,9 @@ class plgContentJtformulator extends JPlugin
 	protected function _getTmpl($path)
 	{
 
-		$form  = $this->form[$this->uParams['theme']];
 		$index = $this->uParams['index'];
 		$id    = $this->uParams['theme'];
+		$form  = $this->form[$this->uParams['theme'] . $index];
 
 		// Start capturing output into a buffer
 		ob_start();
@@ -498,7 +505,8 @@ class plgContentJtformulator extends JPlugin
 	protected function _sendemail()
 	{
 		$jConfig = JFactory::getConfig();
-		$data    = $this->form[$this->uParams['theme']]->getData()->toArray();
+		$index   = $this->uParams['index'];
+		$data    = $this->form[$this->uParams['theme'] . $index]->getData()->toArray();
 
 		if ($this->mail)
 		{
