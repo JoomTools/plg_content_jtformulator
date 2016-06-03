@@ -421,9 +421,16 @@ class plgContentJtformulator extends JPlugin
 
 		}
 
-		$test = ($rule && $fieldvalidation)
+		if ($type == 'file' || $type == 'File')
+		{
+			$valid = $this->_handleFiles($field, $data);
+		}
+		else
+		{
+			$test = ($rule && $fieldvalidation)
 			? $rule->test($field, $value)
 			: $fieldvalidation;
+		}
 
 		if ($value && $test == false)
 		{
@@ -452,6 +459,29 @@ class plgContentJtformulator extends JPlugin
 
 			$this->validField = false;
 		}
+	}
+
+	protected function _handleFiles($field, $data)
+	{
+		jimport('joomla.filesystem.file');
+		$return = false;
+		$formName = $this->uParams['theme'] . $this->uParams['index'];
+
+		$mediaHelper = new JHelperMedia;
+		$jinput = JFactory::getApplication()->input;
+		$files = $jinput->files->get($formName);
+		$file = $files['files'];
+		$params = JComponentHelper::getParams('com_media');
+		$_params = $params->get('upload_extensions');
+		$params->set('upload_extensions', $_params . ',zip,ZIP');
+
+		$img1 = $mediaHelper->isImage($file[0]['name']);
+		$img2 = $mediaHelper->isImage($file[1]['name']);
+		$up1 = $mediaHelper->canUpload($file[0]);
+		$up2 = $mediaHelper->canUpload($file[1]);
+		$up3 = $mediaHelper->canUpload($file[2]);
+
+		return $return;
 	}
 
 	protected function _getCaptcha()
