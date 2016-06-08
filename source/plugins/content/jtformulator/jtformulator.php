@@ -227,7 +227,7 @@ class plgContentJtformulator extends JPlugin
 						if ($this->_sendemail())
 						{
 							JFactory::getApplication()
-								->enqueueMessage(JText::_('PLG_JT_FORMULATOR_EMAIL_THANKS'), 'success');
+								->enqueueMessage(JText::_('PLG_JT_FORMULATOR_EMAIL_THANKS'), 'message');
 
 							JFactory::getApplication()
 								->redirect(JRoute::_('index.php', false));
@@ -300,8 +300,9 @@ class plgContentJtformulator extends JPlugin
 	{
 		$token         = JSession::checkToken();
 		$valid_captcha = true;
-		$index         = $this->uParams['index'];
-		$fieldXML      = $this->form[$this->uParams['theme'] . $index]->getXML();
+		$this->_clearOldFiles();
+		$index    = $this->uParams['index'];
+		$fieldXML = $this->form[$this->uParams['theme'] . $index]->getXML();
 
 		foreach ($fieldXML as $fieldset)
 		{
@@ -318,7 +319,7 @@ class plgContentJtformulator extends JPlugin
 			{
 				$this->_validateField($fieldset->field);
 			}
-		} // end foreach
+		}
 
 		if ($this->uParams['captcha'] == 'joomla')
 		{
@@ -340,14 +341,6 @@ class plgContentJtformulator extends JPlugin
 
 		$valid = ($token && $valid_captcha && $this->validField) ? true : false;
 
-		if (!$valid)
-		{
-			JFactory::getApplication()
-				->enqueueMessage(
-					JText::_('PLG_JT_FORMULATOR_FIELD_ERROR'), 'error'
-				);
-		}
-
 		return $valid;
 	}
 
@@ -367,10 +360,19 @@ class plgContentJtformulator extends JPlugin
 		$required        = (string) $field['required'];
 		$name            = (string) $field['name'];
 		$class           = (string) $field['class'];
+		$label           = JText::_((string) $field['label']);
 
 		if (isset($data[$name]))
 		{
 			$value = $data[$name];
+		}
+
+		if ($type == 'file' || $type == 'File')
+		{
+			$jinput = JFactory::getApplication()->input;
+			$_value = $jinput->files->get($this->uParams['theme'] . $index);
+			$value  = $_value['files'];
+			$this->form[$this->uParams['theme'] . $index]->bind(array($name => $value));
 		}
 
 		if ((string) $field['showon'])
@@ -421,18 +423,11 @@ class plgContentJtformulator extends JPlugin
 
 		}
 
-		if ($type == 'file' || $type == 'File')
-		{
-			$valid = $this->_handleFiles($field, $data);
-		}
-		else
-		{
-			$test = ($rule && $fieldvalidation)
+		$test = ($rule && $fieldvalidation)
 			? $rule->test($field, $value)
 			: $fieldvalidation;
-		}
 
-		if ($value && $test == false)
+		if (!$fieldvalidation && $test == false)
 		{
 			$class = $this->form[$this->uParams['theme'] . $index]->getFieldAttribute($name, 'class');
 			$class = $class
@@ -458,30 +453,89 @@ class plgContentJtformulator extends JPlugin
 			}
 
 			$this->validField = false;
+
+			JFactory::getApplication()
+				->enqueueMessage(
+					JText::sprintf('PLG_JT_FORMULATOR_FIELD_ERROR', $label), 'error'
+				);
+
+			return;
+		}
+
+		if ($type == 'file' || $type == 'File')
+		{
+			$this->_saveFiles($value, $name);
+		}
+
+	}
+
+	protected function _saveFiles($files, $fieldName)
+	{
+		jimport('joomla.filesystem.folder');
+		jimport('joomla.filesystem.file');
+
+		$value   = array();
+		$nowPath = date('Ymd');
+
+		$filePath = !$this->params->get('file_path', 'uploads')
+			? 'images/uploads'
+			: 'images/' . $this->params->get('file_path');
+
+		$uploadPath = JPATH_BASE . '/' . $filePath . '/' . $nowPath;
+		$uploadURL  = rtrim(JUri::base(), '/') . '/' . $filePath . '/' . $nowPath;
+		$formName   = $this->uParams['theme'] . $this->uParams['index'];
+
+		if (!is_dir($uploadPath))
+		{
+			$_uploadPath = JFolder::create($uploadPath);
+		}
+
+		foreach ($files as $file)
+		{
+			$save     = null;
+			$fileName = JFile::stripExt($file['name']);
+			$fileExt  = JFile::getExt($file['name']);
+			$name     = JFilterOutput::stringURLSafe($fileName) . '.' . $fileExt;
+
+			$save = JFile::copy($file['tmp_name'], $uploadPath . '/' . $name);
+
+			if ($save)
+			{
+				$value[$name] = $uploadURL . '/' . $name;
+			}
 		}
 	}
 
-	protected function _handleFiles($field, $data)
+	protected function _clearOldFiles()
 	{
-		jimport('joomla.filesystem.file');
-		$return = false;
-		$formName = $this->uParams['theme'] . $this->uParams['index'];
+		jimport('joomla.filesystem.folder');
 
-		$mediaHelper = new JHelperMedia;
-		$jinput = JFactory::getApplication()->input;
-		$files = $jinput->files->get($formName);
-		$file = $files['files'];
-		$params = JComponentHelper::getParams('com_media');
-		$_params = $params->get('upload_extensions');
-		$params->set('upload_extensions', $_params . ',zip,ZIP');
+		if (!$fileClear = (int) $this->params->get('file_clear'))
+		{
+			return;
+		}
 
-		$img1 = $mediaHelper->isImage($file[0]['name']);
-		$img2 = $mediaHelper->isImage($file[1]['name']);
-		$up1 = $mediaHelper->canUpload($file[0]);
-		$up2 = $mediaHelper->canUpload($file[1]);
-		$up3 = $mediaHelper->canUpload($file[2]);
+		$filePath   = !$this->params->get('file_path', 'uploads')
+			? 'images/uploads'
+			: 'images/' . $this->params->get('file_path');
+		$uploadBase = JPATH_BASE . '/' . $filePath;
+		if (!$folders = JFolder::folders($uploadBase))
+		{
+			return;
+		}
 
-		return $return;
+		$nowPath = date('Ymd');
+		$now     = new DateTime($nowPath);
+
+		foreach ($folders as $folder)
+		{
+			$date   = new DateTime($folder);
+			$clrear = date_diff($now, $date)->days;
+			if (date_diff($now, $date)->days >= $fileClear)
+			{
+				JFolder::delete($uploadBase . '/' . $folder);
+			}
+		}
 	}
 
 	protected function _getCaptcha()

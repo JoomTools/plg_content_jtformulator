@@ -1,48 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="2.5" type="plugin" group="content" method="upgrade">
+<extension version="3.5"
+           type="plugin"
+           group="content"
+           method="upgrade">
 	<name>PLG_JT_FORMULATOR_XML_NAME</name>
-	<creationDate>##DATE##</creationDate>
+	<creationDate>2016-05-30</creationDate>
 	<author>Guido De Gobbis</author>
 	<authorEmail>support@joomtools.de</authorEmail>
 	<authorUrl>www.joomtools.de</authorUrl>
-	<copyright>Copyright (C) ##YEAR## JoomTools.de. All rights reserved.</copyright>
+	<copyright>Copyright (C) 2016 JoomTools.de. All rights reserved.</copyright>
 	<license>GPL v3</license>
-	<version>##VERSION##</version>
+	<version>1.0.11</version>
 	<description>PLG_JT_FORMULATOR_XML_DESC</description>
 
 	<files>
-		##FILES##
+		<folder>assets</folder>
+		<file plugin="jtformulator">jtformulator.php</file>
+		<file>jtformulator.xml</file>
+		<folder>tmpl</folder>
 	</files>
 
 	<languages folder="language">
-		##LANGUAGE_FILES##
+		<language tag="de-DE">de-DE/de-DE.plg_content_jtformulator.ini</language>
+		<language tag="de-DE">de-DE/de-DE.plg_content_jtformulator.sys.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_content_jtformulator.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_content_jtformulator.sys.ini</language>
 	</languages>
 
 	<config>
-	  <fields name="params">
+		<fields name="params">
 			<fieldset name="basic">
 
 				<field name="captcha"
-						type="list"
-						class="chzn-color-state"
-						default="custom"
-						label="PLG_JT_FORMULATOR_XML_CAPTCHA_LABEL"
-						description="PLG_JT_FORMULATOR_XML_CAPTCHA_DESC">
+				       type="list"
+				       class="chzn-color-state"
+				       default="custom"
+				       label="PLG_JT_FORMULATOR_XML_CAPTCHA_LABEL"
+				       description="PLG_JT_FORMULATOR_XML_CAPTCHA_DESC">
 					<option value="0">JOPTION_DO_NOT_USE</option>
 					<option value="joomla">PLG_JT_FORMULATOR_XML_CAPTCHA_VALUE_JOOMLA</option>
 				</field>
 
+				<field name="file_path"
+				       type="text"
+				       default="uploads"
+				       label="PLG_JT_FORMULATOR_XML_FILE_PATH_LABEL"
+				       description="PLG_JT_FORMULATOR_XML_FILE_PATH_DESC"/>
+
+				<field name="file_clear"
+				       type="integer"
+				       default="30"
+				       first="0"
+				       last="365"
+				       step="5"
+				       label="PLG_JT_FORMULATOR_XML_FILE_CLEAR_LABEL"
+				       description="PLG_JT_FORMULATOR_XML_FILE_CLEAR_DESC"/>
+
 				<field name="error_class"
-						type="text"
-						default=""
-						label="PLG_JT_FORMULATOR_XML_ERROR_CLASS_LABEL"
-						description="PLG_JT_FORMULATOR_XML_ERROR_CLASS_DESC" />
+				       type="text"
+				       default=""
+				       label="PLG_JT_FORMULATOR_XML_ERROR_CLASS_LABEL"
+				       description="PLG_JT_FORMULATOR_XML_ERROR_CLASS_DESC"/>
 
 			</fieldset>
-	  </fields>    
+		</fields>
 	</config>
 
 	<updateservers>
-		<server type="collection" name="joomtools.de - Updateserver">http://updates.joomtools.de/extensions.xml</server>
+		<server type="collection"
+		        name="joomtools.de - Updateserver">http://updates.joomtools.de/extensions.xml
+		</server>
 	</updateservers>
 </extension>

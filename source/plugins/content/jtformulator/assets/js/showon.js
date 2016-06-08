@@ -1,8 +1,8 @@
 jQuery(function ($) {
 	"use strict";
 
-	$.fn.toggleNovalidate = function (init) {
-		if ($(this).hasClass('novalidate') && init > 0) {
+	$.fn.toggleNovalidate = function (activate) {
+		if (activate > 0) {
 			$(this).removeNovalidate();
 		}
 		else {
@@ -31,10 +31,11 @@ jQuery(function ($) {
 			dataShowonId = dataShowon[0].field,
 			dataShowonValues = dataShowon[0].values,
 
-			$setter = $('[name="' + dataShowonId + '"]'),
+			$setter = $('[name^="' + dataShowonId + '"]'),
 			setterVal = $setter.val(),
 			isCheckbox = $setter.is('[type="checkbox"]'),
 			isRadio = $setter.is('[type="radio"]');
+
 
 		if (isRadio) {
 			setterVal = $setter.filter(':checked').val();
@@ -53,7 +54,11 @@ jQuery(function ($) {
 		}
 
 		$setter.change(function () {
-			$field.toggleNovalidate($(this).val());
+			var toggler = 0;
+			if ($.inArray(setterVal.toString(), dataShowonValues) != -1) {
+				toggler = 1
+			}
+			$field.toggleNovalidate(toggler);
 		});
 
 	});
