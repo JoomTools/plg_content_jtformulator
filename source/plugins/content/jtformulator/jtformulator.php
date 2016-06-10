@@ -346,100 +346,104 @@ class plgContentJtformulator extends JPlugin
 
 	protected function _validateField($field)
 	{
-		$errorClass      = $this->params->get('error_class', 'invalid');
-		$index           = $this->uParams['index'];
-		$data            = $this->form[$this->uParams['theme'] . $index]->getData()->toArray();
-		$rule            = '';
-		$value           = '';
-		$showon_value    = '';
-		$showon          = array();
-		$fieldvalidation = true;
-		$valid           = true;
-		$type            = (string) $field['type'];
-		$validate        = (string) $field['validate'];
-		$required        = (string) $field['required'];
-		$name            = (string) $field['name'];
-		$class           = (string) $field['class'];
-		$label           = JText::_((string) $field['label']);
+		$errorClass    = $this->params->get('error_class', 'invalid');
+		$index         = $this->uParams['index'];
+		$data          = $this->form[$this->uParams['theme'] . $index]->getData()->toArray();
+		$rule          = false;
+		$value         = '';
+		$_showon_value = '';
+		$showon        = (string) $field['showon'];
+		$validField    = true;
+		$valid         = false;
+		$type          = strtolower((string) $field['type']);
+		$validate      = (string) $field['validate'];
+		$required      = (string) $field['required'];
+		$name          = (string) $field['name'];
+		$class         = (string) $field['class'];
+		$label         = (string) $field['label'];
+		$label         = JText::_($label);
 
 		if (isset($data[$name]))
 		{
 			$value = $data[$name];
 		}
 
-		if ($type == 'file' || $type == 'File')
+		if ($type == 'file')
 		{
-			$jinput = JFactory::getApplication()->input;
-			$_value = $jinput->files->get($this->uParams['theme'] . $index);
-			$value  = $_value['files'];
-			$this->form[$this->uParams['theme'] . $index]->bind(array($name => $value));
+			$jinput      = JFactory::getApplication()->input;
+			$submitFiles = $jinput->files->get($this->uParams['theme'] . $index);
+			$value       = (count($submitFiles['files']) >= 1 && !empty($submitFiles['files'][0]['name']))
+				? $submitFiles['files']
+				: '';
+
+			if ($value)
+			{
+				$this->form[$this->uParams['theme'] . $index]->bind(array($name => $value));
+			}
 		}
 
-		if ((string) $field['showon'])
+		if ($showon)
 		{
-			$showon       = explode(':', (string) $field['showon']);
-			$showon_value = $this->form[$this->uParams['theme'] . $index]->getField($showon[0])->value;
+			$_showon_value = explode(':', $showon);
+			$showon_value  = $this->form[$this->uParams['theme'] . $index]->getField($showon[0])->value;
 
-			if ($required && $showon[1] != $showon_value)
+			if ($required && $_showon_value[1] != $showon_value)
 			{
 				$required = false;
 			}
 		}
 
-		if ($field->option)
-		{
-			foreach ($field->option as $option)
-			{
-				$_val = (string) $option->attributes()->value;
-				if ($_val)
-				{
-					$val = $value == JText::_($_val) ? $value : $_val;
-
-					$option->attributes()->value = $val;
-				}
-			}
-		}
-
 		if ($required && !$value)
 		{
-			$fieldvalidation = false;
+			$validField = false;
 		}
 
-		if ($type == 'email' || $validate == 'email')
+		if ($validField)
 		{
-			$validate  = $validate ? $validate : 'email';
-			$emailName = $name;
-		}
-
-		if ($validate && $fieldvalidation)
-		{
-
-			if ($validate == 'email')
+			if ($field->option)
 			{
+				foreach ($field->option as $option)
+				{
+					$_val = (string) $option->attributes()->value;
+					if ($_val)
+					{
+						$val = $value == JText::_($_val) ? $value : $_val;
+
+						$option->attributes()->value = $val;
+					}
+				}
+			}
+
+			if ($type == 'email')
+			{
+				$validate  = 'email';
+				$emailName = $name;
 				$field->addAttribute('tld', 'tld');
 			}
 
-			$rule = JFormHelper::loadRuleType($validate);
+			if ($validate)
+			{
+				$rule = JFormHelper::loadRuleType($validate);
+			}
 
+			$valid = $rule ? $rule->test($field, $value) : $validField;
 		}
 
-		$test = ($rule && $fieldvalidation)
-			? $rule->test($field, $value)
-			: $fieldvalidation;
-
-		if (!$fieldvalidation && $test == false)
+		if (!$valid)
 		{
 			$class = $this->form[$this->uParams['theme'] . $index]->getFieldAttribute($name, 'class');
 			$class = $class
 				? trim(str_replace($errorClass, '', $class)) . ' '
 				: '';
 
-			$this->form[$this->uParams['theme'] . $index]->setFieldAttribute($name, 'class', $class . $errorClass);
-			$valid = false;
-		}
+			$labelClass = $this->form[$this->uParams['theme'] . $index]->getFieldAttribute($name, 'labelclass');
+			$labelClass = $labelClass
+				? trim(str_replace($errorClass, '', $labelClass)) . ' '
+				: '';
 
-		if (!$valid)
-		{
+			$this->form[$this->uParams['theme'] . $index]->setFieldAttribute($name, 'class', $class . $errorClass);
+			$this->form[$this->uParams['theme'] . $index]->setFieldAttribute($name, 'labelclass', $labelClass . $errorClass);
+			
 			if ($this->uParams['jversion'] <= '2')
 			{
 				$this->form[$this->uParams['theme'] . $index]->setValue($emailName, null, '');
@@ -462,11 +466,17 @@ class plgContentJtformulator extends JPlugin
 			return;
 		}
 
+		if (!$valid)
+		{
+		}
+
 		if ($type == 'file' || $type == 'File')
 		{
 			$this->_saveFiles($value, $name);
 		}
 
+		// for Debugging return false for validation
+		$this->validField = false;
 	}
 
 	protected function _saveFiles($files, $fieldName)
@@ -519,6 +529,7 @@ class plgContentJtformulator extends JPlugin
 			? 'images/uploads'
 			: 'images/' . $this->params->get('file_path');
 		$uploadBase = JPATH_BASE . '/' . $filePath;
+
 		if (!$folders = JFolder::folders($uploadBase))
 		{
 			return;
