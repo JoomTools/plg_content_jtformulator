@@ -530,11 +530,12 @@ class plgContentJtformulator extends JPlugin
 			: 'images/' . $this->params->get('file_path');
 		$uploadBase = JPATH_BASE . '/' . $filePath;
 
-		if (!$folders = JFolder::folders($uploadBase))
+		if (!is_dir($uploadBase))
 		{
 			return;
 		}
 
+		$folders = JFolder::folders($uploadBase);
 		$nowPath = date('Ymd');
 		$now     = new DateTime($nowPath);
 
