@@ -13,7 +13,8 @@ defined('_JEXEC') or die('Restricted access');
 class plgContentJtformulator extends JPlugin
 {
 
-	protected $captcha;
+	protected $honeypot;
+	protected $issetCaptcha;
 	protected $validCaptcha = true;
 	protected $validField = true;
 	protected $fileFields = array();
@@ -135,10 +136,10 @@ class plgContentJtformulator extends JPlugin
 
 			if ($checkTheme)
 			{
-				$this->captcha = '<input type="text"';
-				$this->captcha .= ' name="' . $uParams['theme'] . $cIndex . '[information_number]"';
-				$this->captcha .= ' style="position: absolute;top:-999em;left:-999em;height: 0;width: 0;"';
-				$this->captcha .= ' value="" />';
+				$this->honeypot = '<input type="text"';
+				$this->honeypot .= ' name="' . $uParams['theme'] . $cIndex . '[information_number]"';
+				$this->honeypot .= ' style="position: absolute;top:-999em;left:-999em;height: 0;width: 0;"';
+				$this->honeypot .= ' value="" />';
 
 				$formLang = dirname(dirname(dirname(
 					$this->_getTmplPath('language/' . $tag . '/' . $tag . '.' . $uParams['theme'] . '_form', 'ini')
@@ -164,6 +165,22 @@ class plgContentJtformulator extends JPlugin
 
 				// Set Formfields
 				$this->form[$uParams['theme'] . $cIndex] = $field;
+
+				$issetCaptcha = $this->_issetCaptcha();
+
+				if (!$issetCaptcha)
+				{
+					$setCaptcha   = $this->_setCaptcha();
+					$issetCaptcha = $setCaptcha ? 'captcha' : false;
+				}
+
+				//$this->issetCaptcha = $issetCaptcha;
+
+				// Remove Captcha if disabled by plugin
+				if (!$this->uParams['captcha'] && $issetCaptcha)
+				{
+					$this->form[$uParams['theme'] . $cIndex]->removeField($issetCaptcha);
+				}
 
 				// Get form submit task
 				$task = JFactory::getApplication()->input->get('task', false, 'post');
@@ -217,11 +234,6 @@ class plgContentJtformulator extends JPlugin
 						$valid = false;
 					}
 
-				}
-
-				if ($this->uParams['captcha'])
-				{
-					$this->_getCaptcha();
 				}
 
 				$formHtmlPath = $this->_getTmplPath('form');
@@ -305,6 +317,33 @@ class plgContentJtformulator extends JPlugin
 		return $return;
 	}
 
+	protected function _issetCaptcha()
+	{
+		$form   = $this->form[$this->uParams['theme'] . $this->uParams['index']];
+		$fields = $form->getFieldset();
+
+		foreach ($fields as $field)
+		{
+
+			$type = (string) $field->getAttribute('type');
+
+			if ($type == 'captcha')
+			{
+				return (string) $field->getAttribute('name');
+			}
+		}
+
+		return false;
+	}
+
+	protected function _setCaptcha()
+	{
+		$form = $this->form[$this->uParams['theme'] . $this->uParams['index']];
+		$xml  = '<form><fieldset name="submit"><field name="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field></fieldset></form>';
+
+		return $form->load($xml, false);
+	}
+
 	protected function _validate()
 	{
 		$token         = JSession::checkToken();
@@ -329,28 +368,10 @@ class plgContentJtformulator extends JPlugin
 			}
 		}
 
-		if ($this->uParams['captcha'] == 'joomla')
-		{
-			$jcaptcha = JFactory::getConfig()->get('captcha');
-
-			if ($jcaptcha)
-			{
-				$valid_captcha = JCaptcha::getInstance($jcaptcha);
-
-				if (!$valid_captcha->checkAnswer(true))
-				{
-					$valid_captcha = false;
-				}
-			}
-
-		}
-
-		$this->validCaptcha = $valid_captcha;
-
 		// for Debugging return false for validation
 		//$this->validField = false;
 
-		$valid = ($token && $valid_captcha && $this->validField) ? true : false;
+		$valid = ($token && $this->validField) ? true : false;
 
 		if (!empty($this->fileFields))
 		{
@@ -368,6 +389,12 @@ class plgContentJtformulator extends JPlugin
 			}
 		}
 
+		if ($this->validCaptcha !== true)
+		{
+			$this->_invalidField($this->issetCaptcha);
+			$valid = false;
+		}
+
 		return $valid;
 	}
 
@@ -379,7 +406,8 @@ class plgContentJtformulator extends JPlugin
 		$value         = '';
 		$_showon_value = '';
 		$showon        = (string) $field['showon'];
-		$validField    = true;
+		$showField     = true;
+		$validateField = true;
 		$valid         = false;
 		$type          = strtolower((string) $field['type']);
 		$validate      = (string) $field['validate'];
@@ -389,42 +417,48 @@ class plgContentJtformulator extends JPlugin
 		$label         = (string) $field['label'];
 		$label         = JText::_($label);
 
+		if ($showon)
+		{
+			$_showon_value = explode(':', $showon);
+			$_showon_value[1] = JText::_($_showon_value[1]);
+			$showon_value  = $this->form[$this->uParams['theme'] . $index]->getField($_showon_value[0])->value;
+
+			if ($required && $_showon_value[1] != $showon_value)
+			{
+				$showField = false;
+				$valid     = true;
+				$this->form[$this->uParams['theme'] . $index]->setValue($name, null, '');
+			}
+		}
+
 		if (isset($data[$name]))
 		{
 			$value = $data[$name];
 		}
 
-		if ($type == 'file')
-		{
-			$jinput      = JFactory::getApplication()->input;
-			$submitFiles = $jinput->files->get($this->uParams['theme'] . $index);
-
-			if (count($submitFiles[$name]) >= 1 && !empty($submitFiles[$name][0]['name']))
-			{
-				$value              = $submitFiles['files'];
-				$this->submitFiles  = array_merge_recursive($this->submitFiles, $submitFiles);
-				$this->fileFields[] = $name;
-			}
-		}
-
-		if ($showon)
-		{
-			$_showon_value = explode(':', $showon);
-			$showon_value  = $this->form[$this->uParams['theme'] . $index]->getField($showon[0])->value;
-
-			if ($required && $_showon_value[1] != $showon_value)
-			{
-				$required = false;
-			}
-		}
-
 		if ($required && !$value)
 		{
-			$validField = false;
+			if (!$showField)
+			{
+				$validateField = false;
+			}
 		}
 
-		if ($validField)
+		if ($validateField && $showField)
 		{
+			if ($type == 'file')
+			{
+				$jinput      = JFactory::getApplication()->input;
+				$submitFiles = $jinput->files->get($this->uParams['theme'] . $index);
+
+				if (count($submitFiles[$name]) >= 1 && !empty($submitFiles[$name][0]['name']))
+				{
+					$value              = $submitFiles['files'];
+					$this->submitFiles  = array_merge_recursive($this->submitFiles, $submitFiles);
+					$this->fileFields[] = $name;
+				}
+			}
+
 			if ($field->option)
 			{
 				$oCount = count($field->option);
@@ -460,10 +494,32 @@ class plgContentJtformulator extends JPlugin
 				$rule = JFormHelper::loadRuleType($validate);
 			}
 
-			$valid = $rule ? $rule->test($field, $value) : $validField;
+			if ($rule)
+			{
+				if ($type == 'captcha')
+				{
+					$valid = $rule->test($field, $value, null, null, $this->form[$this->uParams['theme'] . $index]);
+
+					if ($valid !== true)
+					{
+						$this->validCaptcha = $valid;
+						$this->issetCaptcha = $name;
+						$valid              = false;
+					}
+				}
+				else
+				{
+					$valid = $rule->test($field, $value);
+				}
+			}
+			else
+			{
+				$valid = $validateField;
+			}
+
 		}
 
-		if (!$valid)
+		if (!$valid && $type != 'captcha')
 		{
 			$this->_invalidField($name);
 
@@ -479,28 +535,82 @@ class plgContentJtformulator extends JPlugin
 	{
 		$errorClass = $this->params->get('error_class', 'invalid');
 		$formName   = $this->uParams['theme'] . $this->uParams['index'];
-		$label = $this->form[$formName]->getFieldAttribute($fieldName, 'label');
-		$label = JText::_($label);
-		$class = $this->form[$formName]->getFieldAttribute($fieldName, 'class');
+		$label      = $this->form[$formName]->getFieldAttribute($fieldName, 'label');
+		$label      = JText::_($label);
+		$class      = $this->form[$formName]->getFieldAttribute($fieldName, 'class');
 		$labelClass = $this->form[$formName]->getFieldAttribute($fieldName, 'labelclass');
 
-		$class = $class
-			? trim(str_replace($errorClass, '', $class)) . ' '
-			: '';
+		if ($fieldName == $this->issetCaptcha)
+		{
+			$class = $class
+				? trim(str_replace($errorClass, '', $class)) . ' '
+				: '';
 
-		$labelClass = $labelClass
-			? trim(str_replace($errorClass, '', $labelClass)) . ' '
-			: '';
+			$labelClass = $labelClass
+				? trim(str_replace($errorClass, '', $labelClass)) . ' '
+				: '';
 
-		$this->form[$formName]->setFieldAttribute($fieldName, 'class', $class . $errorClass);
-		$this->form[$formName]->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
+			$this->form[$formName]->setFieldAttribute($fieldName, 'class', $class . $errorClass);
+			$this->form[$formName]->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
+
+			JFactory::getApplication()
+				->enqueueMessage((string) $this->validCaptcha, 'error');
+		}
+		else
+		{
+			$class = $class
+				? trim(str_replace($errorClass, '', $class)) . ' '
+				: '';
+
+			$labelClass = $labelClass
+				? trim(str_replace($errorClass, '', $labelClass)) . ' '
+				: '';
+
+			$this->form[$formName]->setFieldAttribute($fieldName, 'class', $class . $errorClass);
+			$this->form[$formName]->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
+
+			JFactory::getApplication()
+				->enqueueMessage(
+					JText::sprintf('PLG_JT_FORMULATOR_FIELD_ERROR', $label), 'error'
+				);
+		}
 
 		$this->validField = false;
+	}
 
-		JFactory::getApplication()
-			->enqueueMessage(
-				JText::sprintf('PLG_JT_FORMULATOR_FIELD_ERROR', $label), 'error'
-			);
+	protected function _clearOldFiles()
+	{
+		jimport('joomla.filesystem.folder');
+
+		if (!$fileClear = (int) $this->params->get('file_clear'))
+		{
+			return;
+		}
+
+		$filePath   = !$this->params->get('file_path', 'uploads')
+			? 'images/uploads'
+			: 'images/' . $this->params->get('file_path');
+		$uploadBase = JPATH_BASE . '/' . $filePath;
+
+		if (!is_dir($uploadBase))
+		{
+			return;
+		}
+
+		$folders = JFolder::folders($uploadBase);
+		$nowPath = date('Ymd');
+		$now     = new DateTime($nowPath);
+
+		foreach ($folders as $folder)
+		{
+			$date   = new DateTime($folder);
+			$clrear = date_diff($now, $date)->days;
+
+			if ($clrear >= $fileClear)
+			{
+				JFolder::delete($uploadBase . '/' . $folder);
+			}
+		}
 	}
 
 	protected function _saveFiles()
@@ -550,67 +660,6 @@ class plgContentJtformulator extends JPlugin
 
 			$this->form[$formName]->setValue($fieldName, null, $value);
 		}
-	}
-
-	protected function _clearOldFiles()
-	{
-		jimport('joomla.filesystem.folder');
-
-		if (!$fileClear = (int) $this->params->get('file_clear'))
-		{
-			return;
-		}
-
-		$filePath   = !$this->params->get('file_path', 'uploads')
-			? 'images/uploads'
-			: 'images/' . $this->params->get('file_path');
-		$uploadBase = JPATH_BASE . '/' . $filePath;
-
-		if (!is_dir($uploadBase))
-		{
-			return;
-		}
-
-		$folders = JFolder::folders($uploadBase);
-		$nowPath = date('Ymd');
-		$now     = new DateTime($nowPath);
-
-		foreach ($folders as $folder)
-		{
-			$date   = new DateTime($folder);
-			$clrear = date_diff($now, $date)->days;
-
-			if ($clrear >= $fileClear)
-			{
-				JFolder::delete($uploadBase . '/' . $folder);
-			}
-		}
-	}
-
-	protected function _getCaptcha()
-	{
-		$captcha = $captcha_val = '';
-		$index   = $this->uParams['index'];
-
-		if ($this->uParams['captcha'] == 'joomla')
-		{
-			$jcaptcha = JFactory::getConfig()->get('captcha');
-
-			if ($jcaptcha)
-			{
-				$captcha     = JCaptcha::getInstance($jcaptcha);
-				$captcha_val = $captcha
-					? $captcha->display('recaptcha', 'recaptcha' . $index, 'g-recaptcha')
-					: '';
-			}
-
-		}
-
-		$captcha_val .= $captcha
-			? '<noscript style="position:relative;">' . JText::_('PLG_JT_FORMULATOR_CAPTCHA_NOSCRIPT') . '</noscript>'
-			: '';
-
-		$this->captcha = $captcha_val . $this->captcha;
 	}
 
 	protected function _getTmpl($path)
