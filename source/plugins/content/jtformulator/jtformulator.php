@@ -73,7 +73,10 @@ class plgContentJtformulator extends JPlugin
 
 		JLoader::register('JFormField', dirname(__FILE__) . '/assets/jformfield.php');
 
-		$this->uParams['captcha']   = count($matches[0]) ? $this->params->get('captcha') : false;
+		$this->uParams['captcha'] = count($matches[0]) ? $this->params->get('captcha') : false;
+
+		// Get Framwork
+		$this->uParams['framework'] = $this->params->get('framework', 0);
 
 		foreach ($matches[0] as $matchKey => $matchValue)
 		{
@@ -106,6 +109,15 @@ class plgContentJtformulator extends JPlugin
 			if (isset($uParams['subject']))
 			{
 				$this->uParams['subject'] = $uParams['subject'];
+			}
+
+			// Get Framwork
+			$layoutSuffix = array();
+
+			if (!empty($this->uParams['framework']))
+			{
+				// Override global Framework
+				$layoutSuffix = array($this->uParams['framework']);
 			}
 
 			foreach ($checkThemeFiles as $chkFile => $chkType)
@@ -168,16 +180,6 @@ class plgContentJtformulator extends JPlugin
 					JPATH_THEMES . '/' . $template . '/html/layouts',
 					JPATH_PLUGINS . '/content/jtformulator/layouts'
 				);
-
-				// Get Framwork from FormXML if is set
-				$framework = $field->getAttribute('framework') ? :'';
-				$layoutSuffix = array();
-
-				if (!empty($framework))
-				{
-					// Override global Framework
-					$layoutSuffix = array($framework);
-				}
 
 				// Set Framework as Layout->Suffix
 				$this->form[$uParams['theme'] . $cIndex]->framework = $layoutSuffix;
@@ -290,42 +292,57 @@ class plgContentJtformulator extends JPlugin
 
 	protected function _getTmplPath($filename, $type = 'php')
 	{
-		$template  = JFactory::getApplication()->getTemplate();
-		$file      = $filename . '.' . $type;
+		$template = JFactory::getApplication()->getTemplate();
+		$file     = $filename . '.' . $type;
+		$fileFw   = $this->uParams['framework'];
+
+		// Build fallback path with default theme
+		$dAbsPath = JPATH_PLUGINS . '/content/jtformulator/tmpl/default';
 
 		// Build template override path for theme
 		$tAbsPath = JPATH_THEMES . '/' . $template
 			. '/html/plg_content_jtformulator/'
-			. $this->uParams['theme'] . '/' . $file;
+			. $this->uParams['theme'];
 
 		// Build plugin path for theme
 		$bAbsPath = JPATH_PLUGINS . '/content/jtformulator/tmpl/'
-			. $this->uParams['theme'] . '/' . $file;
+			. $this->uParams['theme'];
 
-		// Build fallback path with default theme
-		$dAbsPath = JPATH_PLUGINS . '/content/jtformulator/tmpl/default/' . $file;
+		if ($filename == 'form' && $fileFw)
+		{
+			// Set the theme path
+			if (file_exists($tAbsPath . '/' . $fileFw))
+			{
+				return $tAbsPath . '/' . $fileFw;
+			}
+			elseif (file_exists($bAbsPath . '/' . $fileFw))
+			{
+				return $bAbsPath . '/' . $fileFw;
+			}
+			elseif (file_exists($dAbsPath . '/' . $fileFw))
+			{
+				return $dAbsPath . '/' . $fileFw;
+			}
+		}
 
 		// Set the right theme path
-		if (file_exists($tAbsPath))
+		if (file_exists($tAbsPath . '/' . $file))
 		{
-			$return = $tAbsPath;
+			return $tAbsPath . '/' . $file;
 		}
-		elseif (file_exists($bAbsPath))
+		elseif (file_exists($bAbsPath . '/' . $file))
 		{
-			$return = $bAbsPath;
+			return $bAbsPath . '/' . $file;
 		}
 		else
 		{
-			$return = $dAbsPath;
+			return $dAbsPath . '/' . $file;
 
-			if ($this->uParams['theme'] != 'default' && $type != 'ini')
+/*			if ($this->uParams['theme'] != 'default' && $type != 'ini')
 			{
 				return false;
-			}
-
+			}*/
 		}
-
-		return $return;
 	}
 
 	protected function _issetCaptcha()

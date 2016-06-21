@@ -513,10 +513,9 @@ abstract class JFormField
 	protected function getRenderer($layoutId = 'default')
 	{
 		$renderer         = new JLayoutFile($layoutId);
-		$framework_suffix = array();
 
 		$renderer->setDebug($this->isDebugEnabled());
-		$renderer->setDebug(true);
+		//$renderer->setDebug(true);
 
 		$layoutPaths = $this->getLayoutPaths();
 

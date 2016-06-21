@@ -53,6 +53,16 @@
 				       label="PLG_JT_FORMULATOR_XML_ERROR_CLASS_LABEL"
 				       description="PLG_JT_FORMULATOR_XML_ERROR_CLASS_DESC"/>
 
+				<field name="framework"
+				       type="list"
+				       default="custom"
+				       label="PLG_JT_FORMULATOR_XML_FRAMEWORK_LABEL"
+				       description="PLG_JT_FORMULATOR_XML_FRAMEWORK_DESC">
+					<option value="0">PLG_JT_FORMULATOR_XML_FRAMEWORK_VALUE_CORE</option>
+					<option value="bs3">PLG_JT_FORMULATOR_XML_FRAMEWORK_VALUE_BS3</option>
+					<option value="uikit">PLG_JT_FORMULATOR_XML_CAPTCHA_VALUE_UIKIT</option>
+				</field>
+
 			</fieldset>
 		</fields>
 	</config>
