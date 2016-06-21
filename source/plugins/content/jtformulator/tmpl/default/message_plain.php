@@ -1,21 +1,22 @@
 <?php
 /**
-* @Copyright	(c) 2016 JoomTools.de - All rights reserved.
-* @package		JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
-* @author		Guido De Gobbis
-* @link 		http://www.joomtools.de
-*
-* @license		GPL v3
-**/
+ * @Copyright    (c) 2016 JoomTools.de - All rights reserved.
+ * @package        JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
+ * @author         Guido De Gobbis
+ * @link           http://www.joomtools.de
+ *
+ * @license        GPL v3
+ **/
 
 defined('_JEXEC') or die;
 
-foreach ($form->getFieldsets() as $fieldset)
-{
-	$fieldsetLabel = $fieldset->label;
-	$fields        = $form->getFieldset($fieldset->name);
+$fieldsets = $form->getXML();
 
-	if (count($fields))
+foreach ($fieldsets->fieldset as $fieldset)
+{
+	$fieldsetLabel = (string) $fieldset['label'];
+
+	if (count($fieldset->field))
 	{
 		if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel))))
 		{
@@ -24,10 +25,23 @@ foreach ($form->getFieldsets() as $fieldset)
 		}
 		echo "====================" . "\n";
 
-		foreach ($fields as $field)
+		foreach ($fieldset->field as $field)
 		{
-			$label = trim(JText::_($form->getFieldAttribute($field->fieldname, 'label')));
-			$value = $form->getValue($field->fieldname);
+			$label = trim(JText::_((string) $field['label']));
+			$value = $form->getValue((string) $field['name']);
+			$type  = (string) $form->getFieldAttribute((string) $field['name'], 'type');
+
+			if ($type == 'spacer')
+			{
+				$label = '&nbsp;';
+				$value = trim(JText::_((string) $field['label']));
+			}
+
+			if (empty($value))
+			{
+				// Comment out 'continue', if you want to submit only filled fields
+				//continue;
+			}
 
 			if (is_array($value))
 			{
@@ -35,8 +49,12 @@ foreach ($form->getFieldsets() as $fieldset)
 				{
 					$values[] = trim(JText::_($_value));
 				}
-				 $value = implode(", ", $values);
+				$value = implode(", ", $values);
 				unset($values);
+			}
+			else
+			{
+				$value = trim(JText::_($value));
 			}
 
 

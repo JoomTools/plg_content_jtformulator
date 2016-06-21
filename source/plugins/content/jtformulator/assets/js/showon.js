@@ -54,7 +54,13 @@ jQuery(function ($) {
 		}
 
 		$setter.change(function () {
-			var toggler = 0;
+			var toggler = 0,
+				setterVal = $(this).filter(':checked').val();
+
+			if (setterVal === undefined) {
+				setterVal = 0;
+			}
+
 			if ($.inArray(setterVal.toString(), dataShowonValues) != -1) {
 				toggler = 1
 			}

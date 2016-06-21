@@ -1,12 +1,12 @@
 <?php
 /**
-* @Copyright	(c) 2016 JoomTools.de - All rights reserved.
-* @package		JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
-* @author		Guido De Gobbis
-* @link 		http://www.joomtools.de
-*
-* @license		GPL v3
-**/
+ * @Copyright    (c) 2016 JoomTools.de - All rights reserved.
+ * @package        JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
+ * @author         Guido De Gobbis
+ * @link           http://www.joomtools.de
+ *
+ * @license        GPL v3
+ **/
 
 defined('_JEXEC') or die;
 JHtml::_('behavior.keepalive');
@@ -22,37 +22,97 @@ $this->mail['sender_email'] = 'email';
 ?>
 {emailcloak=off}
 <div class="contact-form">
-	<form name="<?php echo $id; ?>_form" id="<?php echo $id.$index; ?>_form" action="<?php echo JRoute::_("index.php"); ?>" method="post" class="form-validate">
+	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
 
-		<fieldset>
-			<legend><?php echo JText::_('JT_FORMULATOR_DEFAULT_FORM_LABEL'); ?></legend>
-			<dl>
+	<form name="<?php echo $id . $index; ?>_form"
+	      id="<?php echo $id . $index; ?>_form"
+	      action="<?php echo JRoute::_("index.php"); ?>"
+	      method="post"
+	      enctype="multipart/form-data"
+	      class="form-validate
+	      ">
+		<?php
 
-				<dt><?php echo $form->getLabel('name') ;?></dt>
-				<dd><?php echo $form->getInput('name') ;?></dd>
-				<br />
-				<dt><?php echo $form->getLabel('email') ;?></dt>
-				<dd><?php echo $form->getInput('email') ;?></dd>
-				<br />
-				<dt><?php echo $form->getLabel('subject') ;?></dt>
-				<dd><?php echo $form->getInput('subject') ;?></dd>
-				<br />
-				<dt><?php echo $form->getLabel('message') ;?></dt>
-				<dd><?php echo $form->getInput('message') ;?></dd>
-				<br />
-				<dd><?php echo $this->captcha; ?></dd>
-				<br />
-				<dd><button class="button validate" type="submit"><?php echo JText::_('JT_FORMULATOR_DEFAULT_FORM_SEND'); ?></button></dd>
+		$fieldsets         = $form->getXML();
+		$countFieldsets    = 1;
+		$sumFieldsets      = count($fieldsets->fieldset);
+		$submitSet         = false;
 
-			</dl>
-		</fieldset>
+		foreach ($fieldsets->fieldset as $fieldset) :
 
-		<input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>" />
-		<input type="hidden" name="task" value="<?php echo $id; ?>_sendmail" />
-		<input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>" />
-		<input type="hidden" name="itemid" value="<?php echo JFactory::getApplication()->input->get('idemid'); ?>" />
-		<input type="hidden" name="id" value="<?php echo JFactory::getApplication()->input->get('id'); ?>" />
-		<?php echo JHtml::_( 'form.token' ); ?>
+			$fieldsetName = (string) $fieldset['name'];
+			$fieldsetLabel = (string) $fieldset['label'];
+			$fieldsetDesc  = (string) $fieldset['description'];
+			$sumFields     = count($fieldset->field);
+			$fieldsetClass = (string) $fieldset['class']
+				? (string) $fieldset['class']
+				: '';
+
+			if ($fieldsetName == 'submit' && $sumFields == 0)
+			{
+				$sumFields = 1;
+			}
+
+			if ($sumFields) :
+				if ($countFieldsets % 2) : ?>
+					<!--<div class="row">-->
+				<?php endif; ?>
+
+				<fieldset class="<?php echo $fieldsetClass; ?>">
+					<?php if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
+						<legend><?php echo $legend; ?></legend>
+					<?php endif; ?>
+					<?php if (isset($fieldsetDesc) && strlen($desc = trim(JText::_($fieldsetDesc)))) : ?>
+						<p><?php echo $desc; ?></p>
+					<?php endif; ?>
+					<?php foreach ($fieldset->field as $field)
+					{
+
+						$fieldName = (string) $field['name'];
+
+						$renderOptions['gridgroup'] = (string) $field['gridgroup'];
+						$renderOptions['gridlabel'] = (string) $field['gridlabel'];
+						$renderOptions['gridfield'] = (string) $field['gridfield'];
+
+						echo $form->renderField($fieldName, null, null, $renderOptions);
+					}
+
+					if ($fieldsetName == 'submit') :
+						$submitSet = true; ?>
+						<div class="control-group">
+							<div class="controls">
+								<button class="validate"
+								        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
+							</div>
+						</div>
+					<?php endif; ?>
+
+				</fieldset>
+			<?php endif;
+
+			$countFieldsets++;
+			if ($countFieldsets % 2 || $countFieldsets > $sumFieldsets) : ?>
+				<!--</div>-->
+			<?php endif;
+
+		endforeach;
+
+		if ($submitSet === false) : ?>
+			<div class="control-group">
+				<div class="controls">
+					<button class="validate"
+					        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
+				</div>
+			</div>
+		<?php endif; ?>
+
+		<?php echo $this->honeypot; ?>
+		<input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>"/>
+		<input type="hidden" name="task" value="<?php echo $id . $index; ?>_sendmail"/>
+		<input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>"/>
+		<input type="hidden" name="itemid" value="<?php echo JFactory::getApplication()->input->get('idemid'); ?>"/>
+		<input type="hidden" name="id" value="<?php echo JFactory::getApplication()->input->get('id'); ?>"/>
+		<?php echo JHtml::_('form.token'); ?>
 
 	</form>
 </div>

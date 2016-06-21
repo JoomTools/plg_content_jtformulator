@@ -71,6 +71,8 @@ class plgContentJtformulator extends JPlugin
 			return;
 		}
 
+		JLoader::register('JFormField', dirname(__FILE__) . '/assets/jformfield.php');
+
 		$this->uParams['captcha'] = count($matches[0]) ? $this->params->get('captcha') : false;
 
 		foreach ($matches[0] as $matchKey => $matchValue)
@@ -150,15 +152,7 @@ class plgContentJtformulator extends JPlugin
 				// Define Formfields
 				$formXmlPath = $this->_getTmplPath('fields', 'xml');
 
-				if ($this->uParams['jversion'] >= '3')
-				{
-					$field = new JForm($this->uParams['theme'] . $cIndex, array('control' => $uParams['theme'] . $cIndex));
-				}
-				else
-				{
-					require_once('assets/joomla25.jformextended.class.php');
-					$field = new JFormExtended($this->uParams['theme'] . $cIndex, array('control' => $uParams['theme'] . $cIndex));
-				}
+				$field = new JForm($this->uParams['theme'] . $cIndex, array('control' => $uParams['theme'] . $cIndex));
 
 				// Load Formfields
 				$field->loadFile($formXmlPath);
@@ -269,7 +263,6 @@ class plgContentJtformulator extends JPlugin
 
 			$row->text = substr_replace($row->text, $html, $pos, $end);
 			$cIndex++;
-			JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js');
 		}
 	}
 
@@ -419,9 +412,9 @@ class plgContentJtformulator extends JPlugin
 
 		if ($showon)
 		{
-			$_showon_value = explode(':', $showon);
+			$_showon_value    = explode(':', $showon);
 			$_showon_value[1] = JText::_($_showon_value[1]);
-			$showon_value  = $this->form[$this->uParams['theme'] . $index]->getField($_showon_value[0])->value;
+			$showon_value     = $this->form[$this->uParams['theme'] . $index]->getField($_showon_value[0])->value;
 
 			if ($required && $_showon_value[1] != $showon_value)
 			{

@@ -1,83 +1,118 @@
 <?php
 /**
-* @Copyright	(c) 2016 JoomTools.de - All rights reserved.
-* @package		JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
-* @author		Guido De Gobbis
-* @link 		http://www.joomtools.de
-*
-* @license		GPL v3
-**/
+ * @Copyright    (c) 2016 JoomTools.de - All rights reserved.
+ * @package        JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
+ * @author         Guido De Gobbis
+ * @link           http://www.joomtools.de
+ *
+ * @license        GPL v3
+ **/
 
 defined('_JEXEC') or die;
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidation');
 
 // Set Fieldname or own value
-$this->mail['sender_name'] = array('anrede', 'vorname', 'nachname');
+$this->mail['sender_name'] = 'name';
+
+// If you have to concatenate more fields, use an array like this
+//$this->mail['sender_name'] = array('anrede', 'vname', 'nname');
+
+$this->mail['sender_email'] = 'email';
 ?>
 {emailcloak=off}
-<div class="extended-form">
-	<form name="<?php echo $id; ?>_form" id="<?php echo $id.$index; ?>_form" action="<?php echo JRoute::_("index.php"); ?>" method="post" class="form-validate">
+<div class="contact-form">
+	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
 
-		<p>
-			<?php echo JText::_( 'JT_FORMULATOR_EXTENDED_FORM_LABEL' ); ?>
-		</p>
+	<form name="<?php echo $id . $index; ?>_form"
+	      id="<?php echo $id . $index; ?>_form"
+	      action="<?php echo JRoute::_("index.php"); ?>"
+	      method="post"
+	      enctype="multipart/form-data"
+	      class="form-validate
+	      ">
+		<?php
 
-		<p>&nbsp;</p>
+		$fieldsets         = $form->getXML();
+		$countFieldsets    = 1;
+		$sumFieldsets      = count($fieldsets->fieldset);
+		$submitSet         = false;
 
-		<p>
-			<?php echo $form->getLabel('anrede') ;?>
-			<br /><?php echo $form->getInput('anrede') ;?>
-		</p>
-		<br />
+		foreach ($fieldsets->fieldset as $fieldset) :
 
-		<p>
-			<?php echo $form->getLabel('vorname') ;?>
-			<br /><?php echo $form->getInput('vorname') ;?>
-		</p>
-		<br />
+			$fieldsetName = (string) $fieldset['name'];
+			$fieldsetLabel = (string) $fieldset['label'];
+			$fieldsetDesc  = (string) $fieldset['description'];
+			$sumFields     = count($fieldset->field);
+			$fieldsetClass = (string) $fieldset['class']
+				? (string) $fieldset['class']
+				: '';
 
-		<p>
-			<?php echo $form->getLabel('nachname') ;?>
-			<br /><?php echo $form->getInput('nachname') ;?>
-		</p>
-		<br />
+			if ($fieldsetName == 'submit' && $sumFields == 0)
+			{
+				$sumFields = 1;
+			}
 
-		<p>
-			<?php echo $form->getLabel('tel') ;?>
-			<br /><?php echo $form->getInput('tel') ;?>
-		</p>
-		<br />
+			if ($sumFields) :
+				if ($countFieldsets % 2) : ?>
+					<!--<div class="row">-->
+				<?php endif; ?>
 
-		<p>
-			<?php echo $form->getLabel('email') ;?>
-			<br /><?php echo $form->getInput('email') ;?>
-		</p>
-		<br />
+				<fieldset class="<?php echo $fieldsetClass; ?>">
+					<?php if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
+						<legend><?php echo $legend; ?></legend>
+					<?php endif; ?>
+					<?php if (isset($fieldsetDesc) && strlen($desc = trim(JText::_($fieldsetDesc)))) : ?>
+						<p><?php echo $desc; ?></p>
+					<?php endif; ?>
+					<?php foreach ($fieldset->field as $field)
+					{
 
-		<p>
-			<?php echo $form->getLabel('subject') ;?>
-			<br /><?php echo $form->getInput('subject') ;?>
-		</p>
-		<br />
+						$fieldName = (string) $field['name'];
 
-		<p>
-			<?php echo $form->getLabel('message') ;?>
-			<br /><?php echo $form->getInput('message') ;?>
-		</p>
+						$renderOptions['gridgroup'] = (string) $field['gridgroup'];
+						$renderOptions['gridlabel'] = (string) $field['gridlabel'];
+						$renderOptions['gridfield'] = (string) $field['gridfield'];
 
-		<p>&nbsp;</p>
-		<?php echo $this->captcha; ?>
-		<p>&nbsp;</p>
+						echo $form->renderField($fieldName, null, null, $renderOptions);
+					}
 
-		<button class="button validate" type="submit"><?php echo JText::_( 'JT_FORMULATOR_EXTENDED_FORM_SEND' ); ?></button>
+					if ($fieldsetName == 'submit') :
+						$submitSet = true; ?>
+						<div class="control-group">
+							<div class="controls">
+								<button class="validate"
+								        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
+							</div>
+						</div>
+					<?php endif; ?>
 
-		<input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>" />
-		<input type="hidden" name="task" value="<?php echo $id; ?>_sendmail" />
-		<input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>" />
-		<input type="hidden" name="itemid" value="<?php echo JFactory::getApplication()->input->get('idemid'); ?>" />
-		<input type="hidden" name="id" value="<?php echo JFactory::getApplication()->input->get('id'); ?>" />
-		<?php echo JHtml::_( 'form.token' ); ?>
+				</fieldset>
+			<?php endif;
+
+			$countFieldsets++;
+			if ($countFieldsets % 2 || $countFieldsets > $sumFieldsets) : ?>
+				<!--</div>-->
+			<?php endif;
+
+		endforeach;
+
+		if ($submitSet === false) : ?>
+			<div class="control-group">
+				<div class="controls">
+					<button class="validate"
+					        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
+				</div>
+			</div>
+		<?php endif; ?>
+
+		<?php echo $this->honeypot; ?>
+		<input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>"/>
+		<input type="hidden" name="task" value="<?php echo $id . $index; ?>_sendmail"/>
+		<input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>"/>
+		<input type="hidden" name="itemid" value="<?php echo JFactory::getApplication()->input->get('idemid'); ?>"/>
+		<input type="hidden" name="id" value="<?php echo JFactory::getApplication()->input->get('id'); ?>"/>
+		<?php echo JHtml::_('form.token'); ?>
 
 	</form>
 </div>

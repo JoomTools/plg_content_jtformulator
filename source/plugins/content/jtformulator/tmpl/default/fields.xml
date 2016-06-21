@@ -3,7 +3,7 @@
 	<fieldset>
 		<field name="name"
 			type="text"
-			class="inputbox"
+			gridgroup="test"
 			size="30"
 			description="JT_FORMULATOR_DEFAULT_FORM_NAME_DESC"
 			label="JT_FORMULATOR_DEFAULT_FORM_NAME_LABEL"
