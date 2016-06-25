@@ -512,7 +512,20 @@ abstract class JFormField
 	 */
 	protected function getRenderer($layoutId = 'default')
 	{
-		$renderer         = new JLayoutFile($layoutId);
+		$renderer = new JLayoutFile($layoutId);
+
+		// Set Framwork as Layout->Suffix
+		if (!empty($this->form->framework))
+		{
+			if (!method_exists($renderer, 'setSuffixes'))
+			{
+				unset($renderer);
+				JLoader::register('JTLayoutFile', dirname(__FILE__) . '/file.php');
+				$renderer = new JTLayoutFile($layoutId);
+			}
+
+			$renderer->setSuffixes($this->form->framework);
+		}
 
 		$renderer->setDebug($this->isDebugEnabled());
 		//$renderer->setDebug(true);
@@ -528,12 +541,6 @@ abstract class JFormField
 		if (!empty($this->form->addLayoutsPath))
 		{
 			$renderer->addIncludePath($this->form->addLayoutsPath);
-		}
-
-		// Set Framwork as Layout->Suffix
-		if (!empty($this->form->framework))
-		{
-			$renderer->setSuffixes($this->form->framework);
 		}
 
 		return $renderer;

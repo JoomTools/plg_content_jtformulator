@@ -294,7 +294,7 @@ class plgContentJtformulator extends JPlugin
 	{
 		$template = JFactory::getApplication()->getTemplate();
 		$file     = $filename . '.' . $type;
-		$fileFw   = $this->uParams['framework'];
+		$fileFw   = $filename . '.' . $this->uParams['framework'] . '.' . $type;
 
 		// Build fallback path with default theme
 		$dAbsPath = JPATH_PLUGINS . '/content/jtformulator/tmpl/default';
@@ -308,7 +308,7 @@ class plgContentJtformulator extends JPlugin
 		$bAbsPath = JPATH_PLUGINS . '/content/jtformulator/tmpl/'
 			. $this->uParams['theme'];
 
-		if ($filename == 'form' && $fileFw)
+		if ($type != 'ini' && $fileFw)
 		{
 			// Set the theme path
 			if (file_exists($tAbsPath . '/' . $fileFw))
