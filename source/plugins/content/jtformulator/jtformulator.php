@@ -432,7 +432,6 @@ class plgContentJtformulator extends JPlugin
 		$data          = $this->form[$this->uParams['theme'] . $index]->getData()->toArray();
 		$rule          = false;
 		$value         = '';
-		$_showon_value = '';
 		$showon        = (string) $field['showon'];
 		$showField     = true;
 		$validateField = true;
@@ -441,9 +440,6 @@ class plgContentJtformulator extends JPlugin
 		$validate      = (string) $field['validate'];
 		$required      = (string) $field['required'];
 		$name          = (string) $field['name'];
-		$class         = (string) $field['class'];
-		$label         = (string) $field['label'];
-		$label         = JText::_($label);
 
 		if ($showon)
 		{
@@ -451,11 +447,16 @@ class plgContentJtformulator extends JPlugin
 			$_showon_value[1] = JText::_($_showon_value[1]);
 			$showon_value     = $this->form[$this->uParams['theme'] . $index]->getField($_showon_value[0])->value;
 
-			if ($required && $_showon_value[1] != $showon_value)
+			if ($_showon_value[1] != $showon_value)
 			{
 				$showField = false;
 				$valid     = true;
 				$this->form[$this->uParams['theme'] . $index]->setValue($name, null, '');
+
+				if ($type == 'spacer')
+				{
+					$this->form[$this->uParams['theme'] . $index]->setFieldAttribute($name, 'label', '');
+				}
 			}
 		}
 
@@ -513,7 +514,6 @@ class plgContentJtformulator extends JPlugin
 			if ($type == 'email')
 			{
 				$validate  = 'email';
-				$emailName = $name;
 				$field->addAttribute('tld', 'tld');
 			}
 
@@ -550,12 +550,6 @@ class plgContentJtformulator extends JPlugin
 		if (!$valid && $type != 'captcha')
 		{
 			$this->_invalidField($name);
-
-			if ($this->uParams['jversion'] <= '2')
-			{
-				$this->form[$this->uParams['theme'] . $index]->setValue($emailName, null, '');
-				$this->_invalidField($name);
-			}
 		}
 	}
 
@@ -695,7 +689,7 @@ class plgContentJtformulator extends JPlugin
 
 		$index = $this->uParams['index'];
 		$id    = $this->uParams['theme'];
-		$form  = $this->form[$this->uParams['theme'] . $index];
+		$form  = $this->form[$id . $index];
 
 		// Start capturing output into a buffer
 		ob_start();
@@ -746,13 +740,13 @@ class plgContentJtformulator extends JPlugin
 
 		}
 
-		$sender_email = isset($mail['sender_email'])
+		$replayToEmail = isset($mail['sender_email']) && !empty($mail['sender_email'])
 			? $mail['sender_email']
-			: $jConfig->get('mailfrom');
+			: '';
 
-		$sender_name = isset($mail['sender_name'])
+		$replayToName = isset($mail['sender_name']) && !empty($mail['sender_email'])
 			? $mail['sender_name']
-			: $jConfig->get('fromname');
+			: '';
 
 		$recipient = $this->uParams['mailto']
 			? $this->uParams['mailto']
@@ -766,7 +760,13 @@ class plgContentJtformulator extends JPlugin
 		$hBody  = $this->_getTmpl($this->_getTmplPath('message_html'));
 		$pBody  = $this->_getTmpl($this->_getTmplPath('message_plain'));
 
-		$mailer->setSender(array($sender_email, $sender_name));
+		$mailer->setSender(array($jConfig->get('mailfrom'), $jConfig->get('fromname')));
+
+		if (!empty($replayToEmail))
+		{
+			$mailer->addReplyTo($replayToEmail, $replayToName);
+		}
+
 		$mailer->addRecipient($recipient);
 		$mailer->setSubject($subject);
 		$mailer->IsHTML(true);

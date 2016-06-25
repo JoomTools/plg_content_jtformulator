@@ -20,35 +20,33 @@ foreach ($fieldsets->fieldset as $fieldset)
 	{
 		if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel))))
 		{
-			echo "====================" . "\n";
+			echo "\n" ."====================" . "\n";
 			echo $legend . "\n";
 		}
 		echo "====================" . "\n";
 
 		foreach ($fieldset->field as $field)
 		{
-			$label       = trim(JText::_((string) $field['label']));
+			$label       = strip_tags(trim(JText::_((string) $field['label'])));
 			$value       = $form->getValue((string) $field['name']);
 			$type        = (string) $form->getFieldAttribute((string) $field['name'], 'type');
 			$fileTimeOut = '';
 
 			if ($type == 'file' && $this->params->get('file_clear'))
 			{
-				$fileTimeOut .= "====================" . "\n";
+				$fileTimeOut .= "========" . "\n";
 				$fileTimeOut .= JText::sprintf('PLG_JT_FORMULATOR_FILE_TIMEOUT', $this->params->get('file_clear')) . "\n";
 				$fileTimeOut .= "\n";
 			}
 
 			if ($type == 'spacer')
 			{
-				$label = '&nbsp;';
-				$value = trim(JText::_((string) $field['label']));
-			}
-
-			if (empty($value))
-			{
-				// Comment out 'continue', if you want to submit only filled fields
-				continue;
+				if ($label)
+				{
+					$value = "========" . "\n";
+					$value .= $label;
+					$label = '';
+				}
 			}
 
 			if (is_array($value))
@@ -57,7 +55,7 @@ foreach ($fieldsets->fieldset as $fieldset)
 				{
 					if ($type == 'file')
 					{
-						$values[] = '<a href="' . $_value . '" download>' . $_key . '</a> *';
+						$values[] = strip_tags(trim($_key)) . ' *';
 					}
 					else
 					{
@@ -70,11 +68,17 @@ foreach ($fieldsets->fieldset as $fieldset)
 			}
 			else
 			{
-				$value = trim(JText::_($value));
+				$value = strip_tags(trim(JText::_($value)));
 			}
 
-			echo strip_tags($label) . ": ";
-			echo $value ? strip_tags($value) : '--';
+			if (empty($value) || $type == 'captcha')
+			{
+				// Comment out 'continue', if you want to submit only filled fields
+				continue;
+			}
+
+			echo !empty($label) ? $label . ": " : '';
+			echo !empty($value) ? $value : '--';
 			echo "\n";
 			echo $fileTimeOut;
 		}

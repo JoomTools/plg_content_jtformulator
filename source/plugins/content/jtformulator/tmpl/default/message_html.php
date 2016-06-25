@@ -24,9 +24,9 @@ foreach ($fieldsets->fieldset as $fieldset)
 		<table cellpadding="2" border="1">
 			<tbody>
 			<?php foreach ($fieldset->field as $field) :
-				$label = trim(JText::_((string) $field['label']));
-				$value = $form->getValue((string) $field['name']);
-				$type = (string) $form->getFieldAttribute((string) $field['name'], 'type');
+				$label       = strip_tags(trim(JText::_((string) $field['label'])));
+				$value       = $form->getValue((string) $field['name']);
+				$type        = (string) $form->getFieldAttribute((string) $field['name'], 'type');
 				$fileTimeOut = '';
 
 				if ($type == 'file' && $this->params->get('file_clear'))
@@ -38,14 +38,11 @@ foreach ($fieldsets->fieldset as $fieldset)
 
 				if ($type == 'spacer')
 				{
-					$label = '&nbsp;';
-					$value = trim(JText::_((string) $field['label']));
-				}
-
-				if (empty($value))
-				{
-					// Comment out 'continue', if you want to submit only filled fields
-					continue;
+					if ($label)
+					{
+						$value = $label;
+						$label = '&nbsp;';
+					}
 				}
 
 				if (is_array($value))
@@ -67,17 +64,24 @@ foreach ($fieldsets->fieldset as $fieldset)
 				}
 				else
 				{
-					$value = trim(JText::_($value));
+					$value = strip_tags(trim(JText::_($value)));
+				}
+
+				if (empty($value) || $type == 'captcha')
+				{
+					// Comment out 'continue', if you want to submit only filled fields
+					continue;
 				} ?>
 				<tr>
-					<th style="width:30%; text-align: left;">
-						<?php echo strip_tags($label); ?>
+					<th style="width:40%; text-align: left;">
+						<?php echo $label; ?>
 					</th>
-					<td><?php echo $value ? nl2br(strip_tags($value)) : '--'; ?></td>
+					<td><?php echo $value ? nl2br($value) : '--'; ?></td>
 				</tr>
 				<?php echo $fileTimeOut; ?>
 			<?php endforeach; ?>
 			</tbody>
 		</table>
+		<br />
 	<?php endif;
 }

@@ -28,7 +28,7 @@ $this->mail['sender_email'] = 'email';
 	      id="<?php echo $id . $index; ?>_form"
 	      action="<?php echo JRoute::_("index.php"); ?>"
 	      method="post"
-	      class="form-validate"
+	      class="row form-validate"
 	      enctype="multipart/form-data"
 	>
 		<?php
@@ -45,8 +45,8 @@ $this->mail['sender_email'] = 'email';
 			$fieldsetDesc  = (string) $fieldset['description'];
 			$sumFields     = count($fieldset->field);
 			$fieldsetClass = (string) $fieldset['class']
-				? (string) $fieldset['class'] . ''
-				: '';
+				? (string) $fieldset['class'] . ' col-sm-12'
+				: 'col-sm-12';
 
 			if ($fieldsetName == 'submit' && $sumFields == 0)
 			{
@@ -79,8 +79,8 @@ $this->mail['sender_email'] = 'email';
 
 					if ($fieldsetName == 'submit') :
 						$submitSet = true; ?>
-						<div class="control-group">
-							<button class="button validate"
+						<div class="form-group">
+							<button class="btn btn-default validate"
 							        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
 						</div>
 					<?php endif; ?>
@@ -96,8 +96,8 @@ $this->mail['sender_email'] = 'email';
 		endforeach;
 
 		if ($submitSet === false) : ?>
-			<div class="control-group">
-				<button class="button validate"
+			<div class="form-group">
+				<button class="btn btn-default validate"
 				        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
 			</div>
 		<?php endif; ?>
