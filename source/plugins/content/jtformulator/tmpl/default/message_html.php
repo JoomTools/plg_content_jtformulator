@@ -26,7 +26,7 @@ foreach ($fieldsets->fieldset as $fieldset)
 			<?php foreach ($fieldset->field as $field) :
 				$label = trim(JText::_((string) $field['label']));
 				$value = $form->getValue((string) $field['name']);
-				$type  = (string) $form->getFieldAttribute((string) $field['name'], 'type');
+				$type = (string) $form->getFieldAttribute((string) $field['name'], 'type');
 				$fileTimeOut = '';
 
 				if ($type == 'file' && $this->params->get('file_clear'))
@@ -45,7 +45,7 @@ foreach ($fieldsets->fieldset as $fieldset)
 				if (empty($value))
 				{
 					// Comment out 'continue', if you want to submit only filled fields
-					//continue;
+					continue;
 				}
 
 				if (is_array($value))

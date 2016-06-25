@@ -27,9 +27,17 @@ foreach ($fieldsets->fieldset as $fieldset)
 
 		foreach ($fieldset->field as $field)
 		{
-			$label = trim(JText::_((string) $field['label']));
-			$value = $form->getValue((string) $field['name']);
-			$type  = (string) $form->getFieldAttribute((string) $field['name'], 'type');
+			$label       = trim(JText::_((string) $field['label']));
+			$value       = $form->getValue((string) $field['name']);
+			$type        = (string) $form->getFieldAttribute((string) $field['name'], 'type');
+			$fileTimeOut = '';
+
+			if ($type == 'file' && $this->params->get('file_clear'))
+			{
+				$fileTimeOut .= "====================" . "\n";
+				$fileTimeOut .= JText::sprintf('PLG_JT_FORMULATOR_FILE_TIMEOUT', $this->params->get('file_clear')) . "\n";
+				$fileTimeOut .= "\n";
+			}
 
 			if ($type == 'spacer')
 			{
@@ -40,15 +48,23 @@ foreach ($fieldsets->fieldset as $fieldset)
 			if (empty($value))
 			{
 				// Comment out 'continue', if you want to submit only filled fields
-				//continue;
+				continue;
 			}
 
 			if (is_array($value))
 			{
-				foreach ($value as $_value)
+				foreach ($value as $_key => $_value)
 				{
-					$values[] = trim(JText::_($_value));
+					if ($type == 'file')
+					{
+						$values[] = '<a href="' . $_value . '" download>' . $_key . '</a> *';
+					}
+					else
+					{
+						$values[] = strip_tags(trim(JText::_($_value)));
+					}
 				}
+
 				$value = implode(", ", $values);
 				unset($values);
 			}
@@ -57,10 +73,10 @@ foreach ($fieldsets->fieldset as $fieldset)
 				$value = trim(JText::_($value));
 			}
 
-
 			echo strip_tags($label) . ": ";
 			echo $value ? strip_tags($value) : '--';
-			echo "\n\r";
+			echo "\n";
+			echo $fileTimeOut;
 		}
 	}
 }
