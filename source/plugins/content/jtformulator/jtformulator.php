@@ -338,10 +338,10 @@ class plgContentJtformulator extends JPlugin
 		{
 			return $dAbsPath . '/' . $file;
 
-/*			if ($this->uParams['theme'] != 'default' && $type != 'ini')
-			{
-				return false;
-			}*/
+			/*			if ($this->uParams['theme'] != 'default' && $type != 'ini')
+						{
+							return false;
+						}*/
 		}
 	}
 
@@ -374,16 +374,15 @@ class plgContentJtformulator extends JPlugin
 
 	protected function _validate()
 	{
-		$token         = JSession::checkToken();
-		$valid_captcha = true;
-		$index         = $this->uParams['index'];
-		$fieldXML      = $this->form[$this->uParams['theme'] . $index]->getXML();
+		$token    = JSession::checkToken();
+		$index    = $this->uParams['index'];
+		$fieldXML = $this->form[$this->uParams['theme'] . $index]->getXML();
 
 		foreach ($fieldXML as $fieldset)
 		{
 			$count = count($fieldset->field);
 
-			if ($count > 1)
+			if ($count >= 1)
 			{
 				foreach ($fieldset->field as $field)
 				{
@@ -480,11 +479,24 @@ class plgContentJtformulator extends JPlugin
 				$jinput      = JFactory::getApplication()->input;
 				$submitFiles = $jinput->files->get($this->uParams['theme'] . $index);
 
-				if (count($submitFiles[$name]) >= 1 && !empty($submitFiles[$name][0]['name']))
+				$issetFiles = false;
+
+				if (!empty($submitFiles[$name][0]['name']))
 				{
-					$value              = $submitFiles['files'];
-					$this->submitFiles  = array_merge_recursive($this->submitFiles, $submitFiles);
-					$this->fileFields[] = $name;
+					$issetFiles = true;
+					$files      = $submitFiles[$name];
+				}
+				elseif (!empty($submitFiles[$name]['name']))
+				{
+					$issetFiles = true;
+					$files      = array($submitFiles[$name]);
+				}
+
+				if ($issetFiles)
+				{
+					$value                    = $files;
+					$this->submitFiles[$name] = $files;
+					$this->fileFields[]       = $name;
 				}
 			}
 
@@ -513,7 +525,7 @@ class plgContentJtformulator extends JPlugin
 
 			if ($type == 'email')
 			{
-				$validate  = 'email';
+				$validate = 'email';
 				$field->addAttribute('tld', 'tld');
 			}
 
