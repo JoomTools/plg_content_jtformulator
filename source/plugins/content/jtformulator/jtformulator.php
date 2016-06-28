@@ -63,7 +63,8 @@ class plgContentJtformulator extends JPlugin
 		                         'message_plain' => 'php'
 		);
 
-		$regex = "@(<(\w+)[^>]*>|){jtformulator(\s.*)?}(</\\2>|)@";
+		$template = JFactory::getApplication()->getTemplate();
+		$regex    = "@(<(\w+)[^>]*>|){jtformulator(\s.*)?}(</\\2>|)@";
 
 		// Get all matches or return
 		if (!preg_match_all($regex, $row->text, $matches))
@@ -72,6 +73,12 @@ class plgContentJtformulator extends JPlugin
 		}
 
 		JLoader::register('JFormField', dirname(__FILE__) . '/assets/jformfield.php');
+
+		// add form fields
+		JFormHelper::addFieldPath(dirname(__FILE__) . '/assets/fields');
+		// add form rules
+		JFormHelper::addRulePath(dirname(__FILE__) . '/assets/rules');
+
 
 		$this->uParams['captcha'] = count($matches[0]) ? $this->params->get('captcha') : false;
 
@@ -173,8 +180,6 @@ class plgContentJtformulator extends JPlugin
 				$this->form[$uParams['theme'] . $cIndex] = $field;
 
 				// Set Layouts override
-				$template = JFactory::getApplication()->getTemplate();
-
 				$this->form[$uParams['theme'] . $cIndex]->addLayoutsPath = array(
 					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/layouts',
 					JPATH_THEMES . '/' . $template . '/html/layouts',
@@ -389,14 +394,7 @@ class plgContentJtformulator extends JPlugin
 					$this->_validateField($field);
 				}
 			}
-			else
-			{
-				$this->_validateField($fieldset->field);
-			}
 		}
-
-		// for Debugging return false for validation
-		//$this->validField = false;
 
 		$valid = ($token && $this->validField) ? true : false;
 
@@ -525,13 +523,16 @@ class plgContentJtformulator extends JPlugin
 
 			if ($type == 'email')
 			{
-				$validate = 'email';
 				$field->addAttribute('tld', 'tld');
 			}
 
 			if ($validate)
 			{
 				$rule = JFormHelper::loadRuleType($validate);
+			}
+			else
+			{
+				$rule = JFormHelper::loadRuleType($type);
 			}
 
 			if ($rule)
