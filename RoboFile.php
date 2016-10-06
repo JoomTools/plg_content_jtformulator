@@ -47,4 +47,16 @@ class RoboFile extends \Robo\Tasks
 	{
 		(new \Joomla\Jorobo\Tasks\CopyrightHeader())->run();
 	}
+
+	/**
+	 * Symlink projectfiles from source into target
+	 *
+	 * @param   string  $target  Absolute path to Joomla! root
+	 *
+	 * @return   void
+	 */
+	public function map($target)
+	{
+		$this->taskMap($target)->run();
+	}
 }
