@@ -1,11 +1,11 @@
 <?php
 /**
- * @package     Joomla.Platform
- * @subpackage  Form
- *
- * @copyright   Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved.
- * @license     GNU General Public License version 2 or later; see LICENSE
- */
+* @Copyright   (c) 2016 JoomTools.de - All rights reserved.
+* @package     JT - Formulator - Plugin for Joomla! 3.5+
+* @author      Guido De Gobbis
+* @link        http://www.joomtools.de
+* @license     GPL v3
+**/
 
 defined('JPATH_PLATFORM') or die;
 

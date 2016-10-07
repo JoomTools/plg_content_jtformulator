@@ -1,12 +1,11 @@
 <?php
 /**
- * @Copyright    (c) 2016 JoomTools.de - All rights reserved.
- * @package        JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
- * @author         Guido De Gobbis
- * @link           http://www.joomtools.de
- *
- * @license        GPL v3
- **/
+* @Copyright   (c) 2016 JoomTools.de - All rights reserved.
+* @package     JT - Formulator - Plugin for Joomla! 3.5+
+* @author      Guido De Gobbis
+* @link        http://www.joomtools.de
+* @license     GPL v3
+**/
 
 defined('_JEXEC') or die('Restricted access');
 
@@ -29,6 +28,8 @@ class plgContentJtformulator extends JPlugin
 	// Mail
 	protected $mail = array();
 
+	protected $regex = "@(<(\w+)[^>]*>|){jtformulator(\s.*)?}(</\\2>|)@";
+
 	public function __construct(&$subject, $params)
 	{
 		if (JFactory::getApplication()->isAdmin())
@@ -45,13 +46,30 @@ class plgContentJtformulator extends JPlugin
 		$this->loadLanguage();
 	}
 
+	/**
+	 * Plugin that generates forms within content
+	 *
+	 * @param   string   $context   The context of the content being passed to the plugin.
+	 * @param   object   &row       The article object.  Note $article->text is also available
+	 * @param   mixed    &$params   The article params
+	 * @param   integer  $page      The 'page' number
+	 *
+	 * @return  void
+	 *
+	 * @since   1.6
+	 */
 	public function onContentPrepare($context, &$row, &$params, $page = 0)
 	{
+		// Don't run this plugin when the content is being indexed
+		if ($context == 'com_finder.indexer')
+		{
+			return true;
+		}
 		if (JFactory::getApplication()->isAdmin()
 			|| strpos($row->text, '{jtformulator') === false
 		)
 		{
-			return;
+			return true;
 		}
 
 		$msg             = '';
@@ -64,10 +82,9 @@ class plgContentJtformulator extends JPlugin
 		);
 
 		$template = JFactory::getApplication()->getTemplate();
-		$regex    = "@(<(\w+)[^>]*>|){jtformulator(\s.*)?}(</\\2>|)@";
 
 		// Get all matches or return
-		if (!preg_match_all($regex, $row->text, $matches))
+		if (!preg_match_all($this->regex, $row->text, $matches))
 		{
 			return;
 		}

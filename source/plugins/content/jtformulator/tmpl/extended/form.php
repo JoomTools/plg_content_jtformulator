@@ -1,12 +1,11 @@
 <?php
 /**
- * @Copyright    (c) 2016 JoomTools.de - All rights reserved.
- * @package        JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
- * @author         Guido De Gobbis
- * @link           http://www.joomtools.de
- *
- * @license        GPL v3
- **/
+* @Copyright   (c) 2016 JoomTools.de - All rights reserved.
+* @package     JT - Formulator - Plugin for Joomla! 3.5+
+* @author      Guido De Gobbis
+* @link        http://www.joomtools.de
+* @license     GPL v3
+**/
 
 defined('_JEXEC') or die;
 JHtml::_('behavior.keepalive');
