@@ -1,11 +1,11 @@
 <?php
 /**
-* @Copyright   (c) 2016 JoomTools.de - All rights reserved.
-* @package     JT - Formulator - Plugin for Joomla! 3.5+
-* @author      Guido De Gobbis
-* @link        http://www.joomtools.de
-* @license     GPL v3
-**/
+ * @Copyright   (c) 2016 JoomTools.de - All rights reserved.
+ * @package     JT - Formulator - Plugin for Joomla! 3.5+
+ * @author      Guido De Gobbis
+ * @link        http://www.joomtools.de
+ * @license     GPL v3
+ **/
 
 defined('_JEXEC') or die('Restricted access');
 
@@ -34,25 +34,22 @@ class plgContentJtformulator extends JPlugin
 	{
 		if (JFactory::getApplication()->isAdmin())
 		{
-			return true;
+			return;
 		}
 
 		parent::__construct($subject, $params);
 
-		$version                   = new JVersion();
-		$joomla_main_version       = substr($version->RELEASE, 0, strpos($version->RELEASE, '.'));
-		$this->uParams['jversion'] = $joomla_main_version;
-
+		$this->resetUserParams();
 		$this->loadLanguage();
 	}
 
 	/**
 	 * Plugin that generates forms within content
 	 *
-	 * @param   string   $context   The context of the content being passed to the plugin.
-	 * @param   object   &row       The article object.  Note $article->text is also available
-	 * @param   mixed    &$params   The article params
-	 * @param   integer  $page      The 'page' number
+	 * @param   string   $context  The context of the content being passed to the plugin.
+	 * @param   object   &row      The article object.  Note $article->text is also available
+	 * @param   mixed    &$params  The article params
+	 * @param   integer  $page     The 'page' number
 	 *
 	 * @return  void
 	 *
@@ -96,51 +93,55 @@ class plgContentJtformulator extends JPlugin
 		// add form rules
 		JFormHelper::addRulePath(dirname(__FILE__) . '/assets/rules');
 
-
-		$this->uParams['captcha'] = count($matches[0]) ? $this->params->get('captcha') : false;
-
-		// Get Framwork
-		$this->uParams['framework'] = $this->params->get('framework', 0);
-
 		foreach ($matches[0] as $matchKey => $matchValue)
 		{
-			$html    = '';
-			$uParams = array();
-			$lang    = JFactory::getLanguage();
-			$tag     = $lang->getTag();
-			$vars    = $matches[3][$matchKey] ? explode('|', $matches[3][$matchKey]) : array();
+			// Set default framework value
+			$this->uParams['framework'] = $this->params->get('framework', 0);
 
-			if (!empty($vars))
+			// Set default captcha value
+			$this->uParams['captcha'] = count($matches[0]) ? $this->params->get('captcha') : false;
+
+			// Clear html replace
+			$html = '';
+
+			// Set language tag
+			$langTag = JFactory::getLanguage()->getTag();
+
+			// Set default recipient
+			$uParams['mailto'] = null;
+
+			// User param pairs from plugin call
+			$vars = array();
+
+			if (!empty($matches[3][$matchKey]))
 			{
-				foreach ($vars as $var)
-				{
-					list($key, $value) = explode('=', trim($var));
-					$uParams[$key] = $value;
-				}
+				$vars = explode('|', $matches[3][$matchKey]);
 			}
 
-			$this->uParams['mailto'] = isset($uParams['mailto'])
-				? str_replace('#', '@', $uParams['mailto'])
-				: null;
+			// Get user params as assoc array
+			$uParams = $this->getUserParams($vars);
 
-			$uParams['theme'] = isset($uParams['theme'])
-				? $uParams['theme']
-				: 'default';
+			if (!empty($uParams['mailto'])) 
+			{
+				$uParams['mailto'] = str_replace('#', '@', $uParams['mailto']);
+			}
 
-			$this->uParams['theme'] = $uParams['theme'];
+			if (empty($uParams['theme'])) 
+			{
+				$uParams['theme'] = 'default';
+			}
+
+			// Merge user params width default params
+			$this->uParams = array_merge($this->uParams, $uParams);
+
+			// Set form counter as index
 			$this->uParams['index'] = $cIndex;
 
-			if (isset($uParams['subject']))
-			{
-				$this->uParams['subject'] = $uParams['subject'];
-			}
-
-			// Get Framwork
+			// Define framework as layout suffix
 			$layoutSuffix = array();
 
 			if (!empty($this->uParams['framework']))
 			{
-				// Override global Framework
 				$layoutSuffix = array($this->uParams['framework']);
 			}
 
@@ -180,7 +181,7 @@ class plgContentJtformulator extends JPlugin
 				$this->honeypot .= ' value="" />';
 
 				$formLang = dirname(dirname(dirname(
-					$this->_getTmplPath('language/' . $tag . '/' . $tag . '.' . $uParams['theme'] . '_form', 'ini')
+					$this->_getTmplPath('language/' . $langTag . '/' . $langTag . '.' . $uParams['theme'] . '_form', 'ini')
 				)));
 
 				$this->loadLanguage($uParams['theme'] . '_form', $formLang);
@@ -309,7 +310,41 @@ class plgContentJtformulator extends JPlugin
 
 			$row->text = substr_replace($row->text, $html, $pos, $end);
 			$cIndex++;
+			$this->resetUserParams();
 		}
+	}
+
+	/**
+	 * Reset user params to default
+	 */
+	protected function resetUserParams()
+	{
+		$this->uParams             = array();
+		$version                   = new JVersion();
+		$joomla_main_version       = substr($version->RELEASE, 0, strpos($version->RELEASE, '.'));
+		$this->uParams['jversion'] = $joomla_main_version;
+	}
+
+	/**
+	 * @param   array   $vars  Param pairs from plugin call
+	 *
+	 * @return  array
+	 */
+	protected function getUserParams($vars)
+	{
+		$uParams = array();
+
+		if (!empty($vars))
+		{
+			foreach ($vars as $var)
+			{
+				list($key, $value) = explode('=', trim($var));
+				$uParams[$key] = $value;
+			}
+
+		}
+
+		return $uParams;
 	}
 
 	protected function _getTmplPath($filename, $type = 'php')
