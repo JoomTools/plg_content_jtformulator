@@ -1,38 +1,116 @@
 <?php
 /**
-* @package     Joomla.Plugin
-* @subpackage  Content.jtformulator
-*
-* @author      Guido De Gobbis
-* @copyright   (c) 2016 JoomTools.de - All rights reserved.
-* @license     GNU General Public License version 3 or later
-**/
+ * @package         Joomla.Plugin
+ * @subpackage      Content.jtformulator
+ *
+ * @author          Guido De Gobbis
+ * @copyright   (c) 2016 JoomTools.de - All rights reserved.
+ * @license         GNU General Public License version 3 or later
+ **/
 
 defined('_JEXEC') or die('Restricted access');
 
 class plgContentJtformulator extends JPlugin
 {
-
+	/**
+	 * Honeypot
+	 *
+	 * @var    string
+	 * @since  1.0
+	 */
 	protected $honeypot;
-	protected $issetCaptcha;
-	protected $validCaptcha = true;
-	protected $validField = true;
-	protected $fileFields = array();
-	protected $submitFiles = array();
 
-	// Formular
+	/**
+	 * TODO Desctiption
+	 *
+	 * @var    string
+	 * @since  1.0
+	 */
+	protected $issetCaptcha;
+
+	/**
+	 * TODO Desctiption
+	 *
+	 * @var    boolean
+	 * @since  1.0
+	 */
+	protected $validCaptcha = true;
+
+	/**
+	 * JFormField validation
+	 *
+	 * @var    boolean
+	 * @since  1.0
+	 */
+	protected $validField = true;
+
+	/**
+	 * Array with JFormField Names of submitted Files
+	 *
+	 * @var    array
+	 * @since  1.0
+	 */
+	protected $fileFields = array();
+
+	/**
+	 * Array with submitted Files
+	 *
+	 * @var    array
+	 * @since  1.0
+	 */
+	protected $submitedFiles = array();
+
+	/**
+	 * Array with JForm Objects
+	 *
+	 * @var    array
+	 * @since  1.0
+	 */
 	protected $form = array();
 
-	// Userparams
+	/**
+	 * Array with User params
+	 *
+	 * @var    array
+	 * @since  1.0
+	 */
 	protected $uParams = array();
 
-	// Mail
+	/**
+	 * Mail
+	 *
+	 * @var    array
+	 * @since  1.0
+	 */
 	protected $mail = array();
 
-	protected $regex = "@(<(\w+)[^>]*>|){jtformulator(\s.*)?}(</\\2>|)@";
+	/**
+	 * Affects constructor behavior. If true, language files will be loaded automatically.
+	 *
+	 * @var    boolean
+	 * @since  3.1
+	 */
+	protected $autoloadLanguage = true;
 
+	/**
+	 * The regular expression to identify Plugin call.
+	 *
+	 * @var    string
+	 * @since  1.0
+	 */
+	private $regex = "@(<(\w+)[^>]*>|){jtformulator(\s.*)?}(</\\2>|)@";
+
+	/**
+	 * plgContentJtformulator constructor.
+	 *
+	 * @param   object &$subject
+	 * @param   array  $params
+	 *
+	 * @since   1.0
+	 */
 	public function __construct(&$subject, $params)
 	{
+		// Don't run in administration panel
 		if (JFactory::getApplication()->isAdmin())
 		{
 			return;
@@ -41,33 +119,44 @@ class plgContentJtformulator extends JPlugin
 		parent::__construct($subject, $params);
 
 		$this->resetUserParams();
-		$this->loadLanguage();
 	}
 
 	/**
-	 * Plugin that generates forms within content
-	 *
-	 * @param   string   $context  The context of the content being passed to the plugin.
-	 * @param   object   &row      The article object.  Note $article->text is also available
-	 * @param   mixed    &$params  The article params
-	 * @param   integer  $page     The 'page' number
+	 * Reset user Params to default
 	 *
 	 * @return  void
-	 *
-	 * @since   1.6
+	 * @since   1.0
 	 */
-	public function onContentPrepare($context, &$row, &$params, $page = 0)
+	protected function resetUserParams()
 	{
-		// Don't run this plugin when the content is being indexed
-		if ($context == 'com_finder.indexer')
-		{
-			return true;
-		}
-		if (JFactory::getApplication()->isAdmin()
-			|| strpos($row->text, '{jtformulator') === false
+		$this->uParams             = array();
+		$version                   = new JVersion();
+		$joomla_main_version       = substr($version->RELEASE, 0, strpos($version->RELEASE, '.'));
+		$this->uParams['jversion'] = $joomla_main_version;
+	}
+
+	/**
+	 * Plugin to generates Forms within content
+	 *
+	 * @param   string  $context  The context of the content being passed to the plugin.
+	 * @param   object  &article  The article object.  Note $article->text is also available
+	 * @param   mixed   &$params  The article params
+	 * @param   integer $page     The 'page' number
+	 *
+	 * @return  void
+	 * @since  1.6
+	 */
+	public function onContentPrepare($context, &$article, &$params, $page = 0)
+	{
+		$app = JFactory::getApplication();
+
+		// Don't run in administration Panel or when the content is being indexed
+		if ($app->isAdmin()
+			|| $context == 'com_finder.indexer'
+			|| strpos($article->text, '{jtformulator') === false
 		)
 		{
-			return true;
+			return;
 		}
 
 		$msg             = '';
@@ -79,10 +168,10 @@ class plgContentJtformulator extends JPlugin
 		                         'message_plain' => 'php'
 		);
 
-		$template = JFactory::getApplication()->getTemplate();
+		$template = $app->getTemplate();
 
 		// Get all matches or return
-		if (!preg_match_all($this->regex, $row->text, $matches))
+		if (!preg_match_all($this->regex, $article->text, $matches))
 		{
 			return;
 		}
@@ -120,14 +209,14 @@ class plgContentJtformulator extends JPlugin
 			}
 
 			// Get user params as assoc array
-			$uParams = $this->getUserParams($vars);
+			$uParams = $this->setUserParams($vars);
 
-			if (!empty($uParams['mailto'])) 
+			if (!empty($uParams['mailto']))
 			{
 				$uParams['mailto'] = str_replace('#', '@', $uParams['mailto']);
 			}
 
-			if (empty($uParams['theme'])) 
+			if (empty($uParams['theme']))
 			{
 				$uParams['theme'] = 'default';
 			}
@@ -136,7 +225,7 @@ class plgContentJtformulator extends JPlugin
 			$this->uParams = array_merge($this->uParams, $uParams);
 
 			// Set form counter as index
-			$this->uParams['index'] = $cIndex;
+			$this->uParams['index'] = (int) $cIndex;
 
 			// Define framework as layout suffix
 			$layoutSuffix = array();
@@ -157,27 +246,25 @@ class plgContentJtformulator extends JPlugin
 			{
 				$checkTheme = false;
 
-				JFactory::getApplication()
-					->enqueueMessage(
-						JText::sprintf('PLG_JT_FORMULATOR_FILES_ERROR', $this->uParams['theme'])
-						, 'error'
-					);
+				$app->enqueueMessage(
+					JText::sprintf('PLG_JT_FORMULATOR_FILES_ERROR', $this->uParams['theme'])
+					, 'error'
+				);
 			}
 			elseif (in_array(false, $_checkTheme))
 			{
 				$checkTheme = false;
 
-				JFactory::getApplication()
-					->enqueueMessage(
-						JText::sprintf('PLG_JT_FORMULATOR_THEME_ERROR', $this->uParams['theme'])
-						, 'error'
-					);
+				$app->enqueueMessage(
+					JText::sprintf('PLG_JT_FORMULATOR_THEME_ERROR', $this->uParams['theme'])
+					, 'error'
+				);
 			}
 
 			if ($checkTheme)
 			{
 				$this->honeypot = '<input type="text"';
-				$this->honeypot .= ' name="' . $uParams['theme'] . $cIndex . '[information_number]"';
+				$this->honeypot .= ' fieldName="' . $uParams['theme'] . $cIndex . '[information_number]"';
 				$this->honeypot .= ' style="position: absolute;top:-999em;left:-999em;height: 0;width: 0;"';
 				$this->honeypot .= ' value="" />';
 
@@ -225,12 +312,12 @@ class plgContentJtformulator extends JPlugin
 				}
 
 				// Get form submit task
-				$task = JFactory::getApplication()->input->get('task', false, 'post');
+				$task = $app->input->get('task', false, 'post');
 
 				if ($task == $this->uParams['theme'] . $cIndex . "_sendmail")
 				{
 					// Get Form values
-					$submitValues = JFactory::getApplication()->input->get($uParams['theme'] . $cIndex, array(), 'post', 'array');
+					$submitValues = $app->input->get($uParams['theme'] . $cIndex, array(), 'post', 'array');
 
 					foreach ($submitValues as $subKey => $_subValue)
 					{
@@ -289,49 +376,36 @@ class plgContentJtformulator extends JPlugin
 					{
 						if ($this->_sendemail())
 						{
-							JFactory::getApplication()
-								->enqueueMessage(JText::_('PLG_JT_FORMULATOR_EMAIL_THANKS'), 'message');
-
-							JFactory::getApplication()
-								->redirect(JRoute::_('index.php', false));
+							$app->enqueueMessage(JText::_('PLG_JT_FORMULATOR_EMAIL_THANKS'), 'message');
+							$app->redirect(JRoute::_('index.php', false));
 						}
 					}
 					if ($submitValues['information_number'])
 					{
-						JFactory::getApplication()
-							->redirect(JRoute::_('index.php', false));
+						$app->redirect(JRoute::_('index.php', false));
 					}
 
 				}
 
 			}
 
-			$pos = strpos($row->text, $matchValue);
+			$pos = strpos($article->text, $matchValue);
 			$end = strlen($matchValue);
 
-			$row->text = substr_replace($row->text, $html, $pos, $end);
+			$article->text = substr_replace($article->text, $html, $pos, $end);
 			$cIndex++;
 			$this->resetUserParams();
 		}
 	}
 
 	/**
-	 * Reset user params to default
-	 */
-	protected function resetUserParams()
-	{
-		$this->uParams             = array();
-		$version                   = new JVersion();
-		$joomla_main_version       = substr($version->RELEASE, 0, strpos($version->RELEASE, '.'));
-		$this->uParams['jversion'] = $joomla_main_version;
-	}
-
-	/**
-	 * @param   array   $vars  Param pairs from plugin call
+	 * Set user Params
+	 * @param   array $vars  Params pairs from Plugin call
 	 *
 	 * @return  array
+	 * @since   1.0
 	 */
-	protected function getUserParams($vars)
+	protected function setUserParams($vars)
 	{
 		$uParams = array();
 
@@ -415,7 +489,7 @@ class plgContentJtformulator extends JPlugin
 
 			if ($type == 'captcha')
 			{
-				return (string) $field->getAttribute('name');
+				return (string) $field->getAttribute('fieldName');
 			}
 		}
 
@@ -425,7 +499,7 @@ class plgContentJtformulator extends JPlugin
 	protected function _setCaptcha()
 	{
 		$form = $this->form[$this->uParams['theme'] . $this->uParams['index']];
-		$xml  = '<form><fieldset name="submit"><field name="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field></fieldset></form>';
+		$xml  = '<form><fieldset fieldName="submit"><field fieldName="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field></fieldset></form>';
 
 		return $form->load($xml, false);
 	}
@@ -433,7 +507,7 @@ class plgContentJtformulator extends JPlugin
 	protected function _validate()
 	{
 		$token    = JSession::checkToken();
-		$index    = $this->uParams['index'];
+		$index    = (int) $this->uParams['index'];
 		$fieldXML = $this->form[$this->uParams['theme'] . $index]->getXML();
 
 		foreach ($fieldXML as $fieldset)
@@ -478,7 +552,7 @@ class plgContentJtformulator extends JPlugin
 
 	protected function _validateField($field)
 	{
-		$index         = $this->uParams['index'];
+		$index         = (int) $this->uParams['index'];
 		$data          = $this->form[$this->uParams['theme'] . $index]->getData()->toArray();
 		$rule          = false;
 		$value         = '';
@@ -489,7 +563,7 @@ class plgContentJtformulator extends JPlugin
 		$type          = strtolower((string) $field['type']);
 		$validate      = (string) $field['validate'];
 		$required      = (string) $field['required'];
-		$name          = (string) $field['name'];
+		$fieldName     = (string) $field['fieldName'];
 
 		if ($showon)
 		{
@@ -501,18 +575,18 @@ class plgContentJtformulator extends JPlugin
 			{
 				$showField = false;
 				$valid     = true;
-				$this->form[$this->uParams['theme'] . $index]->setValue($name, null, '');
+				$this->form[$this->uParams['theme'] . $index]->setValue($fieldName, null, '');
 
 				if ($type == 'spacer')
 				{
-					$this->form[$this->uParams['theme'] . $index]->setFieldAttribute($name, 'label', '');
+					$this->form[$this->uParams['theme'] . $index]->setFieldAttribute($fieldName, 'label', '');
 				}
 			}
 		}
 
-		if (isset($data[$name]))
+		if (isset($data[$fieldName]))
 		{
-			$value = $data[$name];
+			$value = $data[$fieldName];
 		}
 
 		if ($required && !$value)
@@ -527,28 +601,7 @@ class plgContentJtformulator extends JPlugin
 		{
 			if ($type == 'file')
 			{
-				$jinput      = JFactory::getApplication()->input;
-				$submitFiles = $jinput->files->get($this->uParams['theme'] . $index);
-
-				$issetFiles = false;
-
-				if (!empty($submitFiles[$name][0]['name']))
-				{
-					$issetFiles = true;
-					$files      = $submitFiles[$name];
-				}
-				elseif (!empty($submitFiles[$name]['name']))
-				{
-					$issetFiles = true;
-					$files      = array($submitFiles[$name]);
-				}
-
-				if ($issetFiles)
-				{
-					$value                    = $files;
-					$this->submitFiles[$name] = $files;
-					$this->fileFields[]       = $name;
-				}
+				$value = $this->getSubmittedFiles($fieldName);
 			}
 
 			if ($field->option)
@@ -597,7 +650,7 @@ class plgContentJtformulator extends JPlugin
 					if ($valid !== true)
 					{
 						$this->validCaptcha = $valid;
-						$this->issetCaptcha = $name;
+						$this->issetCaptcha = $fieldName;
 						$valid              = false;
 					}
 				}
@@ -615,8 +668,46 @@ class plgContentJtformulator extends JPlugin
 
 		if (!$valid && $type != 'captcha')
 		{
-			$this->_invalidField($name);
+			$this->_invalidField($fieldName);
 		}
+	}
+
+	/**
+	 * Get submitted Files
+	 *
+	 * @param   string $fieldName JFormField Name
+	 *
+	 * @return  array
+	 * @since   1.0
+	 */
+	protected function getSubmittedFiles($fieldName)
+	{
+		$value       = null;
+		$index       = (int) $this->uParams['index'];
+		$jinput      = JFactory::getApplication()->input;
+		$submitFiles = $jinput->files->get($this->uParams['theme'] . $index);
+
+		$issetFiles = false;
+
+		if (!empty($submitFiles[$fieldName][0]['fieldName']))
+		{
+			$issetFiles = true;
+			$files      = $submitFiles[$fieldName];
+		}
+		elseif (!empty($submitFiles[$fieldName]['fieldName']))
+		{
+			$issetFiles = true;
+			$files      = array($submitFiles[$fieldName]);
+		}
+
+		if ($issetFiles)
+		{
+			$value                           = $files;
+			$this->submitedFiles[$fieldName] = $files;
+			$this->fileFields[]              = $fieldName;
+		}
+
+		return $value;
 	}
 
 	protected function _invalidField($fieldName)
@@ -706,8 +797,8 @@ class plgContentJtformulator extends JPlugin
 		jimport('joomla.filesystem.folder');
 		jimport('joomla.filesystem.file');
 
-		$submitFiles = $this->submitFiles;
-		$nowPath     = date('Ymd');
+		$submitedFiles = $this->submitedFiles;
+		$nowPath       = date('Ymd');
 
 		$filePath = !$this->params->get('file_path', 'uploads')
 			? 'images/uploads'
@@ -727,15 +818,15 @@ class plgContentJtformulator extends JPlugin
 			JFile::write(JPATH_BASE . '/' . $filePath . '/.htaccess', JText::_('PLG_JT_FORMULATOR_SET_ATTACHMENT'));
 		}
 
-		foreach ($submitFiles as $fieldName => $files)
+		foreach ($submitedFiles as $fieldName => $files)
 		{
 			$value = array();
 
 			foreach ($files as $file)
 			{
 				$save     = null;
-				$fileName = JFile::stripExt($file['name']);
-				$fileExt  = JFile::getExt($file['name']);
+				$fileName = JFile::stripExt($file['fieldName']);
+				$fileExt  = JFile::getExt($file['fieldName']);
 				$name     = JFilterOutput::stringURLSafe($fileName) . '.' . $fileExt;
 
 				$save = JFile::copy($file['tmp_name'], $uploadBase . '/' . $name);
