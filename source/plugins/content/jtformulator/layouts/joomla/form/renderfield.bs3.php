@@ -1,10 +1,11 @@
 <?php
 /**
-* @Copyright   (c) 2016 JoomTools.de - All rights reserved.
-* @package     JT - Formulator - Plugin for Joomla! 3.5+
+* @package     Joomla.Plugin
+* @subpackage  Content.jtformulator
+*
 * @author      Guido De Gobbis
-* @link        http://www.joomtools.de
-* @license     GPL v3
+* @copyright   (c) 2016 JoomTools.de - All rights reserved.
+* @license     GNU General Public License version 3 or later
 **/
 
 defined('JPATH_BASE') or die;
