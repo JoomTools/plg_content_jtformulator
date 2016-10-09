@@ -1,11 +1,11 @@
 <?php
 /**
- * @package      Joomla.Plugin
- * @subpackage   Content.jtformulator
+ * @package          Joomla.Plugin
+ * @subpackage       Content.jtformulator
  *
- * @author       Guido De Gobbis
+ * @author           Guido De Gobbis
  * @copyright    (c) 2016 JoomTools.de - All rights reserved.
- * @license      GNU General Public License version 3 or later
+ * @license          GNU General Public License version 3 or later
  **/
 
 defined('_JEXEC') or die('Restricted access');
@@ -91,61 +91,12 @@ class plgContentJtformulator extends JPlugin
 	protected $autoloadLanguage = true;
 
 	/**
-	 * plgContentJtformulator constructor.
-	 *
-	 * @param   object   &$subject
-	 * @param   array    $params
-	 *
-	 * @since   1.0
-	 */
-	public function __construct(&$subject, $params)
-	{
-		// Don't run in administration panel
-		if (JFactory::getApplication()->isAdmin())
-		{
-			return;
-		}
-
-		parent::__construct($subject, $params);
-
-		$this->resetUserParams();
-	}
-
-	/**
-	 * Reset user Params to default
-	 *
-	 * @return   void
-	 * @since    1.0
-	 */
-	protected function resetUserParams()
-	{
-		$this->uParams       = array();
-		$version             = new JVersion();
-		$joomla_main_version = substr($version->RELEASE, 0, strpos($version->RELEASE, '.'));
-
-		// Set default captcha value
-		$this->uParams['captcha'] = $this->params->get('captcha');
-
-		// Set Joomla main version
-		$this->uParams['jversion'] = $joomla_main_version;
-
-		// Set default recipient
-		$this->uParams['mailto'] = JFactory::getConfig()->get('mailfrom');
-
-		// Set default theme
-		$this->uParams['theme'] = 'default';
-
-		// Set default framework value
-		$this->uParams['framework'] = $this->params->get('framework', 0);
-	}
-
-	/**
 	 * Plugin to generates Forms within content
 	 *
-	 * @param   string    $context   The context of the content being passed to the plugin.
-	 * @param   object    &article   The article object.  Note $article->text is also available
-	 * @param   mixed     &$params   The article params
-	 * @param   integer   $page      The 'page' number
+	 * @param   string  $context The context of the content being passed to the plugin.
+	 * @param           object   &article   The article object.  Note $article->text is also available
+	 * @param   mixed   &$params The article params
+	 * @param   integer $page    The 'page' number
 	 *
 	 * @return   void
 	 * @since    1.6
@@ -197,6 +148,8 @@ class plgContentJtformulator extends JPlugin
 			// Clear html replace
 			$html = '';
 
+			$this->resetUserParams();
+
 			if (!empty($userParams[$rKey]))
 			{
 				$vars = explode('|', $userParams[$rKey]);
@@ -208,9 +161,13 @@ class plgContentJtformulator extends JPlugin
 			// Set form counter as index
 			$this->uParams['index'] = (int) $cIndex;
 
+			$formTheme = $this->uParams['theme'] . $cIndex;
+
+			$_checkTheme = array();
+
 			foreach ($checkThemeFiles as $chkFile => $chkType)
 			{
-				$_checkTheme[$chkFile . '.' . $chkType] = $this->getTmplPath($chkFile, $chkType) ? true : false;
+				$_checkTheme[$chkFile . '.' . $chkType] = $this->getTemplatePath($chkFile, $chkType) ? true : false;
 			}
 
 			$checkTheme = true;
@@ -237,15 +194,15 @@ class plgContentJtformulator extends JPlugin
 			if ($checkTheme)
 			{
 				$this->honeypot = '<input type="text"';
-				$this->honeypot .= ' fieldName="' . $this->uParams['theme'] . $cIndex . '[information_number]"';
+				$this->honeypot .= ' fieldName="' . $formTheme . '[information_number]"';
 				$this->honeypot .= ' style="position: absolute;top:-999em;left:-999em;height: 0;width: 0;"';
 				$this->honeypot .= ' value="" />';
 
 				$formLang = dirname(
 					dirname(
 						dirname(
-							$this->getTmplPath('language/' . $langTag . '/'
-							. $langTag . '.' . $this->uParams['theme'] . '_form', 'ini'
+							$this->getTemplatePath('language/' . $langTag . '/'
+								. $langTag . '.' . $this->uParams['theme'] . '_form', 'ini'
 							)
 						)
 					)
@@ -254,18 +211,18 @@ class plgContentJtformulator extends JPlugin
 				$this->loadLanguage($this->uParams['theme'] . '_form', $formLang);
 
 				// Define FormFields
-				$formXmlPath = $this->getTmplPath('fields', 'xml');
+				$formXmlPath = $this->getTemplatePath('fields', 'xml');
 
-				$field = new JForm($this->uParams['theme'] . $cIndex, array('control' => $this->uParams['theme'] . $cIndex));
+				$form = new JForm($formTheme, array('control' => $formTheme));
 
 				// Load Formfields
-				$field->loadFile($formXmlPath);
+				$form->loadFile($formXmlPath);
 
 				// Set Formfields
-				$this->form[$this->uParams['theme'] . $cIndex] = $field;
+				$this->form[$formTheme] = $form;
 
 				// Set Layouts override
-				$this->form[$this->uParams['theme'] . $cIndex]->addLayoutsPath = array(
+				$this->form[$formTheme]->addLayoutsPath = array(
 					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/layouts',
 					JPATH_THEMES . '/' . $template . '/html/layouts',
 					JPATH_PLUGINS . '/content/jtformulator/layouts'
@@ -280,7 +237,7 @@ class plgContentJtformulator extends JPlugin
 				}
 
 				// Set Framework as Layout->Suffix
-				$this->form[$this->uParams['theme'] . $cIndex]->framework = $layoutSuffix;
+				$this->form[$formTheme]->framework = $layoutSuffix;
 
 				$issetCaptcha = $this->issetCaptcha();
 
@@ -290,38 +247,20 @@ class plgContentJtformulator extends JPlugin
 					$issetCaptcha = $setCaptcha ? 'captcha' : false;
 				}
 
-				//$this->issetCaptcha = $issetCaptcha;
+				$this->issetCaptcha = $issetCaptcha;
 
 				// Remove Captcha if disabled by plugin
 				if (!$this->uParams['captcha'] && $issetCaptcha)
 				{
-					$this->form[$this->uParams['theme'] . $cIndex]->removeField($issetCaptcha);
+					$this->form[$formTheme]->removeField($issetCaptcha);
 				}
 
 				// Get form submit task
 				$task = $app->input->get('task', false, 'post');
 
-				if ($task == $this->uParams['theme'] . $cIndex . "_sendmail")
+				if ($task == $formTheme . "_sendmail")
 				{
-					// Get Form values
-					$submitValues = $app->input->get($this->uParams['theme'] . $cIndex, array(), 'post', 'array');
-
-					foreach ($submitValues as $subKey => $_subValue)
-					{
-						if (is_array($_subValue))
-						{
-							$subValue = array();
-							foreach ($_subValue as $sValue)
-							{
-								$subValue[] = JText::_($sValue);
-							}
-						}
-						else
-						{
-							$subValue = JText::_($_subValue);
-						}
-						$submitValues[$subKey] = $subValue;
-					}
+					$submitValues = $this->getTranslatedSubmittedFormValues();
 
 					switch (true)
 					{
@@ -339,7 +278,7 @@ class plgContentJtformulator extends JPlugin
 							break;
 					}
 
-					$this->form[$this->uParams['theme'] . $cIndex]->bind($submitValues);
+					$this->form[$formTheme]->bind($submitValues);
 
 					if (!$submitValues['information_number'])
 					{
@@ -352,22 +291,20 @@ class plgContentJtformulator extends JPlugin
 
 				}
 
-				$formHtmlPath = $this->getTmplPath('form');
+				$formHtmlPath = $this->getTemplatePath('form');
 
 				$html .= $this->getTmpl($formHtmlPath);
 
-				if ($task == $this->uParams['theme'] . $cIndex . "_sendmail")
+				if ($task == $formTheme . "_sendmail")
 				{
 
-					if ($valid)
+					if ($valid && $this->sendMail())
 					{
-						if ($this->sendMail())
-						{
-							$app->enqueueMessage(JText::_('PLG_JT_FORMULATOR_EMAIL_THANKS'), 'message');
-							$app->redirect(JRoute::_('index.php', false));
-						}
+						$app->enqueueMessage(JText::_('PLG_JT_FORMULATOR_EMAIL_THANKS'), 'message');
+						$app->redirect(JRoute::_('index.php', false));
 					}
-					if ($submitValues['information_number'])
+
+					if (!empty($submitValues['information_number']))
 					{
 						$app->redirect(JRoute::_('index.php', false));
 					}
@@ -386,9 +323,37 @@ class plgContentJtformulator extends JPlugin
 	}
 
 	/**
+	 * Reset user Params to default
+	 *
+	 * @return   void
+	 * @since    1.0
+	 */
+	protected function resetUserParams()
+	{
+		$this->uParams       = array();
+		$version             = new JVersion();
+		$joomla_main_version = substr($version->RELEASE, 0, strpos($version->RELEASE, '.'));
+
+		// Set default captcha value
+		$this->uParams['captcha'] = $this->params->get('captcha');
+
+		// Set Joomla main version
+		$this->uParams['jversion'] = $joomla_main_version;
+
+		// Set default recipient
+		$this->uParams['mailto'] = JFactory::getConfig()->get('mailfrom');
+
+		// Set default theme
+		$this->uParams['theme'] = 'default';
+
+		// Set default framework value
+		$this->uParams['framework'] = $this->params->get('framework', 0);
+	}
+
+	/**
 	 * Set user Params
 	 *
-	 * @param   array   $vars   Params pairs from Plugin call
+	 * @param   array $vars Params pairs from Plugin call
 	 *
 	 * @return   array
 	 * @since    1.0
@@ -418,7 +383,7 @@ class plgContentJtformulator extends JPlugin
 		return $uParams;
 	}
 
-	protected function getTmplPath($filename, $type = 'php')
+	protected function getTemplatePath($filename, $type = 'php')
 	{
 		$template = JFactory::getApplication()->getTemplate();
 		$file     = $filename . '.' . $type;
@@ -466,11 +431,10 @@ class plgContentJtformulator extends JPlugin
 			return $bAbsPath . '/' . $file;
 		}
 
-		/*  if ($this->uParams['theme'] != 'default' && $type != 'ini')
-			{
-				return false;
-			}
-		*/
+		if ($this->uParams['theme'] != 'default' && $type != 'ini')
+		{
+			return false;
+		}
 
 		return $dAbsPath . '/' . $file;
 	}
@@ -500,6 +464,41 @@ class plgContentJtformulator extends JPlugin
 		$xml  = '<form><fieldset fieldName="submit"><field fieldName="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field></fieldset></form>';
 
 		return $form->load($xml, false);
+	}
+
+	/**
+	 * Get and translate submitted Form values
+	 *
+	 * @param    array   $submittedValues
+	 * @return   array
+	 * @since    1.0
+	 */
+	protected function getTranslatedSubmittedFormValues($submittedValues = array())
+	{
+		$app       = JFactory::getApplication();
+		$formTheme = $this->uParams['theme'] . $this->uParams['index'];
+
+		// Get Form values
+		if (empty($submittedValues))
+		{
+			$submittedValues = $app->input->get($formTheme, array(), 'post', 'array');
+		}
+
+		foreach ($submittedValues as $subKey => $_subValue)
+		{
+			if (is_array($_subValue))
+			{
+				$subValue = $this->getTranslatedSubmittedFormValues($_subValue);
+			}
+			else
+			{
+				$subValue = JText::_($_subValue);
+			}
+
+			$submittedValues[$subKey] = $subValue;
+		}
+
+		return $submittedValues;
 	}
 
 	protected function validate()
@@ -673,7 +672,7 @@ class plgContentJtformulator extends JPlugin
 	/**
 	 * Get submitted Files
 	 *
-	 * @param   string   $fieldName   JFormField Name
+	 * @param   string $fieldName JFormField Name
 	 *
 	 * @return   array
 	 * @since    1.0
@@ -910,8 +909,8 @@ class plgContentJtformulator extends JPlugin
 			: JText::sprintf('PLG_JT_FORMULATOR_EMAIL_SUBJECT', $jConfig->get('sitename'));
 
 		$mailer = JFactory::getMailer();
-		$hBody  = $this->getTmpl($this->getTmplPath('message_html'));
-		$pBody  = $this->getTmpl($this->getTmplPath('message_plain'));
+		$hBody  = $this->getTmpl($this->getTemplatePath('message_html'));
+		$pBody  = $this->getTmpl($this->getTemplatePath('message_plain'));
 
 		$mailer->setSender(array($jConfig->get('mailfrom'), $jConfig->get('fromname')));
 
