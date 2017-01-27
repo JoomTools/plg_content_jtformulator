@@ -1,14 +1,17 @@
 <?php
 /**
-* @package     Joomla.Plugin
-* @subpackage  Content.jtformulator
-*
-* @author      Guido De Gobbis
-* @copyright   (c) 2016 JoomTools.de - All rights reserved.
-* @license     GNU General Public License version 3 or later
+ * @package     Joomla.Plugin
+ * @subpackage  Content.jtformulator
+ *
+ * @author      Guido De Gobbis
+ * @copyright   (c) 2017 JoomTools.de - All rights reserved.
+ * @license     GNU General Public License version 3 or later
 **/
 
 defined('JPATH_PLATFORM') or die;
+
+use Joomla\String\Normalise;
+use Joomla\String\StringHelper;
 
 /**
  * Abstract Form Field class for the Joomla Platform.
@@ -288,6 +291,14 @@ abstract class JFormField
 	protected $onclick;
 
 	/**
+	 * The conditions to show/hide the field.
+	 *
+	 * @var    string
+	 * @since  3.7.0
+	 */
+	protected $showon;
+
+	/**
 	 * The count value for generated name field
 	 *
 	 * @var    integer
@@ -337,22 +348,22 @@ abstract class JFormField
 		// If there is a form passed into the constructor set the form and form control properties.
 		if ($form instanceof JForm)
 		{
-			$this->form        = $form;
+			$this->form = $form;
 			$this->formControl = $form->getFormControl();
 		}
 
 		// Detect the field type if not set
 		if (!isset($this->type))
 		{
-			$parts = JStringNormalise::fromCamelCase(get_called_class(), true);
+			$parts = Normalise::fromCamelCase(get_called_class(), true);
 
 			if ($parts[0] == 'J')
 			{
-				$this->type = JString::ucfirst($parts[count($parts) - 1], '_');
+				$this->type = StringHelper::ucfirst($parts[count($parts) - 1], '_');
 			}
 			else
 			{
-				$this->type = JString::ucfirst($parts[0], '_') . JString::ucfirst($parts[count($parts) - 1], '_');
+				$this->type = StringHelper::ucfirst($parts[0], '_') . StringHelper::ucfirst($parts[count($parts) - 1], '_');
 			}
 		}
 	}
@@ -394,6 +405,7 @@ abstract class JFormField
 			case 'autofocus':
 			case 'autocomplete':
 			case 'spellcheck':
+			case 'showon':
 				return $this->$name;
 
 			case 'input':
@@ -449,6 +461,7 @@ abstract class JFormField
 			case 'validate':
 			case 'pattern':
 			case 'group':
+			case 'showon':
 			case 'default':
 				$this->$name = (string) $value;
 				break;
@@ -463,7 +476,7 @@ abstract class JFormField
 
 			case 'name':
 				$this->fieldname = $this->getFieldName((string) $value);
-				$this->name      = $this->getName($this->fieldname);
+				$this->name = $this->getName($this->fieldname);
 				break;
 
 			case 'multiple':
@@ -476,13 +489,13 @@ abstract class JFormField
 			case 'readonly':
 			case 'autofocus':
 			case 'hidden':
-				$value       = (string) $value;
+				$value = (string) $value;
 				$this->$name = ($value === 'true' || $value === $name || $value === '1');
 				break;
 
 			case 'autocomplete':
-				$value       = (string) $value;
-				$value       = ($value == 'on' || $value == '') ? 'on' : $value;
+				$value = (string) $value;
+				$value = ($value == 'on' || $value == '') ? 'on' : $value;
 				$this->$name = ($value === 'false' || $value === 'off' || $value === '0') ? false : $value;
 				break;
 
@@ -490,17 +503,17 @@ abstract class JFormField
 			case 'translateLabel':
 			case 'translateDescription':
 			case 'translateHint':
-				$value       = (string) $value;
+				$value = (string) $value;
 				$this->$name = !($value === 'false' || $value === 'off' || $value === '0');
 				break;
 
 			case 'translate_label':
-				$value                = (string) $value;
+				$value = (string) $value;
 				$this->translateLabel = $this->translateLabel && !($value === 'false' || $value === 'off' || $value === '0');
 				break;
 
 			case 'translate_description':
-				$value                      = (string) $value;
+				$value = (string) $value;
 				$this->translateDescription = $this->translateDescription && !($value === 'false' || $value === 'off' || $value === '0');
 				break;
 
@@ -531,7 +544,7 @@ abstract class JFormField
 	 */
 	public function setForm(JForm $form)
 	{
-		$this->form        = $form;
+		$this->form = $form;
 		$this->formControl = $form->getFormControl();
 
 		return $this;
@@ -571,7 +584,7 @@ abstract class JFormField
 		$attributes = array(
 			'multiple', 'name', 'id', 'hint', 'class', 'description', 'labelclass', 'onchange', 'onclick', 'validate', 'pattern', 'default',
 			'required', 'disabled', 'readonly', 'autofocus', 'hidden', 'autocomplete', 'spellcheck', 'translateHint', 'translateLabel',
-			'translate_label', 'translateDescription', 'translate_description', 'size');
+			'translate_label', 'translateDescription', 'translate_description', 'size', 'showon');
 
 		$this->default = isset($element['value']) ? (string) $element['value'] : $this->default;
 
@@ -584,7 +597,7 @@ abstract class JFormField
 		}
 
 		// Allow for repeatable elements
-		$repeat       = (string) $element['repeat'];
+		$repeat = (string) $element['repeat'];
 		$this->repeat = ($repeat == 'true' || $repeat == 'multiple' || (!empty($this->form->repeat) && $this->form->repeat == 1));
 
 		// Set the visibility.
@@ -738,10 +751,10 @@ abstract class JFormField
 
 		// Here mainly for B/C with old layouts. This can be done in the layouts directly
 		$extraData = array(
-			'text'     => $data['label'],
-			'for'      => $this->id,
-			'classes'  => explode(' ', $data['labelclass']),
-			'position' => $position
+			'text'        => $data['label'],
+			'for'         => $this->id,
+			'classes'     => explode(' ', $data['labelclass']),
+			'position'    => $position,
 		);
 
 		return $this->getRenderer($this->renderLabelLayout)->render(array_merge($data, $extraData));
@@ -759,7 +772,7 @@ abstract class JFormField
 	protected function getName($fieldName)
 	{
 		// To support repeated element, extensions can set this in plugin->onRenderSettings
-		$repeatCounter = empty($this->form->repeatCounter) ? 0 : $this->form->repeatCounter;
+		//$repeatCounter = empty($this->form->repeatCounter) ? 0 : $this->form->repeatCounter;
 
 		$name = '';
 
@@ -939,21 +952,10 @@ abstract class JFormField
 			$options['hiddenLabel'] = true;
 		}
 
-		if ($showonstring = $this->getAttribute('showon'))
+		if ($this->showon)
 		{
-			$showonarr = array();
-
-			foreach (preg_split('%\[AND\]|\[OR\]%', $showonstring) as $showonfield)
-			{
-				$showon      = explode(':', $showonfield, 2);
-				$showonarr[] = array(
-					'field'  => str_replace('[]', '', $this->getName($showon[0])),
-					'values' => explode(',', $showon[1]),
-					'op'     => (preg_match('%\[(AND|OR)\]' . $showonfield . '%', $showonstring, $matches)) ? $matches[1] : ''
-				);
-			}
-
-			$options['rel']           = ' data-showon=\'' . json_encode($showonarr) . '\'';
+			$options['rel']           = ' data-showon=\'' .
+				json_encode(JFormHelper::parseShowOnConditions($this->showon, $this->formControl, $this->group)) . '\'';
 			$options['showonEnabled'] = true;
 		}
 

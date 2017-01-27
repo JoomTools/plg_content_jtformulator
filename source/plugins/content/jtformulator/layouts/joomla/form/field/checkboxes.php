@@ -1,11 +1,11 @@
 <?php
 /**
-* @package     Joomla.Plugin
-* @subpackage  Content.jtformulator
-*
-* @author      Guido De Gobbis
-* @copyright   (c) 2016 JoomTools.de - All rights reserved.
-* @license     GNU General Public License version 3 or later
+ * @package     Joomla.Plugin
+ * @subpackage  Content.jtformulator
+ *
+ * @author      Guido De Gobbis
+ * @copyright   (c) 2017 JoomTools.de - All rights reserved.
+ * @license     GNU General Public License version 3 or later
 **/
 
 defined('JPATH_BASE') or die;
@@ -35,7 +35,7 @@ extract($displayData);
  * @var   boolean  $repeat          Allows extensions to duplicate elements.
  * @var   boolean  $required        Is this field required?
  * @var   integer  $size            Size attribute of the input.
- * @var   boolean  $spellchec       Spellcheck state for the form field.
+ * @var   boolean  $spellcheck      Spellcheck state for the form field.
  * @var   string   $validate        Validation rules to apply.
  * @var   string   $value           Value attribute of the field.
  * @var   array    $checkedOptions  Options that will be set as checked.
@@ -45,7 +45,7 @@ extract($displayData);
 
 // Including fallback code for HTML5 non supported browsers.
 JHtml::_('jquery.framework');
-JHtml::_('script', 'system/html5fallback.js', false, true);
+JHtml::_('script', 'system/html5fallback.js', array('version' => 'auto', 'relative' => true));
 
 /**
  * The format of the input tag to be filled in using sprintf.
@@ -61,7 +61,7 @@ $alt = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name);
 ?>
 
 <fieldset id="<?php echo $id; ?>" class="<?php echo trim($class . ' checkboxes'); ?>"
-	<?php echo $required ? 'required aria-required="true"' : '';?>
+	<?php echo $required ? 'required aria-required="true"' : ''; ?>
 	<?php echo $autofocus ? 'autofocus' : ''; ?>>
 
 	<?php foreach ($options as $i => $option) : ?>

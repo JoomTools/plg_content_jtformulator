@@ -1,11 +1,11 @@
 <?php
 /**
-* @package     Joomla.Plugin
-* @subpackage  Content.jtformulator
-*
-* @author      Guido De Gobbis
-* @copyright   (c) 2016 JoomTools.de - All rights reserved.
-* @license     GNU General Public License version 3 or later
+ * @package     Joomla.Plugin
+ * @subpackage  Content.jtformulator
+ *
+ * @author      Guido De Gobbis
+ * @copyright   (c) 2017 JoomTools.de - All rights reserved.
+ * @license     GNU General Public License version 3 or later
 **/
 
 defined('JPATH_PLATFORM') or die;
@@ -109,7 +109,7 @@ class JTLayoutFile extends JLayoutBase
 
 		if ($this->isDebugEnabled())
 		{
-			echo "<pre>" . $this->renderDebugMessages() . "</pre>";
+			echo '<pre>' . $this->renderDebugMessages() . '</pre>';
 		}
 
 		// Nothing to show
@@ -495,7 +495,7 @@ class JTLayoutFile extends JLayoutBase
 				break;
 
 			default:
-				$client = (int) JFactory::getApplication()->isAdmin();
+				$client = (int) JFactory::getApplication()->isClient('administrator');
 				break;
 		}
 
@@ -641,7 +641,7 @@ class JTLayoutFile extends JLayoutBase
 	/**
 	 * Render a layout with the same include paths & options
 	 *
-	 * @param   object  $layoutId     Object which properties are used inside the layout file to build displayed output
+	 * @param   string  $layoutId     The identifier for the sublayout to be searched in a subfolder with the name of the current layout
 	 * @param   mixed   $displayData  Data to be rendered
 	 *
 	 * @return  string  The necessary HTML to display the layout
