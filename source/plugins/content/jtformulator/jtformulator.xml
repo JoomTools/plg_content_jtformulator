@@ -60,7 +60,9 @@
 				       description="PLG_JT_FORMULATOR_XML_FRAMEWORK_DESC">
 					<option value="0">PLG_JT_FORMULATOR_XML_FRAMEWORK_VALUE_CORE</option>
 					<option value="bs3">PLG_JT_FORMULATOR_XML_FRAMEWORK_VALUE_BS3</option>
-					<option value="uikit">PLG_JT_FORMULATOR_XML_CAPTCHA_VALUE_UIKIT</option>
+					<option value="bs4">PLG_JT_FORMULATOR_XML_FRAMEWORK_VALUE_BS4</option>
+					<option value="uikit2">PLG_JT_FORMULATOR_XML_CAPTCHA_VALUE_UIKIT2</option>
+					<option value="uikit3">PLG_JT_FORMULATOR_XML_CAPTCHA_VALUE_UIKIT3</option>
 				</field>
 
 			</fieldset>
