@@ -83,6 +83,19 @@ class plgContentJtformulator extends JPlugin
 	 */
 	protected $mail = array();
 	/**
+	 * Array with needed files for Forms
+	 * 
+	 * @var     array
+	 * @since   1.0
+	 */
+	protected $themeFiles = array(
+		'fields'        => 'xml',
+		'form'          => 'php',
+		'message_html'  => 'php',
+		'message_plain' => 'php'
+	);
+
+	/**
 	 * Affects constructor behavior. If true, language files will be loaded automatically.
 	 *
 	 * @var     boolean
@@ -119,12 +132,6 @@ class plgContentJtformulator extends JPlugin
 		$cIndex          = 0;
 		$template        = $app->getTemplate();
 		$langTag         = JFactory::getLanguage()->getTag();
-		$checkThemeFiles = array(
-			'fields'        => 'xml',
-			'form'          => 'php',
-			'message_html'  => 'php',
-			'message_plain' => 'php'
-		);
 
 		// Get all matches or return
 		if (!preg_match_all(self::PLUGIN_REGEX, $article->text, $matches))
@@ -162,39 +169,13 @@ class plgContentJtformulator extends JPlugin
 			$this->uParams['index'] = (int) $cIndex;
 
 			$formTheme = $this->uParams['theme'] . $cIndex;
+			
+			$checkedTheme = $this->checkThemeFiles();
 
-			$_checkTheme = array();
-
-			foreach ($checkThemeFiles as $chkFile => $chkType)
-			{
-				$_checkTheme[$chkFile . '.' . $chkType] = $this->getTemplatePath($chkFile, $chkType) ? true : false;
-			}
-
-			$checkTheme = true;
-
-			if (in_array(true, $_checkTheme) && in_array(false, $_checkTheme))
-			{
-				$checkTheme = false;
-
-				$app->enqueueMessage(
-					JText::sprintf('PLG_JT_FORMULATOR_FILES_ERROR', $this->uParams['theme'])
-					, 'error'
-				);
-			}
-			elseif (in_array(false, $_checkTheme))
-			{
-				$checkTheme = false;
-
-				$app->enqueueMessage(
-					JText::sprintf('PLG_JT_FORMULATOR_THEME_ERROR', $this->uParams['theme'])
-					, 'error'
-				);
-			}
-
-			if ($checkTheme)
+			if ($checkedTheme)
 			{
 				$this->honeypot = '<input type="text"';
-				$this->honeypot .= ' fieldName="' . $formTheme . '[information_number]"';
+				$this->honeypot .= ' name="' . $formTheme . '[information_number]"';
 				$this->honeypot .= ' style="position: absolute;top:-999em;left:-999em;height: 0;width: 0;"';
 				$this->honeypot .= ' value="" />';
 
@@ -446,12 +427,11 @@ class plgContentJtformulator extends JPlugin
 
 		foreach ($fields as $field)
 		{
-
 			$type = (string) $field->getAttribute('type');
 
 			if ($type == 'captcha')
 			{
-				return (string) $field->getAttribute('fieldName');
+				return (string) $field->getAttribute('name');
 			}
 		}
 
@@ -461,7 +441,7 @@ class plgContentJtformulator extends JPlugin
 	protected function setCaptcha()
 	{
 		$form = $this->form[$this->uParams['theme'] . $this->uParams['index']];
-		$xml  = '<form><fieldset fieldName="submit"><field fieldName="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field></fieldset></form>';
+		$xml  = '<form><fieldset name="submit"><field name="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field></fieldset></form>';
 
 		return $form->load($xml, false);
 	}
@@ -928,5 +908,44 @@ class plgContentJtformulator extends JPlugin
 		$send = $mailer->Send();
 
 		return $send;
+	}
+
+	/**
+	 * Checks if all needed files for Forms are found
+	 *
+	 * @return   bool
+	 * @since    1.0
+	 */
+	protected function checkThemeFiles()
+	{
+		$app = JFactory::getApplication();
+		$themeFiles = $this->themeFiles;
+		
+		foreach ($themeFiles as $file => $type)
+		{
+			$theme[$file . '.' . $type] = $this->getTemplatePath($file, $type) ? true : false;
+		}
+
+		if (in_array(true, $theme) && in_array(false, $theme))
+		{
+			$app->enqueueMessage(
+				JText::sprintf('PLG_JT_FORMULATOR_FILES_ERROR', $this->uParams['theme'])
+				, 'error'
+			);
+
+			return false;
+		}
+
+		if (in_array(false, $theme))
+		{
+			$app->enqueueMessage(
+				JText::sprintf('PLG_JT_FORMULATOR_THEME_ERROR', $this->uParams['theme'])
+				, 'error'
+			);
+
+			return false;
+		}
+
+		return true;
 	}
 }
