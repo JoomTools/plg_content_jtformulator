@@ -9,6 +9,9 @@
 **/
 
 defined('_JEXEC') or die;
+
+extract($displayData);
+
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidation');
 
@@ -106,7 +109,7 @@ $this->mail['sender_email'] = 'email';
 			</div>
 		<?php endif; ?>
 
-		<?php echo $this->honeypot; ?>
+		<?php echo $honeypot; ?>
 		<input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>"/>
 		<input type="hidden" name="task" value="<?php echo $id . $index; ?>_sendmail"/>
 		<input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>"/>

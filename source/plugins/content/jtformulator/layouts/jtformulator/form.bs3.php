@@ -9,6 +9,9 @@
 **/
 
 defined('_JEXEC') or die;
+
+extract($displayData);
+
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidation');
 

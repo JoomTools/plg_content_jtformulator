@@ -10,6 +10,8 @@
 
 defined('_JEXEC') or die;
 
+extract($displayData);
+
 $fieldsets = $form->getXML();
 
 foreach ($fieldsets->fieldset as $fieldset)

@@ -82,18 +82,6 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	protected $mail = array();
-	/**
-	 * Array with needed files for Forms
-	 * 
-	 * @var     array
-	 * @since   1.0
-	 */
-	protected $themeFiles = array(
-		'fields'        => 'xml',
-		'form'          => 'php',
-		'message_html'  => 'php',
-		'message_plain' => 'php'
-	);
 
 	/**
 	 * Affects constructor behavior. If true, language files will be loaded automatically.
@@ -169,10 +157,10 @@ class plgContentJtformulator extends JPlugin
 			$this->uParams['index'] = (int) $cIndex;
 
 			$formTheme = $this->uParams['theme'] . $cIndex;
-			
-			$checkedTheme = $this->checkThemeFiles();
 
-			if ($checkedTheme)
+			$formXmlPath = $this->getFieldsFile();
+
+			if (!empty($formXmlPath))
 			{
 				$this->honeypot = '<input type="text"';
 				$this->honeypot .= ' name="' . $formTheme . '[information_number]"';
@@ -182,7 +170,7 @@ class plgContentJtformulator extends JPlugin
 				$formLang = dirname(
 					dirname(
 						dirname(
-							$this->getTemplatePath('language/' . $langTag . '/'
+							$this->getLanguagePath('language/' . $langTag . '/'
 								. $langTag . '.' . $this->uParams['theme'] . '_form', 'ini'
 							)
 						)
@@ -190,9 +178,6 @@ class plgContentJtformulator extends JPlugin
 				);
 
 				$this->loadLanguage($this->uParams['theme'] . '_form', $formLang);
-
-				// Define FormFields
-				$formXmlPath = $this->getTemplatePath('fields', 'xml');
 
 				$form = new JForm($formTheme, array('control' => $formTheme));
 
@@ -204,9 +189,10 @@ class plgContentJtformulator extends JPlugin
 
 				// Set Layouts override
 				$this->form[$formTheme]->addLayoutsPath = array(
+					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
 					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/layouts',
-					JPATH_THEMES . '/' . $template . '/html/layouts',
-					JPATH_PLUGINS . '/content/jtformulator/layouts'
+					JPATH_THEMES . '/' . $template . '/html/layouts/jtformulator',
+					JPATH_PLUGINS . '/content/jtformulator/layouts/jtformulator'
 				);
 
 				// Define framework as layout suffix
@@ -250,8 +236,8 @@ class plgContentJtformulator extends JPlugin
 							break;
 
 						case !isset($submitValues['subject'])
-							&& isset($uParams['subject']):
-							$submitValues['subject'] = $this->mail['subject'] = $uParams['subject'];
+							&& isset($this->uParams['subject']):
+							$submitValues['subject'] = $this->mail['subject'] = $this->uParams['subject'];
 							break;
 
 						default:
@@ -261,7 +247,7 @@ class plgContentJtformulator extends JPlugin
 
 					$this->form[$formTheme]->bind($submitValues);
 
-					if (!$submitValues['information_number'])
+					if ($submitValues['information_number'] == '')
 					{
 						$valid = $this->validate();
 					}
@@ -272,14 +258,12 @@ class plgContentJtformulator extends JPlugin
 
 				}
 
-				$formHtmlPath = $this->getTemplatePath('form');
-
-				$html .= $this->getTmpl($formHtmlPath);
+				$html .= $this->getTmpl('form');
 
 				if ($task == $formTheme . "_sendmail")
 				{
-
-					if ($valid && $this->sendMail())
+					$sendmail = $this->sendMail();
+					if ($valid && $sendmail)
 					{
 						$app->enqueueMessage(JText::_('PLG_JT_FORMULATOR_EMAIL_THANKS'), 'message');
 						$app->redirect(JRoute::_('index.php', false));
@@ -358,14 +342,21 @@ class plgContentJtformulator extends JPlugin
 			$uParams['mailto'] = str_replace('#', '@', $uParams['mailto']);
 		}
 
+		if (!empty($uParams['sender']))
+		{
+			$this->mail['sender'] = explode(' ', $uParams['sender']);
+			unset($uParams['sender']);
+		}
+
 		// Merge user params width default params
 		$this->uParams = array_merge($this->uParams, $uParams);
 
 		return $uParams;
 	}
 
-	protected function getTemplatePath($filename, $type = 'php')
+	protected function getLanguagePath($filename, $type = 'php')
 	{
+
 		$template = JFactory::getApplication()->getTemplate();
 		$file     = $filename . '.' . $type;
 		$fileFw   = $filename . '.' . $this->uParams['framework'] . '.' . $type;
@@ -540,7 +531,7 @@ class plgContentJtformulator extends JPlugin
 		$type          = strtolower((string) $field['type']);
 		$validate      = (string) $field['validate'];
 		$required      = (string) $field['required'];
-		$fieldName     = (string) $field['fieldName'];
+		$fieldName     = (string) $field['name'];
 
 		if ($showon)
 		{
@@ -607,6 +598,10 @@ class plgContentJtformulator extends JPlugin
 			if ($type == 'email')
 			{
 				$field->addAttribute('tld', 'tld');
+				if ($required || !empty($value))
+				{
+					$this->mail['sender_email'] = 'email';
+				}
 			}
 
 			if ($validate)
@@ -618,7 +613,7 @@ class plgContentJtformulator extends JPlugin
 				$rule = JFormHelper::loadRuleType($type);
 			}
 
-			if ($rule && !empty($value))
+			if (!empty($rule) && $required)
 			{
 				if ($type == 'captcha')
 				{
@@ -818,26 +813,40 @@ class plgContentJtformulator extends JPlugin
 		}
 	}
 
-	protected function getTmpl($path)
+	protected function getTmpl($filename)
 	{
-
 		$index = $this->uParams['index'];
 		$id    = $this->uParams['theme'];
-		$form  = $this->form[$id . $index];
+		$form = $this->form[$id . $index];
+		$layoutPath = $form->addLayoutsPath;
 
-		// Start capturing output into a buffer
-		ob_start();
+		$displayData = array(
+			'id' => $id,
+			'index' => (int) $index,
+			'honeypot' => $this->honeypot,
+			'form' => $form,
+			'mail' => &$this->mail
+		);
 
-		// Include the requested template filename in the local scope
-		// (this will execute the view logic).
-		include($path);
+		$renderer = new JLayoutFile($filename);
 
-		// Done with the requested template; get the buffer and
-		// clear it.
-		$return = ob_get_contents();
-		ob_end_clean();
+		// Set Framwork as Layout->Suffix
+		if (!empty($this->uParams['framework']))
+		{
+			if (!method_exists($renderer, 'setSuffixes'))
+			{
+				unset($renderer);
+				JLoader::register('JTLayoutFile', dirname(__FILE__) . '/assets/file.php');
+				$renderer = new JTLayoutFile($filename);
+			}
 
-		return $return;
+			$renderer->setSuffixes(array($this->uParams['framework']));
+		}
+
+		$renderer->setIncludePaths($layoutPath);
+		//$renderer->setDebug(true);
+
+		return $renderer->render($displayData);
 	}
 
 	protected function sendMail()
@@ -874,23 +883,23 @@ class plgContentJtformulator extends JPlugin
 
 		}
 
-		$replayToEmail = isset($mail['sender_email']) && !empty($mail['sender_email'])
+		$replayToEmail = !empty($mail['sender_email'])
 			? $mail['sender_email']
 			: '';
 
-		$replayToName = isset($mail['sender_name']) && !empty($mail['sender_email'])
-			? $mail['sender_name']
+		$replayToName = !empty($mail['sender'])
+			? $mail['sender']
 			: '';
 
 		$recipient = $this->uParams['mailto'];
 
-		$subject = (isset($mail['subject']) && !empty($mail['subject']))
+		$subject = (!empty($mail['subject']))
 			? $mail['subject']
 			: JText::sprintf('PLG_JT_FORMULATOR_EMAIL_SUBJECT', $jConfig->get('sitename'));
 
 		$mailer = JFactory::getMailer();
-		$hBody  = $this->getTmpl($this->getTemplatePath('message_html'));
-		$pBody  = $this->getTmpl($this->getTemplatePath('message_plain'));
+		$hBody  = $this->getTmpl('message.html');
+		$pBody  = $this->getTmpl('message.plain');
 
 		$mailer->setSender(array($jConfig->get('mailfrom'), $jConfig->get('fromname')));
 
@@ -916,36 +925,36 @@ class plgContentJtformulator extends JPlugin
 	 * @return   bool
 	 * @since    1.0
 	 */
-	protected function checkThemeFiles()
+	protected function getFieldsFile()
 	{
-		$app = JFactory::getApplication();
-		$themeFiles = $this->themeFiles;
-		
-		foreach ($themeFiles as $file => $type)
+		$app      = JFactory::getApplication();
+		$template = $app->getTemplate();
+		$file = 'fields.' . $this->uParams['framework'] . '.xml';
+
+		$formPath = array(
+			JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
+			JPATH_PLUGINS . '/content/jtformulator/tmpl/' . $this->uParams['theme'],
+			JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/default',
+			JPATH_PLUGINS . '/content/jtformulator/tmpl/default'
+		);
+
+		foreach ($formPath as $path)
 		{
-			$theme[$file . '.' . $type] = $this->getTemplatePath($file, $type) ? true : false;
+			if (file_exists($path . '/' . $file))
+			{
+				return $path . '/' . $file;
+			}
+			elseif (file_exists($path . '/fields.xml'))
+			{
+				return $path . '/fields.xml';
+			}
 		}
 
-		if (in_array(true, $theme) && in_array(false, $theme))
-		{
-			$app->enqueueMessage(
-				JText::sprintf('PLG_JT_FORMULATOR_FILES_ERROR', $this->uParams['theme'])
-				, 'error'
-			);
+		$app->enqueueMessage(
+			JText::sprintf('PLG_JT_FORMULATOR_FILES_ERROR', $this->uParams['theme'])
+			, 'error'
+		);
 
-			return false;
-		}
-
-		if (in_array(false, $theme))
-		{
-			$app->enqueueMessage(
-				JText::sprintf('PLG_JT_FORMULATOR_THEME_ERROR', $this->uParams['theme'])
-				, 'error'
-			);
-
-			return false;
-		}
-
-		return true;
+		return false;
 	}
 }
