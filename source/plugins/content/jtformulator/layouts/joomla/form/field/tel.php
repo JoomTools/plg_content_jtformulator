@@ -1,11 +1,12 @@
 <?php
 /**
- * @package     Joomla.Site
- * @subpackage  Layout
+ * @package     Joomla.Plugin
+ * @subpackage  Content.jtformulator
  *
- * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
- * @license     GNU General Public License version 2 or later; see LICENSE.txt
- */
+ * @author      Guido De Gobbis
+ * @copyright   (c) 2017 JoomTools.de - All rights reserved.
+ * @license     GNU General Public License version 3 or later
+**/
 
 defined('JPATH_BASE') or die;
 
