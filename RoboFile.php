@@ -8,19 +8,31 @@
  * @see http://robo.li/
  */
 
-require_once 'vendor/autoload.php';
+use Joomla\Jorobo\Tasks\loadTasks;
 
 if (!defined('JPATH_BASE'))
 {
 	define('JPATH_BASE', __DIR__);
 }
 
+// PSR-4 Autoload by composer
+require_once JPATH_BASE . '/vendor/autoload.php';
+
 class RoboFile extends \Robo\Tasks
 {
 	// Load tasks from composer, see composer.json
-	use \joomla_projects\robo\loadTasks;
-	use \Joomla\Jorobo\Tasks\loadTasks;
-	
+	//use \joomla_projects\robo\loadTasks;
+	//use \Joomla\Jorobo\Tasks\loadTasks;
+	use loadTasks;
+
+	/**
+	 * Initialize Robo
+	 */
+	public function __construct()
+	{
+		$this->stopOnFail(true);
+	}
+
 	/**
 	 * Build the joomla extension package
 	 *
@@ -35,7 +47,8 @@ class RoboFile extends \Robo\Tasks
 			$this->_copy('jorobo.dist.ini', 'jorobo.ini');
 		}
 
-		$this->taskBuild($params)->run();
+		//$this->taskBuild($params)->run();
+		(new \Joomla\Jorobo\Tasks\Build($params))->run();
 	}
 
 	/**
@@ -57,6 +70,7 @@ class RoboFile extends \Robo\Tasks
 	 */
 	public function map($target)
 	{
-		$this->taskMap($target)->run();
+		//$this->taskMap($target)->run();
+		(new \Joomla\Jorobo\Tasks\Map($target))->run();
 	}
 }
