@@ -19,14 +19,13 @@ JHtml::_('behavior.formvalidation');
 {emailcloak=off}
 <div class="contact-form">
 	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
-
 	<form name="<?php echo $id . $index; ?>_form"
 	      id="<?php echo $id . $index; ?>_form"
 	      action="<?php echo JRoute::_("index.php"); ?>"
 	      method="post"
+	      class="form-validate"
 	      enctype="multipart/form-data"
-	      class="form-validate
-	      ">
+	>
 		<?php
 
 		$fieldsets         = $form->getXML();
@@ -36,13 +35,13 @@ JHtml::_('behavior.formvalidation');
 
 		foreach ($fieldsets->fieldset as $fieldset) :
 
-			$fieldsetName = (string) $fieldset['name'];
+			$fieldsetName  = (string) $fieldset['name'];
 			$fieldsetLabel = (string) $fieldset['label'];
 			$fieldsetDesc  = (string) $fieldset['description'];
 			$sumFields     = count($fieldset->field);
 			$fieldsetClass = (string) $fieldset['class']
-				? (string) $fieldset['class']
-				: '';
+				? (string) $fieldset['class'] . ' uk-fieldset'
+				: 'uk-fieldset';
 
 			if ($fieldsetName == 'submit' && $sumFields == 0)
 			{
@@ -56,7 +55,7 @@ JHtml::_('behavior.formvalidation');
 
 				<fieldset class="<?php echo $fieldsetClass; ?>">
 					<?php if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
-						<legend><?php echo $legend; ?></legend>
+						<legend class="uk-legend"><?php echo $legend; ?></legend>
 					<?php endif; ?>
 					<?php if (isset($fieldsetDesc) && strlen($desc = trim(JText::_($fieldsetDesc)))) : ?>
 						<p><?php echo $desc; ?></p>
@@ -75,11 +74,9 @@ JHtml::_('behavior.formvalidation');
 
 					if ($fieldsetName == 'submit') :
 						$submitSet = true; ?>
-						<div class="control-group">
-							<div class="controls">
-								<button class="validate"
-								        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
-							</div>
+						<div class="form-group">
+							<button class="btn btn-default validate"
+							        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
 						</div>
 					<?php endif; ?>
 
@@ -94,11 +91,9 @@ JHtml::_('behavior.formvalidation');
 		endforeach;
 
 		if ($submitSet === false) : ?>
-			<div class="control-group">
-				<div class="controls">
-					<button class="validate"
-					        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
-				</div>
+			<div class="form-group">
+				<button class="uk-button uk-button-default"
+				        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
 			</div>
 		<?php endif; ?>
 

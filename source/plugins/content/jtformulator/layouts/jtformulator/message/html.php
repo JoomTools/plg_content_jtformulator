@@ -31,10 +31,10 @@ foreach ($fieldsets->fieldset as $fieldset)
 				$type  = (string) $form->getFieldAttribute((string) $field['name'], 'type');
 				$fileTimeOut = '';
 
-				if ($type == 'file' && $this->params->get('file_clear'))
+				if ($type == 'file' && $fileClear > 0)
 				{
 					$fileTimeOut .= '<tr><td colspan="2">';
-					$fileTimeOut .= JText::sprintf('PLG_JT_FORMULATOR_FILE_TIMEOUT', $this->params->get('file_clear'));
+					$fileTimeOut .= JText::sprintf('PLG_JT_FORMULATOR_FILE_TIMEOUT', $fileClear);
 					$fileTimeOut .= '</td></tr>';
 				}
 
@@ -75,7 +75,7 @@ foreach ($fieldsets->fieldset as $fieldset)
 					<th style="width:30%; text-align: left;">
 						<?php echo strip_tags($label); ?>
 					</th>
-					<td><?php echo $value ? nl2br(strip_tags($value)) : '--'; ?></td>
+					<td><?php echo $value ? nl2br($value) : '--'; ?></td>
 				</tr>
 				<?php echo $fileTimeOut; ?>
 			<?php endforeach; ?>

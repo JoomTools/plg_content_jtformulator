@@ -954,9 +954,33 @@ abstract class JFormField
 
 		if ($this->showon)
 		{
-			$options['rel']           = ' data-showon=\'' .
-				json_encode(JFormHelper::parseShowOnConditions($this->showon, $this->formControl, $this->group)) . '\'';
-			$options['showonEnabled'] = true;
+			$version = new JVersion;
+			$ttest = $version->getShortVersion();
+
+			// Abort if the current Joomla release is older
+			if ($test = version_compare($version->getShortVersion(), "3.7", 'lt'))
+			{
+				$showonarr = array();
+
+				foreach (preg_split('%\[AND\]|\[OR\]%', $this->showon) as $showonfield)
+				{
+					$showon      = explode(':', $showonfield, 2);
+					$showonarr[] = array(
+						'field'  => str_replace('[]', '', $this->getName($showon[0])),
+						'values' => explode(',', $showon[1]),
+						'op'     => (preg_match('%\[(AND|OR)\]' . $showonfield . '%', $this->showon, $matches)) ? $matches[1] : '',
+					);
+				}
+
+				$options['rel']           = ' data-showon=\'' . json_encode($showonarr) . '\'';
+				$options['showonEnabled'] = true;
+			}
+			else
+			{
+				$options['rel']           = ' data-showon=\'' .
+					json_encode(JFormHelper::parseShowOnConditions($this->showon, $this->formControl, $this->group)) . '\'';
+				$options['showonEnabled'] = true;
+			}
 		}
 
 		$data = array(

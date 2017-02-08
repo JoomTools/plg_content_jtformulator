@@ -191,7 +191,9 @@ class plgContentJtformulator extends JPlugin
 				$this->form[$formTheme]->addLayoutsPath = array(
 					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
 					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/layouts',
+					JPATH_THEMES . '/' . $template . '/html/layouts',
 					JPATH_THEMES . '/' . $template . '/html/layouts/jtformulator',
+					JPATH_PLUGINS . '/content/jtformulator/layouts',
 					JPATH_PLUGINS . '/content/jtformulator/layouts/jtformulator'
 				);
 
@@ -661,12 +663,12 @@ class plgContentJtformulator extends JPlugin
 
 		$issetFiles = false;
 
-		if (!empty($submitFiles[$fieldName][0]['fieldName']))
+		if (!empty($submitFiles[$fieldName][0]['name']))
 		{
 			$issetFiles = true;
 			$files      = $submitFiles[$fieldName];
 		}
-		elseif (!empty($submitFiles[$fieldName]['fieldName']))
+		elseif (!empty($submitFiles[$fieldName]['name']))
 		{
 			$issetFiles = true;
 			$files      = array($submitFiles[$fieldName]);
@@ -797,8 +799,8 @@ class plgContentJtformulator extends JPlugin
 			foreach ($files as $file)
 			{
 				$save     = null;
-				$fileName = JFile::stripExt($file['fieldName']);
-				$fileExt  = JFile::getExt($file['fieldName']);
+				$fileName = JFile::stripExt($file['name']);
+				$fileExt  = JFile::getExt($file['name']);
 				$name     = JFilterOutput::stringURLSafe($fileName) . '.' . $fileExt;
 
 				$save = JFile::copy($file['tmp_name'], $uploadBase . '/' . $name);
@@ -824,8 +826,8 @@ class plgContentJtformulator extends JPlugin
 			'id' => $id,
 			'index' => (int) $index,
 			'honeypot' => $this->honeypot,
-			'form' => $form,
-			'mail' => &$this->mail
+			'fileClear' => $this->params->get('file_clear'),
+			'form' => $form
 		);
 
 		$renderer = new JLayoutFile($filename);

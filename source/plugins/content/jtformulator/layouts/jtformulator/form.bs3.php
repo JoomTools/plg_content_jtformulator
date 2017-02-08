@@ -11,17 +11,10 @@
 defined('_JEXEC') or die;
 
 extract($displayData);
+$renderOptions              = array();
 
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidation');
-
-// Set Fieldname or own value
-//$this->mail['sender_name'] = 'name';
-
-// If you have to concatenate more fields, use an array like this
-$renderOptions              = array();
-$this->mail['sender_name']  = array('vname', 'name');
-$this->mail['sender_email'] = 'email';
 ?>
 
 {emailcloak=off}
@@ -105,7 +98,7 @@ $this->mail['sender_email'] = 'email';
 			</div>
 		<?php endif; ?>
 
-		<?php echo $this->honeypot; ?>
+		<?php echo $honeypot; ?>
 		<input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>"/>
 		<input type="hidden" name="task" value="<?php echo $id . $index; ?>_sendmail"/>
 		<input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>"/>
