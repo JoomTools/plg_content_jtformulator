@@ -246,4 +246,33 @@ class JFormFieldList extends JFormField
 
 		return $this;
 	}
+
+	public function setOptionsClass($classes = array())
+	{
+		$class = array();
+		$type = strtolower((string) $this->getAttribute('type'));
+		
+		if (!empty($classes) && $this->element instanceof SimpleXMLElement)
+		{
+			$key = array_search($type, $classes['type'], true);
+
+			if ($key !== false)
+			{
+				$class[] =  $classes['class'][$key];
+			}
+
+			foreach ($this->element->xpath('option') as &$option)
+			{
+				if (!empty($option->class))
+				{
+					$class[] =  $option->class;
+				}
+
+				$option->addAttribute('class', implode(' ', $class));
+				$test=null;
+			}
+		}
+
+		return $this;
+	}
 }

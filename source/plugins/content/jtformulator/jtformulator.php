@@ -1007,26 +1007,22 @@ class plgContentJtformulator extends JPlugin
 		}
 	}
 
-	protected function setFieldClass($fieldname, $classes, $options = null)
+	protected function setFieldClass($fieldname, $classes)
 	{
 		$theme   = $this->uParams['theme'] . (int) $this->uParams['index'];
 		$form   = $this->form[$theme];
+
 		$field = $form->getField($fieldname);
-		$element = (array) $field->element;
 		$type = strtolower((string) $field->getAttribute('type'));
 
-		if (empty($options))
+		if (in_array($type, array('checkbox', 'checkboxes', 'radio')))
 		{
-			if (in_array($type, array('checkbox', 'checkboxes', 'radio')))
-			{
-				$test = $form->getField($fieldname)->element;
-				$this->setFieldClass($fieldname, $classes, $test);
-
-				return;
-			}
+			$field->setOptionsClass($classes);
+			return;
 		}
 
-		$class = array((string) $form->getFieldAttribute($fieldname,'class'));
+
+		$class = array((string) $field->class);
 		$key = array_search($type, $classes['type'], true);
 
 		if ($key !== false)
@@ -1035,7 +1031,7 @@ class plgContentJtformulator extends JPlugin
 		}
 		else
 		{
-			$class[] = $classes['class']['default'];
+			$class[] = $classes['default'];
 		}
 
 		$form->setFieldAttribute($fieldname, 'class', implode(' ', $class));
