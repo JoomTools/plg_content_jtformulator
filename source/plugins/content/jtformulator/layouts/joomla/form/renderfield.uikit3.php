@@ -27,14 +27,14 @@ if (!empty($options['showonEnabled']))
 	JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js');
 }
 
-$gridgroup = empty($options['gridgroup']) ? '': ' ' . $options['gridgroup'];
-$gridlabel = empty($options['gridlabel']) ? '': ' ' . $options['gridlabel'];
-$gridfield = empty($options['gridfield']) ? '': ' ' . $options['gridfield'];
+$gridgroup = !empty($options['gridgroup']) ? ' class="' . $options['gridgroup'] . '"' : '';
+$gridlabel = !empty($options['gridlabel']) ? ' class="' . $options['gridlabel'] . '"' : '';
+$gridfield = !empty($options['gridfield']) ? ' class="' . $options['gridfield'] . '"' : '';
 ?>
 
-<div class="uk-margin<?php echo $gridgroup; ?>" <?php echo $options['rel']; ?>>
+<div<?php echo $gridgroup; ?><?php echo $options['rel']; ?>>
 	<?php if (empty($options['hiddenLabel'])) : ?>
-        <div class="uk-form-label<?php echo $gridlabel; ?>"><?php echo $label; ?></div>
+        <div<?php echo $gridlabel; ?>><?php echo $label; ?></div>
 	<?php endif; ?>
-    <div class="uk-form-controls<?php echo $gridfield; ?>"><?php echo $input; ?></div>
+    <div<?php echo $gridfield; ?>><?php echo $input; ?></div>
 </div>

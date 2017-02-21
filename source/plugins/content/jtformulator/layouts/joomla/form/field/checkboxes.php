@@ -62,7 +62,7 @@ $labelclass = !empty($labelclass) ? ' class="' . $labelclass .'"' : '';
 $class = !empty($class) ? ' class="' . trim($class) . '"' : '';
 ?>
 
-<fieldset id="<?php echo $id; ?>"<?php echo $class; ?>"
+<fieldset id="<?php echo $id; ?>"<?php echo $class; ?>
 	<?php echo $required ? 'required aria-required="true"' : ''; ?>
 	<?php echo $autofocus ? 'autofocus' : ''; ?>>
 

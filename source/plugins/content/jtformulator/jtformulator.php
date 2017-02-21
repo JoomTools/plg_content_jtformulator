@@ -131,6 +131,7 @@ class plgContentJtformulator extends JPlugin
 		$userParams         = $matches[3];
 
 		JLoader::register('JFormField', dirname(__FILE__) . '/assets/jformfield.php');
+		JLoader::register('JHtmlBehavior', dirname(__FILE__) . '/assets/behavior.php');
 
 		// Add form fields
 		JFormHelper::addFieldPath(dirname(__FILE__) . '/assets/fields');
@@ -985,19 +986,21 @@ class plgContentJtformulator extends JPlugin
 			'class' => ''
 		);
 
-		$classes['uikit3']['default'] = 'uk-input';
-
 		$classes['uikit3']['type'][] = 'checkbox';
 		$classes['uikit3']['type'][] = 'checkboxes';
 		$classes['uikit3']['type'][] = 'radio';
 		$classes['uikit3']['type'][] = 'textarea';
 		$classes['uikit3']['type'][] = 'list';
 
-		$classes['uikit3']['class'][] = 'uk-checkbox';
-		$classes['uikit3']['class'][] = 'uk-checkbox';
-		$classes['uikit3']['class'][] = 'uk-radio';
-		$classes['uikit3']['class'][] = 'uk-textarea';
-		$classes['uikit3']['class'][] = 'uk-select';
+		$classes['uikit3']['class']['default']  = 'uk-input';
+		$classes['uikit3']['class']['gridgroup']    = 'uk-margin';
+		$classes['uikit3']['class']['gridlabel']    = 'uk-form-label';
+		$classes['uikit3']['class']['gridfield'] = 'uk-form-controls';
+		$classes['uikit3']['class'][]           = array('', 'option' => 'uk-checkbox');
+		$classes['uikit3']['class'][]           = array('', 'option' => 'uk-checkbox');
+		$classes['uikit3']['class'][]           = array('', 'option' => 'uk-radio');
+		$classes['uikit3']['class'][][]         = 'uk-textarea';
+		$classes['uikit3']['class'][][]         = 'uk-select';
 
 		$fields = $form->getFieldset();
 
@@ -1018,23 +1021,30 @@ class plgContentJtformulator extends JPlugin
 		if (in_array($type, array('checkbox', 'checkboxes', 'radio')))
 		{
 			$field->setOptionsClass($classes);
-			return;
 		}
 
 
-		$class = array((string) $field->class);
+		$class = array((string) $form->getFieldAttribute($fieldname, 'class'));
 		$key = array_search($type, $classes['type'], true);
 
 		if ($key !== false)
 		{
-			$class[] = $classes['class'][$key];
+			$class[] = $classes['class'][$key][0];
 		}
 		else
 		{
-			$class[] = $classes['default'];
+			$class[] = $classes['class']['default'];
 		}
 
 		$form->setFieldAttribute($fieldname, 'class', implode(' ', $class));
+
+		$gridgroup = array((string) $form->getFieldAttribute($fieldname, 'gridgroup'), $classes['class']['gridgroup']);
+		$gridlabel = array((string) $form->getFieldAttribute($fieldname, 'gridlabel'), $classes['class']['gridlabel']);
+		$gridfield = array((string) $form->getFieldAttribute($fieldname, 'gridfield'), $classes['class']['gridfield']);
+
+		$form->setFieldAttribute($fieldname, 'gridgroup', implode(' ', $gridgroup));
+		$form->setFieldAttribute($fieldname, 'gridlabel', implode(' ', $gridlabel));
+		$form->setFieldAttribute($fieldname, 'gridfield', implode(' ', $gridfield));
 
 		return;
 	}

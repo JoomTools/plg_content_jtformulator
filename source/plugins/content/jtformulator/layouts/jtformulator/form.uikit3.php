@@ -14,7 +14,7 @@ extract($displayData);
 $renderOptions              = array();
 
 JHtml::_('behavior.keepalive');
-JHtml::_('behavior.formvalidation');
+JHtml::_('behavior.formvalidation', 'uk-form-danger');
 ?>
 {emailcloak=off}
 <div class="contact-form">
@@ -74,7 +74,7 @@ JHtml::_('behavior.formvalidation');
 
 					if ($fieldsetName == 'submit') :
 						$submitSet = true; ?>
-						<div class="form-group">
+						<div class="uk-form-group">
 							<button class="btn btn-default validate"
 							        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
 						</div>

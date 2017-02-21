@@ -258,7 +258,7 @@ class JFormFieldList extends JFormField
 
 			if ($key !== false)
 			{
-				$class[] =  $classes['class'][$key];
+				$class[] =  $classes['class'][$key]['option'];
 			}
 
 			foreach ($this->element->xpath('option') as &$option)
