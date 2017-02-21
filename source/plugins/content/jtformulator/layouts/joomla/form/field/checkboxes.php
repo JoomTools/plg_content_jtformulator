@@ -71,7 +71,7 @@ $alt = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name);
 
 			// In case there is no stored value, use the option's default state.
 			$checked     = (!$hasValue && $option->checked) ? 'checked' : $checked;
-			$optionClass = !empty($option->class) ? 'class="' . $option->class . '"' : 'class="checkbox"';
+			$optionClass = !empty($option->class) ? 'class="' . $option->class . '"' : '';
 			$disabled    = !empty($option->disable) || $disabled ? 'disabled' : '';
 
 			// Initialize some JavaScript option attributes.

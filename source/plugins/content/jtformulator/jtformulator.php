@@ -208,6 +208,8 @@ class plgContentJtformulator extends JPlugin
 				// Set Framework as Layout->Suffix
 				$this->form[$formTheme]->framework = $layoutSuffix;
 
+				$this->setFrameworkFieldClass();
+
 				$issetCaptcha = $this->issetCaptcha();
 
 				if (!$issetCaptcha)
@@ -958,5 +960,86 @@ class plgContentJtformulator extends JPlugin
 		);
 
 		return false;
+	}
+
+	protected function setFrameworkFieldClass()
+	{
+		$theme   = $this->uParams['theme'] . (int) $this->uParams['index'];
+		$form   = $this->form[$theme];
+		$framework = $this->form[$theme]->framework[0];
+
+		$classes = array();
+
+		$classes['bs3'][] = array(
+			'type'  => array(),
+			'class' => ''
+		);
+
+		$classes['bs4'][] = array(
+			'type'  => array(),
+			'class' => ''
+		);
+
+		$classes['uikit'][] = array(
+			'type'  => array(),
+			'class' => ''
+		);
+
+		$classes['uikit3']['default'] = 'uk-input';
+
+		$classes['uikit3']['type'][] = 'checkbox';
+		$classes['uikit3']['type'][] = 'checkboxes';
+		$classes['uikit3']['type'][] = 'radio';
+		$classes['uikit3']['type'][] = 'textarea';
+		$classes['uikit3']['type'][] = 'list';
+
+		$classes['uikit3']['class'][] = 'uk-checkbox';
+		$classes['uikit3']['class'][] = 'uk-checkbox';
+		$classes['uikit3']['class'][] = 'uk-radio';
+		$classes['uikit3']['class'][] = 'uk-textarea';
+		$classes['uikit3']['class'][] = 'uk-select';
+
+		$fields = $form->getFieldset();
+
+		foreach ($fields as $field)
+		{
+			$this->setFieldClass($field->fieldname, $classes[$framework]);
+		}
+	}
+
+	protected function setFieldClass($fieldname, $classes, $options = null)
+	{
+		$theme   = $this->uParams['theme'] . (int) $this->uParams['index'];
+		$form   = $this->form[$theme];
+		$field = $form->getField($fieldname);
+		$element = (array) $field->element;
+		$type = strtolower((string) $field->getAttribute('type'));
+
+		if (empty($options))
+		{
+			if (in_array($type, array('checkbox', 'checkboxes', 'radio')))
+			{
+				$test = $form->getField($fieldname)->element;
+				$this->setFieldClass($fieldname, $classes, $test);
+
+				return;
+			}
+		}
+
+		$class = array((string) $form->getFieldAttribute($fieldname,'class'));
+		$key = array_search($type, $classes['type'], true);
+
+		if ($key !== false)
+		{
+			$class[] = $classes['class'][$key];
+		}
+		else
+		{
+			$class[] = $classes['class']['default'];
+		}
+
+		$form->setFieldAttribute($fieldname, 'class', implode(' ', $class));
+
+		return;
 	}
 }
