@@ -131,7 +131,6 @@ class plgContentJtformulator extends JPlugin
 		$userParams         = $matches[3];
 
 		JLoader::register('JFormField', dirname(__FILE__) . '/assets/jformfield.php');
-		JLoader::register('JHtmlBehavior', dirname(__FILE__) . '/assets/behavior.php');
 
 		// Add form fields
 		JFormHelper::addFieldPath(dirname(__FILE__) . '/assets/fields');
@@ -199,7 +198,7 @@ class plgContentJtformulator extends JPlugin
 				);
 
 				// Define framework as layout suffix
-				$layoutSuffix = array();
+				$layoutSuffix = array('');
 
 				if (!empty($this->uParams['framework']))
 				{
@@ -849,7 +848,7 @@ class plgContentJtformulator extends JPlugin
 		}
 
 		$renderer->setIncludePaths($layoutPath);
-		//$renderer->setDebug(true);
+		$renderer->setDebug(true);
 
 		return $renderer->render($displayData);
 	}
@@ -967,9 +966,23 @@ class plgContentJtformulator extends JPlugin
 	{
 		$theme   = $this->uParams['theme'] . (int) $this->uParams['index'];
 		$form   = $this->form[$theme];
-		$framework = $this->form[$theme]->framework[0];
+		$framework = 'default';
+
+		if (!empty($this->form[$theme]->framework[0]))
+		{
+			$framework = $this->form[$theme]->framework[0];
+		}
 
 		$classes = array();
+
+		$classes['default']['type'][] = 'checkbox';
+		$classes['default']['type'][] = 'checkboxes';
+		$classes['default']['class']['default']   = 'input';
+		$classes['default']['class']['gridgroup'] = 'control-group';
+		$classes['default']['class']['gridlabel'] = 'control-label';
+		$classes['default']['class']['gridfield'] = 'controls';
+		$classes['default']['class'][][]           = 'checkbox';
+		$classes['default']['class'][][]            = 'checkbox';
 
 		$classes['bs3'][] = array(
 			'type'  => array(),
@@ -992,15 +1005,15 @@ class plgContentJtformulator extends JPlugin
 		$classes['uikit3']['type'][] = 'textarea';
 		$classes['uikit3']['type'][] = 'list';
 
-		$classes['uikit3']['class']['default']  = 'uk-input';
-		$classes['uikit3']['class']['gridgroup']    = 'uk-margin';
-		$classes['uikit3']['class']['gridlabel']    = 'uk-form-label';
+		$classes['uikit3']['class']['default']   = 'uk-input';
+		$classes['uikit3']['class']['gridgroup'] = 'uk-margin';
+		$classes['uikit3']['class']['gridlabel'] = 'uk-form-label';
 		$classes['uikit3']['class']['gridfield'] = 'uk-form-controls';
-		$classes['uikit3']['class'][]           = array('', 'option' => 'uk-checkbox');
-		$classes['uikit3']['class'][]           = array('', 'option' => 'uk-checkbox');
-		$classes['uikit3']['class'][]           = array('', 'option' => 'uk-radio');
-		$classes['uikit3']['class'][][]         = 'uk-textarea';
-		$classes['uikit3']['class'][][]         = 'uk-select';
+		$classes['uikit3']['class'][]            = array('', 'option' => 'uk-checkbox');
+		$classes['uikit3']['class'][]            = array('', 'option' => 'uk-checkbox');
+		$classes['uikit3']['class'][]            = array('', 'option' => 'uk-radio');
+		$classes['uikit3']['class'][][]          = 'uk-textarea';
+		$classes['uikit3']['class'][][]          = 'uk-select';
 
 		$fields = $form->getFieldset();
 
@@ -1012,8 +1025,9 @@ class plgContentJtformulator extends JPlugin
 
 	protected function setFieldClass($fieldname, $classes)
 	{
-		$theme   = $this->uParams['theme'] . (int) $this->uParams['index'];
-		$form   = $this->form[$theme];
+		$theme     = $this->uParams['theme'] . (int) $this->uParams['index'];
+		$form      = $this->form[$theme];
+		$gridgroup = $gridlabel = $gridfield = array();
 
 		$field = $form->getField($fieldname);
 		$type = strtolower((string) $field->getAttribute('type'));
@@ -1037,6 +1051,7 @@ class plgContentJtformulator extends JPlugin
 		}
 
 		$form->setFieldAttribute($fieldname, 'class', implode(' ', $class));
+
 
 		$gridgroup = array((string) $form->getFieldAttribute($fieldname, 'gridgroup'), $classes['class']['gridgroup']);
 		$gridlabel = array((string) $form->getFieldAttribute($fieldname, 'gridlabel'), $classes['class']['gridlabel']);
