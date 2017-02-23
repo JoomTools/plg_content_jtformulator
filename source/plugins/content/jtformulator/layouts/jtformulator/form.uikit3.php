@@ -16,6 +16,10 @@ $renderOptions              = array();
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidation');
 ?>
+<style>
+    .invalid { border-color: #ff0000 !important; color: #ff0000 !important; }
+    label.invalid { color: #ff0000 !important; }
+</style>
 {emailcloak=off}
 <div class="contact-form">
 	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
@@ -74,7 +78,7 @@ JHtml::_('behavior.formvalidation');
 
 					if ($fieldsetName == 'submit') :
 						$submitSet = true; ?>
-						<div class="form-group">
+						<div class="uk-form-group">
 							<button class="btn btn-default validate"
 							        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
 						</div>

@@ -16,7 +16,10 @@ $renderOptions              = array();
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidation');
 ?>
-
+<style>
+    .invalid { border-color: #ff0000 !important; color: #ff0000 !important; }
+    label.invalid { color: #ff0000 !important; }
+</style>
 {emailcloak=off}
 <div class="contact-form">
 	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
