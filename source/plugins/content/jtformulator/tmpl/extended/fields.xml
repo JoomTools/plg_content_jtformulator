@@ -3,38 +3,38 @@
 	<fieldset>
 		<field name="anrede"
 			type="list"
-			description="JT_FORMULATOR_EXTENDED_FORM_ANREDE_DESC"
-			label="JT_FORMULATOR_EXTENDED_FORM_ANREDE_LABEL"
+			description="JTF_ANREDE_DESC"
+			label="JTF_ANREDE_LABEL"
 			default=""
 			validate="options"
 			required="true"
 		>
-			<option value="">JT_FORMULATOR_EXTENDED_FORM_ANREDE_OPTION_NONE</option>
-			<option value="JT_FORMULATOR_EXTENDED_FORM_ANREDE_OPTION_HERR">JT_FORMULATOR_EXTENDED_FORM_ANREDE_OPTION_HERR</option>
-			<option value="JT_FORMULATOR_EXTENDED_FORM_ANREDE_OPTION_FRAU">JT_FORMULATOR_EXTENDED_FORM_ANREDE_OPTION_FRAU</option>
+			<option value="">JTF_ANREDE_OPTION_NONE</option>
+			<option value="JTF_ANREDE_OPTION_HERR">JTF_ANREDE_OPTION_HERR</option>
+			<option value="JTF_ANREDE_OPTION_FRAU">JTF_ANREDE_OPTION_FRAU</option>
 		</field>
 		<field name="vorname"
 			type="text"
 			class="inputbox"
 			size="30"
-			description="JT_FORMULATOR_EXTENDED_FORM_VNAME_DESC"
-			label="JT_FORMULATOR_EXTENDED_FORM_VNAME_LABEL"
+			description="JTF_VNAME_DESC"
+			label="JTF_VNAME_LABEL"
 			required="true"
 		/>
 		<field name="nachname"
 			type="text"
 			class="inputbox"
 			size="30"
-			description="JT_FORMULATOR_EXTENDED_FORM_NNAME_DESC"
-			label="JT_FORMULATOR_EXTENDED_FORM_NNAME_LABEL"
+			description="JTF_NAME_DESC"
+			label="JTF_NAME_LABEL"
 			required="true"
 		/>
 		<field name="email"
 			type="email"
 			class="inputbox"
 			size="30"
-			description="JT_FORMULATOR_EXTENDED_FORM_EMAIL_DESC"
-			label="JT_FORMULATOR_EXTENDED_FORM_EMAIL_LABEL"
+			description="JTF_EMAIL_DESC"
+			label="JTF_EMAIL_LABEL"
 			validate="email"
 			required="true"
 		/>
@@ -42,16 +42,16 @@
 			type="tel"
 			class="inputbox"
 			size="30"
-			description="JT_FORMULATOR_EXTENDED_FORM_TEL_DESC"
-			label="JT_FORMULATOR_EXTENDED_FORM_TEL_LABEL"
+			description="JTF_TEL_DESC"
+			label="JTF_TEL_LABEL"
 			validate="tel"
 		/>
 		<field name="subject"
 			type="text"
 			class="inputbox"
 			size="30"
-			description="JT_FORMULATOR_EXTENDED_FORM_SUBJECT_DESC"
-			label="JT_FORMULATOR_EXTENDED_FORM_SUBJECT_LABEL"
+			description="JTF_SUBJECT_DESC"
+			label="JTF_SUBJECT_LABEL"
 			required="true"
 		/>
 		<field name="message"
@@ -59,8 +59,8 @@
 			class="inputbox"
 			cols="25"
 			rows="10"
-			description="JT_FORMULATOR_EXTENDED_FORM_MESSAGE_DESC"
-			label="JT_FORMULATOR_EXTENDED_FORM_MESSAGE_LABEL"
+			description="JTF_MESSAGE_DESC"
+			label="JTF_MESSAGE_LABEL"
 			required="true"
 		/>
 	</fieldset>

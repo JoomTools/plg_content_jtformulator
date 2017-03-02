@@ -84,6 +84,14 @@ class plgContentJtformulator extends JPlugin
 	protected $mail = array();
 
 	/**
+	 * Mail
+	 *
+	 * @var     array
+	 * @since   1.0
+	 */
+	protected $addLayoutsPath = array();
+
+	/**
 	 * Affects constructor behavior. If true, language files will be loaded automatically.
 	 *
 	 * @var     boolean
@@ -115,11 +123,12 @@ class plgContentJtformulator extends JPlugin
 			return;
 		}
 
-		$msg             = '';
-		$error_msg       = '';
-		$cIndex          = 0;
-		$template        = $app->getTemplate();
-		$langTag         = JFactory::getLanguage()->getTag();
+		$msg       = '';
+		$error_msg = '';
+		$cIndex    = 0;
+		$template  = $app->getTemplate();
+		$lang      = JFactory::getLanguage();
+		$langTag   = $lang->getTag();
 
 		// Get all matches or return
 		if (!preg_match_all(self::PLUGIN_REGEX, $article->text, $matches))
@@ -130,7 +139,7 @@ class plgContentJtformulator extends JPlugin
 		$pluginReplacements = $matches[0];
 		$userParams         = $matches[3];
 
-		JLoader::register('JFormField', dirname(__FILE__) . '/assets/jformfield.php');
+		//JLoader::register('JFormField', dirname(__FILE__) . '/assets/jformfield.php');
 
 		// Add form fields
 		JFormHelper::addFieldPath(dirname(__FILE__) . '/assets/fields');
@@ -153,6 +162,15 @@ class plgContentJtformulator extends JPlugin
 				$this->setUserParams($vars);
 			}
 
+			// Set Layouts override
+			$this->addLayoutsPath = array(
+				JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
+				JPATH_THEMES . '/' . $template . '/html/layouts/plugin/content/jtformulator',
+				JPATH_THEMES . '/' . $template . '/html/layouts',
+				JPATH_PLUGINS . '/content/jtformulator/layouts/jtformulator',
+				JPATH_PLUGINS . '/content/jtformulator/layouts'
+			);
+
 			// Set form counter as index
 			$this->uParams['index'] = (int) $cIndex;
 
@@ -170,14 +188,15 @@ class plgContentJtformulator extends JPlugin
 				$formLang = dirname(
 					dirname(
 						dirname(
-							$this->getLanguagePath('language/' . $langTag . '/'
-								. $langTag . '.' . $this->uParams['theme'] . '_form', 'ini'
-							)
+							$this->getLanguagePath('language/' . $langTag . '/' . $langTag . '.jtf_theme.ini')
 						)
 					)
 				);
 
-				$this->loadLanguage($this->uParams['theme'] . '_form', $formLang);
+				$this->loadLanguage('jtf_global',JPATH_PLUGINS . '/content/jtformulator/assets');
+
+				//$lang->load('JTF_theme', $formLang);
+				$lang->load('jtf_theme', $formLang);
 
 				$form = new JForm($formTheme, array('control' => $formTheme));
 
@@ -186,16 +205,6 @@ class plgContentJtformulator extends JPlugin
 
 				// Set Formfields
 				$this->form[$formTheme] = $form;
-
-				// Set Layouts override
-				$this->form[$formTheme]->addLayoutsPath = array(
-					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
-					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/layouts',
-					JPATH_THEMES . '/' . $template . '/html/layouts',
-					JPATH_THEMES . '/' . $template . '/html/layouts/jtformulator',
-					JPATH_PLUGINS . '/content/jtformulator/layouts',
-					JPATH_PLUGINS . '/content/jtformulator/layouts/jtformulator'
-				);
 
 				// Define framework as layout suffix
 				$layoutSuffix = array('');
@@ -269,7 +278,7 @@ class plgContentJtformulator extends JPlugin
 					$sendmail = $this->sendMail();
 					if ($valid && $sendmail)
 					{
-						$app->enqueueMessage(JText::_('PLG_JT_FORMULATOR_EMAIL_THANKS'), 'message');
+						$app->enqueueMessage(JText::_('JTF_EMAIL_THANKS'), 'message');
 						$app->redirect(JRoute::_('index.php', false));
 					}
 
@@ -336,7 +345,7 @@ class plgContentJtformulator extends JPlugin
 			foreach ($vars as $var)
 			{
 				list($key, $value) = explode('=', trim($var));
-				$uParams[$key] = $value;
+				$uParams[trim($key)] = trim($value);
 			}
 
 		}
@@ -358,15 +367,9 @@ class plgContentJtformulator extends JPlugin
 		return $uParams;
 	}
 
-	protected function getLanguagePath($filename, $type = 'php')
+	protected function getLanguagePath($filename)
 	{
-
 		$template = JFactory::getApplication()->getTemplate();
-		$file     = $filename . '.' . $type;
-		$fileFw   = $filename . '.' . $this->uParams['framework'] . '.' . $type;
-
-		// Build fallback path with default theme
-		$dAbsPath = JPATH_PLUGINS . '/content/jtformulator/tmpl/default';
 
 		// Build template override path for theme
 		$tAbsPath = JPATH_THEMES . '/' . $template
@@ -377,42 +380,18 @@ class plgContentJtformulator extends JPlugin
 		$bAbsPath = JPATH_PLUGINS . '/content/jtformulator/tmpl/'
 			. $this->uParams['theme'];
 
-		if ($type != 'ini' && $fileFw)
-		{
-			// Set the theme path
-			if (file_exists($tAbsPath . '/' . $fileFw))
-			{
-				return $tAbsPath . '/' . $fileFw;
-			}
-
-			if (file_exists($bAbsPath . '/' . $fileFw))
-			{
-				return $bAbsPath . '/' . $fileFw;
-			}
-
-			if (file_exists($dAbsPath . '/' . $fileFw))
-			{
-				return $dAbsPath . '/' . $fileFw;
-			}
-		}
-
 		// Set the right theme path
-		if (file_exists($tAbsPath . '/' . $file))
+		if (file_exists($tAbsPath . '/' . $filename))
 		{
-			return $tAbsPath . '/' . $file;
+			return $tAbsPath . '/' . $filename;
 		}
 
-		if (file_exists($bAbsPath . '/' . $file))
+		if (file_exists($bAbsPath . '/' . $filename))
 		{
-			return $bAbsPath . '/' . $file;
+			return $bAbsPath . '/' . $filename;
 		}
 
-		if ($this->uParams['theme'] != 'default' && $type != 'ini')
-		{
-			return false;
-		}
-
-		return $dAbsPath . '/' . $file;
+		return false;
 	}
 
 	protected function issetCaptcha()
@@ -726,7 +705,7 @@ class plgContentJtformulator extends JPlugin
 
 			JFactory::getApplication()
 				->enqueueMessage(
-					JText::sprintf('PLG_JT_FORMULATOR_FIELD_ERROR', $label), 'error'
+					JText::sprintf('JTF_FIELD_ERROR', $label), 'error'
 				);
 		}
 
@@ -791,7 +770,7 @@ class plgContentJtformulator extends JPlugin
 
 		if (!file_exists(JPATH_BASE . '/' . $filePath . '/.htaccess'))
 		{
-			JFile::write(JPATH_BASE . '/' . $filePath . '/.htaccess', JText::_('PLG_JT_FORMULATOR_SET_ATTACHMENT'));
+			JFile::write(JPATH_BASE . '/' . $filePath . '/.htaccess', JText::_('JTF_SET_ATTACHMENT_HTACCESS'));
 		}
 
 		foreach ($submitedFiles as $fieldName => $files)
@@ -821,8 +800,7 @@ class plgContentJtformulator extends JPlugin
 	{
 		$index = $this->uParams['index'];
 		$id    = $this->uParams['theme'];
-		$form = $this->form[$id . $index];
-		$layoutPath = $form->addLayoutsPath;
+		$form  = $this->form[$id . $index];
 
 		$displayData = array(
 			'id' => $id,
@@ -847,7 +825,7 @@ class plgContentJtformulator extends JPlugin
 			$renderer->setSuffixes(array($this->uParams['framework']));
 		}
 
-		$renderer->setIncludePaths($layoutPath);
+		$renderer->setIncludePaths($this->addLayoutsPath);
 		$renderer->setDebug(true);
 
 		return $renderer->render($displayData);
@@ -899,7 +877,7 @@ class plgContentJtformulator extends JPlugin
 
 		$subject = (!empty($mail['subject']))
 			? $mail['subject']
-			: JText::sprintf('PLG_JT_FORMULATOR_EMAIL_SUBJECT', $jConfig->get('sitename'));
+			: JText::sprintf('JTF_EMAIL_SUBJECT', $jConfig->get('sitename'));
 
 		$mailer = JFactory::getMailer();
 		$hBody  = $this->getTmpl('message.html');
@@ -933,13 +911,12 @@ class plgContentJtformulator extends JPlugin
 	{
 		$app      = JFactory::getApplication();
 		$template = $app->getTemplate();
-		$file = 'fields.' . $this->uParams['framework'] . '.xml';
+		$framework = ($this->uParams['framework'] != 0) ? '.' . $this->uParams['framework'] : '';
+		$file = 'fields' . $framework . '.xml';
 
 		$formPath = array(
 			JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
-			JPATH_PLUGINS . '/content/jtformulator/tmpl/' . $this->uParams['theme'],
-			JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/default',
-			JPATH_PLUGINS . '/content/jtformulator/tmpl/default'
+			JPATH_PLUGINS . '/content/jtformulator/tmpl/' . $this->uParams['theme']
 		);
 
 		foreach ($formPath as $path)
@@ -948,14 +925,10 @@ class plgContentJtformulator extends JPlugin
 			{
 				return $path . '/' . $file;
 			}
-			elseif (file_exists($path . '/fields.xml'))
-			{
-				return $path . '/fields.xml';
-			}
 		}
 
 		$app->enqueueMessage(
-			JText::sprintf('PLG_JT_FORMULATOR_FILES_ERROR', $this->uParams['theme'])
+			JText::sprintf('JTF_THEME_ERROR', $this->uParams['theme'])
 			, 'error'
 		);
 
@@ -984,20 +957,37 @@ class plgContentJtformulator extends JPlugin
 		$classes['default']['class'][][]           = 'checkbox';
 		$classes['default']['class'][][]            = 'checkbox';
 
-		$classes['bs3'][] = array(
-			'type'  => array(),
-			'class' => ''
-		);
+		$classes['bs3']['type'][] = 'checkbox';
+		$classes['bs3']['class']['default']   = 'input';
+		$classes['bs3']['class']['gridgroup'] = 'control-group';
+		$classes['bs3']['class']['gridlabel'] = 'control-label';
+		$classes['bs3']['class']['gridfield'] = 'controls';
+		$classes['bs3']['class'][][]           = 'checkbox';
+		$classes['bs3']['class'][][]            = 'checkbox';
 
-		$classes['bs4'][] = array(
-			'type'  => array(),
-			'class' => ''
-		);
+		$classes['bs4']['type'][] = 'checkbox';
+		$classes['bs4']['class']['default']   = 'input';
+		$classes['bs4']['class']['gridgroup'] = 'control-group';
+		$classes['bs4']['class']['gridlabel'] = 'control-label';
+		$classes['bs4']['class']['gridfield'] = 'controls';
+		$classes['bs4']['class'][][]           = 'checkbox';
+		$classes['bs4']['class'][][]            = 'checkbox';
 
-		$classes['uikit'][] = array(
-			'type'  => array(),
-			'class' => ''
-		);
+		$classes['uikit']['type'][] = 'checkbox';
+		$classes['uikit']['type'][] = 'checkboxes';
+		$classes['uikit']['type'][] = 'radio';
+		$classes['uikit']['type'][] = 'textarea';
+		$classes['uikit']['type'][] = 'list';
+
+		$classes['uikit']['class']['default']   = 'uk-input';
+		$classes['uikit']['class']['gridgroup'] = 'uk-margin';
+		$classes['uikit']['class']['gridlabel'] = 'uk-form-label';
+		$classes['uikit']['class']['gridfield'] = 'uk-form-controls';
+		$classes['uikit']['class'][]            = array('', 'option' => 'uk-checkbox');
+		$classes['uikit']['class'][]            = array('', 'option' => 'uk-checkbox');
+		$classes['uikit']['class'][]            = array('', 'option' => 'uk-radio');
+		$classes['uikit']['class'][][]          = 'uk-textarea';
+		$classes['uikit']['class'][][]          = 'uk-select';
 
 		$classes['uikit3']['type'][] = 'checkbox';
 		$classes['uikit3']['type'][] = 'checkboxes';

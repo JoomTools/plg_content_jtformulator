@@ -22,7 +22,7 @@ JHtml::_('behavior.formvalidation');
 </style>
 {emailcloak=off}
 <div class="contact-form">
-	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
+	<p><strong><?php echo JText::_('JTF_REQUIRED_FIELDS_LABEL'); ?></strong></p>
 	<form name="<?php echo $id . $index; ?>_form"
 	      id="<?php echo $id . $index; ?>_form"
 	      action="<?php echo JRoute::_("index.php"); ?>"

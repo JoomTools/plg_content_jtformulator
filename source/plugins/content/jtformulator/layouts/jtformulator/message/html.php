@@ -34,7 +34,7 @@ foreach ($fieldsets->fieldset as $fieldset)
 				if ($type == 'file' && $fileClear > 0)
 				{
 					$fileTimeOut .= '<tr><td colspan="2">';
-					$fileTimeOut .= JText::sprintf('PLG_JT_FORMULATOR_FILE_TIMEOUT', $fileClear);
+					$fileTimeOut .= JText::sprintf('JTF_FILE_TIMEOUT', $fileClear);
 					$fileTimeOut .= '</td></tr>';
 				}
 
