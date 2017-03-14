@@ -65,6 +65,16 @@
 					<option value="uikit3">JTF_XML_CAPTCHA_VALUE_UIKIT3</option>
 				</field>
 
+				<field name="debug"
+				       type="radio"
+				       class="btn-group btn-group-yesno"
+				       default="0"
+				       label="JTF_XML_DEBUG_LABEL"
+				       description="JTF_XML_DEBUG_DESC">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
 			</fieldset>
 		</fields>
 	</config>

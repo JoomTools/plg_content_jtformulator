@@ -19,6 +19,7 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	const PLUGIN_REGEX = "@(<(\w+)[^>]*>|){jtformulator(\s.*)?}(</\\2>|)@";
+
 	/**
 	 * Honeypot
 	 *
@@ -26,6 +27,7 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	protected $honeypot;
+
 	/**
 	 * TODO Desctiption
 	 *
@@ -33,6 +35,7 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	protected $issetCaptcha;
+
 	/**
 	 * TODO Desctiption
 	 *
@@ -40,6 +43,7 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	protected $validCaptcha = true;
+
 	/**
 	 * JFormField validation
 	 *
@@ -47,6 +51,7 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	protected $validField = true;
+
 	/**
 	 * Array with JFormField Names of submitted Files
 	 *
@@ -54,6 +59,7 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	protected $fileFields = array();
+
 	/**
 	 * Array with submitted Files
 	 *
@@ -61,6 +67,7 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	protected $submitedFiles = array();
+
 	/**
 	 * Array with JForm Objects
 	 *
@@ -68,6 +75,7 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	protected $form = array();
+
 	/**
 	 * Array with User params
 	 *
@@ -75,6 +83,7 @@ class plgContentJtformulator extends JPlugin
 	 * @since   1.0
 	 */
 	protected $uParams = array();
+
 	/**
 	 * Mail
 	 *
@@ -84,12 +93,20 @@ class plgContentJtformulator extends JPlugin
 	protected $mail = array();
 
 	/**
-	 * Mail
+	 * Pathlist for searching layouts
 	 *
 	 * @var     array
 	 * @since   1.0
 	 */
 	protected $addLayoutsPath = array();
+
+	/**
+	 * Debug
+	 *
+	 * @var     boolean
+	 * @since   1.0
+	 */
+	protected $debug = false;
 
 	/**
 	 * Affects constructor behavior. If true, language files will be loaded automatically.
@@ -102,10 +119,10 @@ class plgContentJtformulator extends JPlugin
 	/**
 	 * Plugin to generates Forms within content
 	 *
-	 * @param   string  $context The context of the content being passed to the plugin.
-	 * @param           object   &article   The article object.  Note $article->text is also available
-	 * @param   mixed   &$params The article params
-	 * @param   integer $page    The 'page' number
+	 * @param    string   $context  The context of the content being passed to the plugin.
+	 * @param    object   &article  The article object.  Note $article->text is also available
+	 * @param    mixed    &$params  The article params
+	 * @param    integer  $page     The 'page' number
 	 *
 	 * @return   void
 	 * @since    1.6
@@ -125,6 +142,7 @@ class plgContentJtformulator extends JPlugin
 
 		$msg       = '';
 		$error_msg = '';
+		$this->debug = (boolean) $this->params->get('debug', 0);
 		$cIndex    = 0;
 		$template  = $app->getTemplate();
 		$lang      = JFactory::getLanguage();
@@ -826,7 +844,7 @@ class plgContentJtformulator extends JPlugin
 		}
 
 		$renderer->setIncludePaths($this->addLayoutsPath);
-		$renderer->setDebug(true);
+		$renderer->setDebug($this->debug);
 
 		return $renderer->render($displayData);
 	}
