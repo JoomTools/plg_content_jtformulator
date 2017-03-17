@@ -3,21 +3,14 @@
   "description": "Plugin to create individual forms",
   "license"    : "GPL-3+",
   "require"    : {
-    "php": ">=5.3.10"
+    "php": ">=5.4"
   },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/degobbis/jorobo"
-    }
-  ],
   "require-dev": {
-    "codeception/codeception": "~2.1",
-    "joomla-projects/joomla-browser": "v3.4.8.2",
-    "consolidation/robo": "~0.6",
-    "joomla-projects/robo": "dev-master",
-    "joomla-projects/selenium-server-standalone": "v2.52.0",
-    "fzaninotto/faker": "^1.5",
-    "joomla-projects/jorobo": "dev-gdg-dev"
+    "codeception/codeception": "~2.2",
+    "consolidation/robo": "~1.0",
+    "joomla-projects/joomla-browser": "~3",
+    "joomla-projects/joomla-testing-robo": "dev-master",
+    "joomla-projects/selenium-server-standalone": "dev-master",
+    "joomla-projects/jorobo": "dev-develop"
   }
 }
