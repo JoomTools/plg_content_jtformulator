@@ -171,6 +171,7 @@ class plgContentJtformulator extends JPlugin
 			$html = '';
 
 			$this->resetUserParams();
+			$this->loadLanguage('jtf_global',JPATH_PLUGINS . '/content/jtformulator/assets');
 
 			if (!empty($userParams[$rKey]))
 			{
@@ -210,8 +211,6 @@ class plgContentJtformulator extends JPlugin
 						)
 					)
 				);
-
-				$this->loadLanguage('jtf_global',JPATH_PLUGINS . '/content/jtformulator/assets');
 
 				//$lang->load('JTF_theme', $formLang);
 				$lang->load('jtf_theme', $formLang);
