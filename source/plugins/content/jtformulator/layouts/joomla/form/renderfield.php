@@ -23,18 +23,23 @@ extract($displayData);
 if (!empty($options['showonEnabled']))
 {
 	JHtml::_('jquery.framework');
-	JHtml::_('script', 'jui/cms.js', false, true);
+	JHtml::_('script', 'jui/cms.js', array('version' => 'auto', 'relative' => true));
 	JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js');
 }
 
-$gridgroup = empty($options['gridgroup']) ? '': ' ' . $options['gridgroup'];
-$gridlabel = empty($options['gridlabel']) ? '': ' ' . $options['gridlabel'];
-$gridfield = empty($options['gridfield']) ? '': ' ' . $options['gridfield'];
+$rel   = empty($options['rel']) ? '' : ' ' . $options['rel'];
 ?>
 
-<div class="control-group<?php echo $gridgroup; ?>" <?php echo $options['rel']; ?>>
+<div class="<?php echo $options['gridgroup']; ?>"<?php echo $rel; ?>>
 	<?php if (empty($options['hiddenLabel'])) : ?>
-		<div class="control-label<?php echo $gridlabel; ?> "><?php echo $label; ?></div>
+        <div class="<?php echo $options['gridlabel']; ?>"><?php echo $label; ?></div>
 	<?php endif; ?>
-	<div class="controls<?php echo $gridfield; ?>"><?php echo $input; ?></div>
+    <div class="<?php echo $options['gridfield']; ?>">
+		<?php if (!empty($options['icon'])) : ?>
+            <span class="input-group-addon">
+            <i class="<?php echo $options['icon']; ?>"></i>
+        </span>
+		<?php endif; ?>
+		<?php echo $input; ?>
+    </div>
 </div>

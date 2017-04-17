@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form class="form-horizontal">
-	<fieldset>
+<form>
+	<fieldset class="uk-form-horizontal">
 		<field name="anrede"
 		       type="list"
-		       icon="glyphicon glyphicon-th-list"
+		       class="uk-width-1-1"
+		       icon="uk-icon-calendar"
 		       description="JTF_ANREDE_DESC"
 		       label="JTF_ANREDE_LABEL"
 		       default=""
@@ -16,7 +17,7 @@
 		</field>
 		<field name="vorname"
 		       type="text"
-		       class="inputbox"
+		       class="uk-width-1-1"
 		       size="30"
 		       description="JTF_VNAME_DESC"
 		       label="JTF_VNAME_LABEL"
@@ -24,7 +25,7 @@
 		/>
 		<field name="nachname"
 		       type="text"
-		       class="inputbox"
+		       class="uk-width-1-1"
 		       size="30"
 		       description="JTF_NAME_DESC"
 		       label="JTF_NAME_LABEL"
@@ -32,7 +33,7 @@
 		/>
 		<field name="email"
 		       type="email"
-		       class="inputbox"
+		       class="uk-width-1-1"
 		       size="30"
 		       description="JTF_EMAIL_DESC"
 		       label="JTF_EMAIL_LABEL"
@@ -41,7 +42,7 @@
 		/>
 		<field name="tel"
 		       type="tel"
-		       class="inputbox"
+		       class="uk-width-1-1"
 		       size="30"
 		       description="JTF_TEL_DESC"
 		       label="JTF_TEL_LABEL"
@@ -49,7 +50,7 @@
 		/>
 		<field name="subject"
 		       type="text"
-		       class="inputbox"
+		       class="uk-width-1-1"
 		       size="30"
 		       description="JTF_SUBJECT_DESC"
 		       label="JTF_SUBJECT_LABEL"
@@ -57,7 +58,7 @@
 		/>
 		<field name="message"
 		       type="textarea"
-		       class="inputbox"
+		       class="uk-width-1-1"
 		       cols="25"
 		       rows="10"
 		       description="JTF_MESSAGE_DESC"

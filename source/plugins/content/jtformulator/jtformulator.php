@@ -93,14 +93,6 @@ class plgContentJtformulator extends JPlugin
 	protected $mail = array();
 
 	/**
-	 * Pathlist for searching layouts
-	 *
-	 * @var     array
-	 * @since   1.0
-	 */
-	protected $addLayoutsPath = array();
-
-	/**
 	 * Debug
 	 *
 	 * @var     boolean
@@ -157,7 +149,7 @@ class plgContentJtformulator extends JPlugin
 		$pluginReplacements = $matches[0];
 		$userParams         = $matches[3];
 
-		//JLoader::register('JFormField', dirname(__FILE__) . '/assets/jformfield.php');
+		JLoader::register('JFormField', dirname(__FILE__) . '/assets/field.php');
 
 		// Add form fields
 		JFormHelper::addFieldPath(dirname(__FILE__) . '/assets/fields');
@@ -180,15 +172,6 @@ class plgContentJtformulator extends JPlugin
 				// Set user params
 				$this->setUserParams($vars);
 			}
-
-			// Set Layouts override
-			$this->addLayoutsPath = array(
-				JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
-				JPATH_THEMES . '/' . $template . '/html/layouts/plugin/content/jtformulator',
-				JPATH_THEMES . '/' . $template . '/html/layouts',
-				JPATH_PLUGINS . '/content/jtformulator/layouts/jtformulator',
-				JPATH_PLUGINS . '/content/jtformulator/layouts'
-			);
 
 			// Set form counter as index
 			$this->uParams['index'] = (int) $cIndex;
@@ -234,7 +217,17 @@ class plgContentJtformulator extends JPlugin
 				// Set Framework as Layout->Suffix
 				$this->form[$formTheme]->framework = $layoutSuffix;
 
-				$this->setFrameworkFieldClass();
+				// Set Debug for Layouts override
+				$this->form[$formTheme]->rendererDebug = $this->debug;
+
+				// Set Layouts override
+				$this->form[$formTheme]->layoutPaths = array(
+					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
+					JPATH_THEMES . '/' . $template . '/html/layouts/plugin/content/jtformulator',
+					JPATH_THEMES . '/' . $template . '/html/layouts',
+					JPATH_PLUGINS . '/content/jtformulator/layouts/jtformulator',
+					JPATH_PLUGINS . '/content/jtformulator/layouts'
+				);
 
 				$issetCaptcha = $this->issetCaptcha();
 
@@ -243,6 +236,8 @@ class plgContentJtformulator extends JPlugin
 					$setCaptcha   = $this->setCaptcha();
 					$issetCaptcha = $setCaptcha ? 'captcha' : false;
 				}
+
+				$this->setFrameworkFieldClass();
 
 				$this->issetCaptcha = $issetCaptcha;
 
@@ -413,7 +408,7 @@ class plgContentJtformulator extends JPlugin
 
 	protected function issetCaptcha()
 	{
-		$form   = $this->form[$this->uParams['theme'] . $this->uParams['index']];
+		$form   = $this->getForm();
 		$fields = $form->getFieldset();
 
 		foreach ($fields as $field)
@@ -431,7 +426,7 @@ class plgContentJtformulator extends JPlugin
 
 	protected function setCaptcha()
 	{
-		$form = $this->form[$this->uParams['theme'] . $this->uParams['index']];
+		$form = $this->getForm();
 		$xml  = '<form><fieldset name="submit"><field name="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field></fieldset></form>';
 
 		return $form->load($xml, false);
@@ -474,9 +469,9 @@ class plgContentJtformulator extends JPlugin
 
 	protected function validate()
 	{
+		$form   = $this->getForm();
 		$token    = JSession::checkToken();
-		$index    = (int) $this->uParams['index'];
-		$fieldXML = $this->form[$this->uParams['theme'] . $index]->getXML();
+		$fieldXML = $form->getXML();
 
 		foreach ($fieldXML as $fieldset)
 		{
@@ -520,8 +515,8 @@ class plgContentJtformulator extends JPlugin
 
 	protected function validateField($field)
 	{
-		$index         = (int) $this->uParams['index'];
-		$data          = $this->form[$this->uParams['theme'] . $index]->getData()->toArray();
+		$form   = $this->getForm();
+		$data          = $form->getData()->toArray();
 		$rule          = false;
 		$value         = '';
 		$showon        = (string) $field['showon'];
@@ -537,7 +532,7 @@ class plgContentJtformulator extends JPlugin
 		{
 			$_showon_value    = explode(':', $showon);
 			$_showon_value[1] = JText::_($_showon_value[1]);
-			$showon_value     = $this->form[$this->uParams['theme'] . $index]->getField($_showon_value[0])->value;
+			$showon_value     = $form->getField($_showon_value[0])->value;
 
 			if ($_showon_value[1] != $showon_value)
 			{
@@ -684,12 +679,12 @@ class plgContentJtformulator extends JPlugin
 
 	protected function invalidField($fieldName)
 	{
+		$form   = $this->getForm();
 		$errorClass = $this->params->get('error_class', 'invalid');
-		$formName   = $this->uParams['theme'] . $this->uParams['index'];
-		$label      = $this->form[$formName]->getFieldAttribute($fieldName, 'label');
+		$label      = $form->getFieldAttribute($fieldName, 'label');
 		$label      = JText::_($label);
-		$class      = $this->form[$formName]->getFieldAttribute($fieldName, 'class');
-		$labelClass = $this->form[$formName]->getFieldAttribute($fieldName, 'labelclass');
+		$class      = $form->getFieldAttribute($fieldName, 'class');
+		$labelClass = $form->getFieldAttribute($fieldName, 'labelclass');
 
 		if ($fieldName == $this->issetCaptcha)
 		{
@@ -701,8 +696,8 @@ class plgContentJtformulator extends JPlugin
 				? trim(str_replace($errorClass, '', $labelClass)) . ' '
 				: '';
 
-			$this->form[$formName]->setFieldAttribute($fieldName, 'class', $class . $errorClass);
-			$this->form[$formName]->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
+			$form->setFieldAttribute($fieldName, 'class', $class . $errorClass);
+			$form->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
 
 			JFactory::getApplication()
 				->enqueueMessage((string) $this->validCaptcha, 'error');
@@ -717,8 +712,8 @@ class plgContentJtformulator extends JPlugin
 				? trim(str_replace($errorClass, '', $labelClass)) . ' '
 				: '';
 
-			$this->form[$formName]->setFieldAttribute($fieldName, 'class', $class . $errorClass);
-			$this->form[$formName]->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
+			$form->setFieldAttribute($fieldName, 'class', $class . $errorClass);
+			$form->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
 
 			JFactory::getApplication()
 				->enqueueMessage(
@@ -769,6 +764,7 @@ class plgContentJtformulator extends JPlugin
 		jimport('joomla.filesystem.folder');
 		jimport('joomla.filesystem.file');
 
+		$form          = $this->getForm();
 		$submitedFiles = $this->submitedFiles;
 		$nowPath       = date('Ymd');
 
@@ -778,7 +774,6 @@ class plgContentJtformulator extends JPlugin
 
 		$uploadBase = JPATH_BASE . '/' . $filePath . '/' . $nowPath;
 		$uploadURL  = rtrim(JUri::base(), '/') . '/' . $filePath . '/' . $nowPath;
-		$formName   = $this->uParams['theme'] . $this->uParams['index'];
 
 		if (!is_dir($uploadBase))
 		{
@@ -809,7 +804,7 @@ class plgContentJtformulator extends JPlugin
 				}
 			}
 
-			$this->form[$formName]->setValue($fieldName, null, $value);
+			$form->setValue($fieldName, null, $value);
 		}
 	}
 
@@ -817,7 +812,7 @@ class plgContentJtformulator extends JPlugin
 	{
 		$index = $this->uParams['index'];
 		$id    = $this->uParams['theme'];
-		$form  = $this->form[$id . $index];
+		$form   = $this->getForm();
 
 		$displayData = array(
 			'id' => $id,
@@ -842,7 +837,7 @@ class plgContentJtformulator extends JPlugin
 			$renderer->setSuffixes(array($this->uParams['framework']));
 		}
 
-		$renderer->setIncludePaths($this->addLayoutsPath);
+		$renderer->addIncludePaths($form->layoutPaths);
 		$renderer->setDebug($this->debug);
 
 		return $renderer->render($displayData);
@@ -928,7 +923,7 @@ class plgContentJtformulator extends JPlugin
 	{
 		$app      = JFactory::getApplication();
 		$template = $app->getTemplate();
-		$framework = ($this->uParams['framework'] != 0) ? '.' . $this->uParams['framework'] : '';
+		$framework = !empty($this->uParams['framework']) ? '.' . $this->uParams['framework'] : '';
 		$file = 'fields' . $framework . '.xml';
 
 		$formPath = array(
@@ -942,6 +937,11 @@ class plgContentJtformulator extends JPlugin
 			{
 				return $path . '/' . $file;
 			}
+
+			if (file_exists($path . '/fields.xml'))
+			{
+				return $path . '/fields.xml';
+			}
 		}
 
 		$app->enqueueMessage(
@@ -954,120 +954,190 @@ class plgContentJtformulator extends JPlugin
 
 	protected function setFrameworkFieldClass()
 	{
-		$theme   = $this->uParams['theme'] . (int) $this->uParams['index'];
-		$form   = $this->form[$theme];
-		$framework = 'default';
+		$form   = $this->getForm();
+		$framework = null;
 
-		if (!empty($this->form[$theme]->framework[0]))
+		if (!empty($form->framework[0]))
 		{
-			$framework = $this->form[$theme]->framework[0];
+			$framework = $form->framework[0];
 		}
 
 		$classes = array();
 
-		$classes['default']['type'][] = 'checkbox';
-		$classes['default']['type'][] = 'checkboxes';
-		$classes['default']['class']['default']   = 'input';
-		$classes['default']['class']['gridgroup'] = 'control-group';
-		$classes['default']['class']['gridlabel'] = 'control-label';
-		$classes['default']['class']['gridfield'] = 'controls';
-		$classes['default']['class'][][]           = 'checkbox';
-		$classes['default']['class'][][]            = 'checkbox';
+		if (empty($framework))
+		{
+			$classes['class']['default'][]   = 'input';
+			$classes['class']['gridgroup'][] = 'control-group';
+			$classes['class']['gridlabel'][] = 'control-label';
+			$classes['class']['gridfield'][] = 'controls';
 
-		$classes['bs3']['type'][] = 'checkbox';
-		$classes['bs3']['class']['default']   = 'input';
-		$classes['bs3']['class']['gridgroup'] = 'control-group';
-		$classes['bs3']['class']['gridlabel'] = 'control-label';
-		$classes['bs3']['class']['gridfield'] = 'controls';
-		$classes['bs3']['class'][][]           = 'checkbox';
-		$classes['bs3']['class'][][]            = 'checkbox';
+			$classes['type'][]    = 'checkbox';
+			$classes['class'][][] = 'checkbox';
 
-		$classes['bs4']['type'][] = 'checkbox';
-		$classes['bs4']['class']['default']   = 'input';
-		$classes['bs4']['class']['gridgroup'] = 'control-group';
-		$classes['bs4']['class']['gridlabel'] = 'control-label';
-		$classes['bs4']['class']['gridfield'] = 'controls';
-		$classes['bs4']['class'][][]           = 'checkbox';
-		$classes['bs4']['class'][][]            = 'checkbox';
+			$classes['type'][]    = 'checkboxes';
+			$classes['class'][] = array('', 'option' => 'checkbox');
 
-		$classes['uikit']['type'][] = 'checkbox';
-		$classes['uikit']['type'][] = 'checkboxes';
-		$classes['uikit']['type'][] = 'radio';
-		$classes['uikit']['type'][] = 'textarea';
-		$classes['uikit']['type'][] = 'list';
+			$classes['type'][] = 'radio';
+			$classes['type'][] = 'textarea';
+			$classes['type'][] = 'list';
+		}
 
-		$classes['uikit']['class']['default']   = 'uk-input';
-		$classes['uikit']['class']['gridgroup'] = 'uk-margin';
-		$classes['uikit']['class']['gridlabel'] = 'uk-form-label';
-		$classes['uikit']['class']['gridfield'] = 'uk-form-controls';
-		$classes['uikit']['class'][]            = array('', 'option' => 'uk-checkbox');
-		$classes['uikit']['class'][]            = array('', 'option' => 'uk-checkbox');
-		$classes['uikit']['class'][]            = array('', 'option' => 'uk-radio');
-		$classes['uikit']['class'][][]          = 'uk-textarea';
-		$classes['uikit']['class'][][]          = 'uk-select';
+		if ($framework == 'bs3')
+		{
+			$classes['class']['default'][]   = 'form-control';
+			$classes['class']['gridgroup'][] = 'form-group';
+			$classes['class']['gridlabel'][] = 'control-label';
+			$classes['class']['gridfield'][] = 'control-field';
 
-		$classes['uikit3']['type'][] = 'checkbox';
-		$classes['uikit3']['type'][] = 'checkboxes';
-		$classes['uikit3']['type'][] = 'radio';
-		$classes['uikit3']['type'][] = 'textarea';
-		$classes['uikit3']['type'][] = 'list';
+			$classes['type'][]    = 'checkbox';
+			$classes['class'][][] = 'checkbox';
 
-		$classes['uikit3']['class']['default']   = 'uk-input';
-		$classes['uikit3']['class']['gridgroup'] = 'uk-margin';
-		$classes['uikit3']['class']['gridlabel'] = 'uk-form-label';
-		$classes['uikit3']['class']['gridfield'] = 'uk-form-controls';
-		$classes['uikit3']['class'][]            = array('', 'option' => 'uk-checkbox');
-		$classes['uikit3']['class'][]            = array('', 'option' => 'uk-checkbox');
-		$classes['uikit3']['class'][]            = array('', 'option' => 'uk-radio');
-		$classes['uikit3']['class'][][]          = 'uk-textarea';
-		$classes['uikit3']['class'][][]          = 'uk-select';
+			$classes['type'][]    = 'checkboxes';
+			$classes['class'][][] = 'checkbox';
 
+			$classes['type'][] = 'radio';
+			$classes['type'][] = 'textarea';
+			$classes['type'][] = 'list';
+		}
+
+		if ($framework == 'bs4')
+		{
+			$classes['class']['default'][]   = 'input';
+			$classes['class']['gridgroup'][] = 'control-group';
+			$classes['class']['gridlabel'][] = 'control-label';
+			$classes['class']['gridfield'][] = '';
+
+			$classes['type'][]    = 'checkbox';
+			$classes['class'][][] = 'checkbox';
+
+			$classes['type'][]    = 'checkboxes';
+			$classes['class'][][] = 'checkbox';
+
+			$classes['type'][] = 'radio';
+			$classes['type'][] = 'textarea';
+			$classes['type'][] = 'list';
+		}
+
+		if ($framework == 'uikit')
+		{
+			$classes['class']['default'][]   = 'uk-input';
+			$classes['class']['gridgroup'][] = 'uk-form-row';
+			$classes['class']['gridlabel'][] = 'uk-form-label';
+			$classes['class']['gridfield'][] = 'uk-form-controls';
+
+			$classes['type'][]  = 'checkbox';
+			$classes['class'][] = array('', 'option' => 'uk-checkbox');
+
+			$classes['type'][]  = 'checkboxes';
+			$classes['class'][] = array('', 'option' => 'uk-checkbox');
+
+			$classes['type'][]  = 'radio';
+			$classes['class'][] = array('', 'option' => 'uk-radio');
+
+			$classes['type'][]    = 'textarea';
+			$classes['class'][][] = 'uk-textarea';
+
+			$classes['type'][]    = 'list';
+			$classes['class'][][] = 'uk-select';
+		}
+
+		if ($framework == 'uikit3')
+		{
+			$classes['class']['default'][]   = 'uk-input';
+			$classes['class']['gridgroup'][] = 'uk-margin';
+			$classes['class']['gridlabel'][] = 'uk-form-label';
+			$classes['class']['gridfield'][] = 'uk-form-controls';
+
+			$classes['type'][]  = 'checkbox';
+			$classes['class'][] = array('', 'option' => 'uk-checkbox');
+
+			$classes['type'][]  = 'checkboxes';
+			$classes['class'][] = array('', 'option' => 'uk-checkbox');
+
+			$classes['type'][]  = 'radio';
+			$classes['class'][] = array('', 'option' => 'uk-radio');
+
+			$classes['type'][]    = 'textarea';
+			$classes['class'][][] = 'uk-textarea';
+
+			$classes['type'][]    = 'list';
+			$classes['class'][][] = 'uk-select';
+		}
+
+		//$fieldsets = $form->getXml();
 		$fields = $form->getFieldset();
 
 		foreach ($fields as $field)
 		{
-			$this->setFieldClass($field->fieldname, $classes[$framework]);
+			$this->setFieldClass((string)$field->fieldname, $classes);
 		}
 	}
 
 	protected function setFieldClass($fieldname, $classes)
 	{
-		$theme     = $this->uParams['theme'] . (int) $this->uParams['index'];
-		$form      = $this->form[$theme];
-		$gridgroup = $gridlabel = $gridfield = array();
+		$form                = $this->getform();
+		$field               = $form->getField($fieldname);
+		$fieldClass          = array();
+		$frameworkFieldClass = array();
 
-		$field = $form->getField($fieldname);
-		$type = strtolower((string) $field->getAttribute('type'));
+		$type  = strtolower((string) $field->getAttribute('type'));
 
 		if (in_array($type, array('checkbox', 'checkboxes', 'radio')))
 		{
 			$field->setOptionsClass($classes);
 		}
 
-
-		$class = array((string) $form->getFieldAttribute($fieldname, 'class'));
-		$key = array_search($type, $classes['type'], true);
+		$frameworkDefaultClass = array_flip($classes['class']['default']);
+		$key   = array_search($type, $classes['type'], true);
 
 		if ($key !== false)
 		{
-			$class[] = $classes['class'][$key][0];
+			if (!empty($classes['class'][$key]))
+			{
+				$frameworkFieldClass = array_flip($classes['class'][$key]);
+			}
 		}
-		else
+
+		if (!empty((string) $form->getFieldAttribute($field->fieldname, 'class')))
 		{
-			$class[] = $classes['class']['default'];
+			$fieldClass = array_flip(explode(' ', (string) $form->getFieldAttribute($field->fieldname, 'class')));
 		}
 
-		$form->setFieldAttribute($fieldname, 'class', implode(' ', $class));
+		$class = array_merge((array) $frameworkDefaultClass, (array) $frameworkFieldClass, (array) $fieldClass);
+		$class = array_keys($class);
+		
+		$form->setFieldAttribute($field->fieldname, 'class', implode(' ', $class));
 
+		$gridgroup = !empty($classes['class']['gridgroup']) ? $classes['class']['gridgroup'] : array();
+		$gridlabel = !empty($classes['class']['gridlabel']) ? $classes['class']['gridlabel'] : array();
+		$gridfield = !empty($classes['class']['gridfield']) ? $classes['class']['gridfield'] : array();
 
-		$gridgroup = array((string) $form->getFieldAttribute($fieldname, 'gridgroup'), $classes['class']['gridgroup']);
-		$gridlabel = array((string) $form->getFieldAttribute($fieldname, 'gridlabel'), $classes['class']['gridlabel']);
-		$gridfield = array((string) $form->getFieldAttribute($fieldname, 'gridfield'), $classes['class']['gridfield']);
+		if (strtolower((string) $field->getAttribute('type')))
 
-		$form->setFieldAttribute($fieldname, 'gridgroup', implode(' ', $gridgroup));
-		$form->setFieldAttribute($fieldname, 'gridlabel', implode(' ', $gridlabel));
-		$form->setFieldAttribute($fieldname, 'gridfield', implode(' ', $gridfield));
+		if (!empty((string) $form->getFieldAttribute($field->fieldname, 'gridgroup')))
+		{
+			$gridgroup[] = (string) $form->getFieldAttribute($field->fieldname, 'gridgroup');
+		}
+
+		if (!empty((string) $form->getFieldAttribute($field->fieldname, 'gridlabel')))
+		{
+			$gridlabel[] = (string) $form->getFieldAttribute($field->fieldname, 'gridlabel');
+		}
+
+		if (!empty((string) $form->getFieldAttribute($field->fieldname, 'gridfield')))
+		{
+			$gridfield[] = (string) $form->getFieldAttribute($field->fieldname, 'gridfield');
+		}
+
+		$form->setFieldAttribute($field->fieldname, 'gridgroup', implode(' ', $gridgroup));
+		$form->setFieldAttribute($field->fieldname, 'gridlabel', implode(' ', $gridlabel));
+		$form->setFieldAttribute($field->fieldname, 'gridfield', implode(' ', $gridfield));
 
 		return;
+	}
+
+	protected function getForm()
+	{
+		return $this->form[$this->uParams['theme'] . (int) $this->uParams['index']];
 	}
 }

@@ -15,21 +15,22 @@ $renderOptions              = array();
 
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidation');
-$formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAttribute('class') : '';
 ?>
 <style>
     .invalid { border-color: #ff0000 !important; color: #ff0000 !important; }
     label.invalid { color: #ff0000 !important; }
+    .uk-form-icon{ display: block; }
+    .uk-form-icon:not(.uk-form-icon-flip)>select { padding-left: 40px !important; }
 </style>
-{emailcloak=off}
-<div class="contact-form row-fluid">
+<div class="contact-form">
 	<p><strong><?php echo JText::_('JTF_REQUIRED_FIELDS_LABEL'); ?></strong></p>
 	<form name="<?php echo $id . $index; ?>_form"
 	      id="<?php echo $id . $index; ?>_form"
 	      action="<?php echo JRoute::_("index.php"); ?>"
 	      method="post"
+	      class="uk-form form-validate"
 	      enctype="multipart/form-data"
-	      class="form-validate<?php echo $formClass; ?>">
+	>
 		<?php
 
 		$fieldsets         = $form->getXML();
@@ -39,12 +40,12 @@ $formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAtt
 
 		foreach ($fieldsets->fieldset as $fieldset) :
 
-			$fieldsetName = (string) $fieldset['name'];
+			$fieldsetName  = (string) $fieldset['name'];
 			$fieldsetLabel = (string) $fieldset['label'];
 			$fieldsetDesc  = (string) $fieldset['description'];
 			$sumFields     = count($fieldset->field);
-			$fieldsetClass = (string) $fieldset['class']
-				? (string) $fieldset['class']
+			$fieldsetClass = !empty((string) $fieldset['class'])
+				? ' class="' . (string) $fieldset['class'] . '"'
 				: '';
 
 			if ($fieldsetName == 'submit' && $sumFields == 0)
@@ -57,9 +58,9 @@ $formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAtt
 					<!--<div class="row">-->
 				<?php endif; ?>
 
-				<fieldset class="<?php echo $fieldsetClass; ?>">
+				<fieldset<?php echo $fieldsetClass; ?>>
 					<?php if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
-						<legend><?php echo $legend; ?></legend>
+						<legend class="uk-legend"><?php echo $legend; ?></legend>
 					<?php endif; ?>
 					<?php if (isset($fieldsetDesc) && strlen($desc = trim(JText::_($fieldsetDesc)))) : ?>
 						<p><?php echo $desc; ?></p>
@@ -72,17 +73,16 @@ $formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAtt
 						$renderOptions['gridgroup'] = (string) $field['gridgroup'];
 						$renderOptions['gridlabel'] = (string) $field['gridlabel'];
 						$renderOptions['gridfield'] = (string) $field['gridfield'];
+						$renderOptions['icon'] = (string) $field['icon'];
 
 						echo $form->renderField($fieldName, null, null, $renderOptions);
 					}
 
 					if ($fieldsetName == 'submit') :
 						$submitSet = true; ?>
-						<div class="control-group">
-							<div class="controls">
-								<button class="validate"
-								        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
-							</div>
+						<div class="uk-form-group uk-margin-large-top">
+							<button class="uk-button uk-button-default"
+							        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
 						</div>
 					<?php endif; ?>
 
@@ -97,11 +97,9 @@ $formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAtt
 		endforeach;
 
 		if ($submitSet === false) : ?>
-			<div class="control-group">
-				<div class="controls">
-					<button class="validate"
-					        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
-				</div>
+			<div class="uk-form-group uk-margin-large-top">
+				<button class="uk-button uk-button-default"
+				        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
 			</div>
 		<?php endif; ?>
 
