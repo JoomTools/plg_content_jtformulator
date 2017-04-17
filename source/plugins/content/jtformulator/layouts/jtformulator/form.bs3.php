@@ -27,7 +27,7 @@ JHtml::_('behavior.formvalidation');
 	      id="<?php echo $id . $index; ?>_form"
 	      action="<?php echo JRoute::_("index.php"); ?>"
 	      method="post"
-	      class="row form-validate"
+	      class="form-validate"
 	      enctype="multipart/form-data"
 	>
 		<?php
@@ -44,8 +44,8 @@ JHtml::_('behavior.formvalidation');
 			$fieldsetDesc  = (string) $fieldset['description'];
 			$sumFields     = count($fieldset->field);
 			$fieldsetClass = (string) $fieldset['class']
-				? (string) $fieldset['class'] . ' col-sm-12'
-				: 'col-sm-12';
+				? ' class="' . (string) $fieldset['class'] . '"'
+				: '';
 
 			if ($fieldsetName == 'submit' && $sumFields == 0)
 			{
@@ -57,7 +57,7 @@ JHtml::_('behavior.formvalidation');
 					<!--<div class="row">-->
 				<?php endif; ?>
 
-				<fieldset class="<?php echo $fieldsetClass; ?>">
+				<fieldset<?php echo $fieldsetClass; ?>>
 					<?php if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
 						<legend><?php echo $legend; ?></legend>
 					<?php endif; ?>
@@ -68,12 +68,14 @@ JHtml::_('behavior.formvalidation');
 					{
 
 						$fieldName = (string) $field['name'];
-
+/*
 						$renderOptions['gridgroup'] = (string) $field['gridgroup'];
 						$renderOptions['gridlabel'] = (string) $field['gridlabel'];
 						$renderOptions['gridfield'] = (string) $field['gridfield'];
-
-						echo $form->renderField($fieldName, null, null, $renderOptions);
+						$renderOptions['icon'] = (string) $field['icon'];
+*/
+						//echo $form->renderField($fieldName, null, null, $renderOptions);
+						echo $form->renderField($fieldName);
 					}
 
 					if ($fieldsetName == 'submit') :
