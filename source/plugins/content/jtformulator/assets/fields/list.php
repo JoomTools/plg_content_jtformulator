@@ -256,7 +256,7 @@ class JFormFieldList extends JFormField
 		{
 			$key = array_search($type, $classes['type'], true);
 
-			if ($key !== false)
+			if ($key !== false && !empty($classes['class'][$key]['option']))
 			{
 				$class[] =  $classes['class'][$key]['option'];
 			}
@@ -268,8 +268,10 @@ class JFormFieldList extends JFormField
 					$class[] =  $option->class;
 				}
 
-				$option->addAttribute('class', implode(' ', $class));
-				$test=null;
+				if (!empty($class))
+				{
+					$option->addAttribute('class', implode(' ', $class));
+				}
 			}
 		}
 

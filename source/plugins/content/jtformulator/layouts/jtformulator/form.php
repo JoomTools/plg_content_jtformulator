@@ -15,21 +15,21 @@ $renderOptions              = array();
 
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidation');
+$formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAttribute('class') : '';
 ?>
 <style>
     .invalid { border-color: #ff0000 !important; color: #ff0000 !important; }
     label.invalid { color: #ff0000 !important; }
 </style>
 {emailcloak=off}
-<div class="contact-form">
+<div class="contact-form row-fluid">
 	<p><strong><?php echo JText::_('JTF_REQUIRED_FIELDS_LABEL'); ?></strong></p>
 	<form name="<?php echo $id . $index; ?>_form"
 	      id="<?php echo $id . $index; ?>_form"
 	      action="<?php echo JRoute::_("index.php"); ?>"
 	      method="post"
 	      enctype="multipart/form-data"
-	      class="form-validate
-	      ">
+	      class="form-validate<?php echo $formClass; ?>">
 		<?php
 
 		$fieldsets         = $form->getXML();

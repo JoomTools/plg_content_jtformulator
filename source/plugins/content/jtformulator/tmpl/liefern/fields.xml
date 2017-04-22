@@ -2,7 +2,7 @@
 <form class="form-horizontal">
 	<fieldset>
 		<field name="anrede"
-		       type="list"
+		       type="checkboxes"
 		       icon="glyphicon glyphicon-th-list"
 		       description="JTF_ANREDE_DESC"
 		       label="JTF_ANREDE_LABEL"

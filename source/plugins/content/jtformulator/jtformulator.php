@@ -967,11 +967,6 @@ class plgContentJtformulator extends JPlugin
 
 		if (empty($framework))
 		{
-			if ($form->getAttribute('orientation', 'stacked') == 'horizontal')
-			{
-				$classes['orientation'][0] = 'form-' . $form->getAttribute('orientation');
-			}
-
 			$classes['class']['default'][]   = 'input';
 			$classes['class']['gridgroup'][] = 'control-group';
 			$classes['class']['gridlabel'][] = 'control-label';
@@ -981,7 +976,7 @@ class plgContentJtformulator extends JPlugin
 			$classes['class'][][] = 'checkbox';
 
 			$classes['type'][]    = 'checkboxes';
-			$classes['class'][][] = 'checkbox';
+			$classes['class'][] = array('', 'option' => 'checkbox');
 
 			$classes['type'][] = 'radio';
 			$classes['type'][] = 'textarea';
@@ -990,11 +985,6 @@ class plgContentJtformulator extends JPlugin
 
 		if ($framework == 'bs3')
 		{
-			if ($form->getAttribute('orientation', 'stacked') == 'horizontal')
-			{
-				$classes['orientation'][0] = 'form-' . $form->getAttribute('orientation');
-			}
-
 			$classes['class']['default'][]   = 'form-control';
 			$classes['class']['gridgroup'][] = 'form-group';
 			$classes['class']['gridlabel'][] = 'control-label';
@@ -1013,11 +1003,6 @@ class plgContentJtformulator extends JPlugin
 
 		if ($framework == 'bs4')
 		{
-			if ($form->getAttribute('orientation', 'stacked') == 'horizontal')
-			{
-				$classes['orientation'][0] = 'form-' . $form->getAttribute('orientation');
-			}
-
 			$classes['class']['default'][]   = 'input';
 			$classes['class']['gridgroup'][] = 'control-group';
 			$classes['class']['gridlabel'][] = 'control-label';
@@ -1032,6 +1017,68 @@ class plgContentJtformulator extends JPlugin
 			$classes['type'][] = 'radio';
 			$classes['type'][] = 'textarea';
 			$classes['type'][] = 'list';
+		}
+
+		if ($framework == 'uikit')
+		{
+			$classes['class']['default'][]   = 'uk-input';
+			$classes['class']['gridgroup'][] = 'uk-form-row';
+			$classes['class']['gridlabel'][] = 'uk-form-label';
+			$classes['class']['gridfield'][] = 'uk-form-controls';
+
+			$classes['type'][]  = 'checkbox';
+			$classes['class'][] = array('', 'option' => 'uk-checkbox');
+
+			$classes['type'][]  = 'checkboxes';
+			$classes['class'][] = array('', 'option' => 'uk-checkbox');
+
+			$classes['type'][]  = 'radio';
+			$classes['class'][] = array('', 'option' => 'uk-radio');
+
+			$classes['type'][]    = 'textarea';
+			$classes['class'][][] = 'uk-textarea';
+
+			$classes['type'][]    = 'list';
+			$classes['class'][][] = 'uk-select';
+		}
+
+		if ($framework == 'uikit3')
+		{
+			$classes['class']['default'][]   = 'uk-input';
+			$classes['class']['gridgroup'][] = 'uk-margin';
+			$classes['class']['gridlabel'][] = 'uk-form-label';
+			$classes['class']['gridfield'][] = 'uk-form-controls';
+
+			$classes['type'][]  = 'checkbox';
+			$classes['class'][] = array('', 'option' => 'uk-checkbox');
+
+			$classes['type'][]  = 'checkboxes';
+			$classes['class'][] = array('', 'option' => 'uk-checkbox');
+
+			$classes['type'][]  = 'radio';
+			$classes['class'][] = array('', 'option' => 'uk-radio');
+
+			$classes['type'][]    = 'textarea';
+			$classes['class'][][] = 'uk-textarea';
+
+			$classes['type'][]    = 'list';
+			$classes['class'][][] = 'uk-select';
+		}
+
+		//$fieldsets = $form->getXml();
+		$fields = $form->getFieldset();
+
+			$classes['type'][]    = 'checkboxes';
+			$classes['class'][][] = 'checkbox';
+
+			$classes['type'][] = 'radio';
+			$classes['type'][] = 'textarea';
+			$classes['type'][] = 'list';
+		}
+
+		if ($framework == 'bs4')
+		{
+			$this->setFieldClass((string)$field->fieldname, $classes);
 		}
 
 		if ($framework == 'uikit')
