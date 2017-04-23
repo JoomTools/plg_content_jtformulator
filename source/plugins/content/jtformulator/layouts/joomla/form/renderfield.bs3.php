@@ -27,14 +27,27 @@ if (!empty($options['showonEnabled']))
 	JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js');
 }
 
-$rel = empty($options['rel']) ? '' : ' ' . $options['rel'];
+$rel       = empty( $options['rel'] ) ? '' : ' ' . $options['rel'];
+$gridgroup = !empty( $options['gridgroup'] ) ? ' class="' . $options['gridgroup'] . '"' : '';
 ?>
 
-<div class="<?php echo $options['gridgroup']; ?>"<?php echo $rel; ?>>
-
-<?php if (empty($options['hiddenLabel'])) : ?>
-    <div class="<?php echo $options['gridlabel']; ?>"><?php echo $label; ?></div>
+<?php if (!empty($gridgroup) || !empty($rel)) : ?>
+<div<?php echo $gridgroup; ?><?php echo $rel; ?>>
 <?php endif; ?>
+
+    <?php if (empty($options['hiddenLabel'])) : ?>
+
+        <?php if (!empty($options['gridlabel'])) : ?>
+        <div class="<?php echo $options['gridlabel']; ?>">
+        <?php endif; ?>
+
+            <?php echo $label; ?>
+
+        <?php if (!empty($options['gridlabel'])) : ?>
+        </div>
+        <?php endif; ?>
+
+    <?php endif; ?>
 
     <?php if (!empty($options['gridfield'])) : ?>
     <div class="<?php echo $options['gridfield']; ?>">
@@ -47,7 +60,7 @@ $rel = empty($options['rel']) ? '' : ' ' . $options['rel'];
             </span>
         <?php endif; ?>
 
-        <?php echo $input; ?>
+            <?php echo $input; ?>
 
         <?php if (!empty($options['icon'])) : ?>
         </div>
@@ -57,4 +70,6 @@ $rel = empty($options['rel']) ? '' : ' ' . $options['rel'];
     </div>
     <?php endif; ?>
 
+<?php if (!empty($gridgroup) || !empty($rel)) : ?>
 </div>
+<?php endif; ?>

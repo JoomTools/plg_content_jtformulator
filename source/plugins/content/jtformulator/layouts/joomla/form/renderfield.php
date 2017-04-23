@@ -24,22 +24,52 @@ if (!empty($options['showonEnabled']))
 {
 	JHtml::_('jquery.framework');
 	JHtml::_('script', 'jui/cms.js', array('version' => 'auto', 'relative' => true));
-	JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js');
+	JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js', array('version' => 'auto', 'relative' => true));
 }
 
 $rel   = empty($options['rel']) ? '' : ' ' . $options['rel'];
+$gridgroup = !empty($options['gridgroup']) ? ' class="' . $options['gridgroup'] . '"' : '';
 ?>
 
-<div class="<?php echo $options['gridgroup']; ?>"<?php echo $rel; ?>>
-	<?php if (empty($options['hiddenLabel'])) : ?>
-        <div class="<?php echo $options['gridlabel']; ?>"><?php echo $label; ?></div>
-	<?php endif; ?>
+<?php if (!empty($gridgroup) || !empty($rel)) : ?>
+<div<?php echo $gridgroup; ?><?php echo $rel; ?>>
+<?php endif; ?>
+
+<?php if (empty($options['hiddenLabel'])) : ?>
+
+    <?php if (!empty($options['gridlabel'])) : ?>
+        <div class="<?php echo $options['gridlabel']; ?>">
+    <?php endif; ?>
+
+        <?php echo $label; ?>
+
+    <?php if (!empty($options['gridlabel'])) : ?>
+        </div>
+    <?php endif; ?>
+
+<?php endif; ?>
+
+<?php if (!empty($options['gridfield'])) : ?>
     <div class="<?php echo $options['gridfield']; ?>">
-		<?php if (!empty($options['icon'])) : ?>
-            <span class="input-group-addon">
-            <i class="<?php echo $options['icon']; ?>"></i>
-        </span>
-		<?php endif; ?>
-		<?php echo $input; ?>
+<?php endif; ?>
+
+    <?php if (!empty($options['icon'])) : ?>
+        <div class="input-prepend">
+            <span class="add-on">
+                <i class="<?php echo $options['icon']; ?>"></i>
+            </span>
+    <?php endif; ?>
+
+            <?php echo $input; ?>
+
+    <?php if (!empty($options['icon'])) : ?>
+        </div>
+    <?php endif; ?>
+
+<?php if (!empty($options['gridfield'])) : ?>
     </div>
+<?php endif; ?>
+
+<?php if (!empty($gridgroup) || !empty($rel)) : ?>
 </div>
+<?php endif; ?>

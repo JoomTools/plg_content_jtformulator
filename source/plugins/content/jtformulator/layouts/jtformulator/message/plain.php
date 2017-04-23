@@ -1,12 +1,12 @@
 <?php
 /**
- * @package     Joomla.Plugin
- * @subpackage  Content.jtformulator
+ * @package         Joomla.Plugin
+ * @subpackage      Content.jtformulator
  *
- * @author      Guido De Gobbis
+ * @author          Guido De Gobbis
  * @copyright   (c) 2017 JoomTools.de - All rights reserved.
- * @license     GNU General Public License version 3 or later
-**/
+ * @license         GNU General Public License version 3 or later
+ **/
 
 defined('_JEXEC') or die;
 
@@ -16,22 +16,33 @@ $fieldsets = $form->getXML();
 
 foreach ($fieldsets->fieldset as $fieldset)
 {
+	if (!empty($fieldset['name']) && (string) $fieldset['name'] == 'submit')
+	{
+		continue;
+	}
+
 	$fieldsetLabel = (string) $fieldset['label'];
 
 	if (count($fieldset->field))
 	{
-		if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel))))
+		if (!empty($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel))))
 		{
 			echo "====================" . "\n";
 			echo $legend . "\n";
 		}
+
 		echo "====================" . "\n";
 
 		foreach ($fieldset->field as $field)
 		{
 			$label = trim(JText::_((string) $field['label']));
 			$value = $form->getValue((string) $field['name']);
-			$type  = (string) $form->getFieldAttribute((string) $field['name'], 'type');
+			$type  = (string) $field['type'];
+
+			if (!empty($field['notmail']))
+			{
+				continue;
+			}
 
 			if ($type == 'spacer')
 			{

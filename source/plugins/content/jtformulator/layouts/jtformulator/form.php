@@ -6,112 +6,61 @@
  * @author      Guido De Gobbis
  * @copyright   (c) 2017 JoomTools.de - All rights reserved.
  * @license     GNU General Public License version 3 or later
-**/
+ **/
 
 defined('_JEXEC') or die;
 
 extract($displayData);
-$renderOptions              = array();
+$formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAttribute('class') : '';
 
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidation');
-$formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAttribute('class') : '';
+$invalisColor = '#ff0000';
+$invalidStylesheet =".invalid{border-color:{$invalisColor}!important;color:{$invalisColor}!important;}label.invalid{color:{$invalisColor}!important;}";
+JFactory::getDocument()->addStyleDeclaration($invalidStylesheet);
 ?>
-<style>
-    .invalid { border-color: #ff0000 !important; color: #ff0000 !important; }
-    label.invalid { color: #ff0000 !important; }
-</style>
-{emailcloak=off}
-<div class="contact-form row-fluid">
-	<p><strong><?php echo JText::_('JTF_REQUIRED_FIELDS_LABEL'); ?></strong></p>
-	<form name="<?php echo $id . $index; ?>_form"
-	      id="<?php echo $id . $index; ?>_form"
-	      action="<?php echo JRoute::_("index.php"); ?>"
-	      method="post"
-	      enctype="multipart/form-data"
-	      class="form-validate<?php echo $formClass; ?>">
+<div class="contact-form">
+    <p><strong><?php echo JText::_('JTF_REQUIRED_FIELDS_LABEL'); ?></strong></p>
+    <form name="<?php echo $id . $index; ?>_form"
+          id="<?php echo $id . $index; ?>_form"
+          action="<?php echo JRoute::_("index.php"); ?>"
+          method="post"
+          class="form-validate<?php echo $formClass; ?>"
+          enctype="multipart/form-data">
 		<?php
 
-		$fieldsets         = $form->getXML();
-		$countFieldsets    = 1;
-		$sumFieldsets      = count($fieldsets->fieldset);
-		$submitSet         = false;
+		$fieldsets = $form->getXML();
 
 		foreach ($fieldsets->fieldset as $fieldset) :
 
-			$fieldsetName = (string) $fieldset['name'];
 			$fieldsetLabel = (string) $fieldset['label'];
 			$fieldsetDesc  = (string) $fieldset['description'];
-			$sumFields     = count($fieldset->field);
 			$fieldsetClass = (string) $fieldset['class']
-				? (string) $fieldset['class']
+				? ' class="' . (string) $fieldset['class'] . '"'
 				: '';
+			?>
 
-			if ($fieldsetName == 'submit' && $sumFields == 0)
-			{
-				$sumFields = 1;
-			}
-
-			if ($sumFields) :
-				if ($countFieldsets % 2) : ?>
-					<!--<div class="row">-->
+            <fieldset<?php echo $fieldsetClass; ?>>
+				<?php if (!empty($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
+                    <legend><?php echo $legend; ?></legend>
 				<?php endif; ?>
+				<?php if (!empty($fieldsetDesc) && strlen($desc = trim(JText::_($fieldsetDesc)))) : ?>
+                    <p><?php echo $desc; ?></p>
+				<?php endif; ?>
+				<?php foreach ($fieldset->field as $field)
+				{
+					echo $form->renderField((string) $field['name']);
+				}
+				?>
+            </fieldset>
+		<?php endforeach; ?>
 
-				<fieldset class="<?php echo $fieldsetClass; ?>">
-					<?php if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
-						<legend><?php echo $legend; ?></legend>
-					<?php endif; ?>
-					<?php if (isset($fieldsetDesc) && strlen($desc = trim(JText::_($fieldsetDesc)))) : ?>
-						<p><?php echo $desc; ?></p>
-					<?php endif; ?>
-					<?php foreach ($fieldset->field as $field)
-					{
-
-						$fieldName = (string) $field['name'];
-
-						$renderOptions['gridgroup'] = (string) $field['gridgroup'];
-						$renderOptions['gridlabel'] = (string) $field['gridlabel'];
-						$renderOptions['gridfield'] = (string) $field['gridfield'];
-
-						echo $form->renderField($fieldName, null, null, $renderOptions);
-					}
-
-					if ($fieldsetName == 'submit') :
-						$submitSet = true; ?>
-						<div class="control-group">
-							<div class="controls">
-								<button class="validate"
-								        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
-							</div>
-						</div>
-					<?php endif; ?>
-
-				</fieldset>
-			<?php endif;
-
-			$countFieldsets++;
-			if ($countFieldsets % 2 || $countFieldsets > $sumFieldsets) : ?>
-				<!--</div>-->
-			<?php endif;
-
-		endforeach;
-
-		if ($submitSet === false) : ?>
-			<div class="control-group">
-				<div class="controls">
-					<button class="validate"
-					        type="submit"><?php echo JText::_('JSUBMIT'); ?></button>
-				</div>
-			</div>
-		<?php endif; ?>
-
-		<?php echo $honeypot; ?>
-		<input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>"/>
-		<input type="hidden" name="task" value="<?php echo $id . $index; ?>_sendmail"/>
-		<input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>"/>
-		<input type="hidden" name="itemid" value="<?php echo JFactory::getApplication()->input->get('idemid'); ?>"/>
-		<input type="hidden" name="id" value="<?php echo JFactory::getApplication()->input->get('id'); ?>"/>
+        <input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>"/>
+        <input type="hidden" name="task" value="<?php echo $id . $index; ?>_sendmail"/>
+        <input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>"/>
+        <input type="hidden" name="itemid" value="<?php echo JFactory::getApplication()->input->get('idemid'); ?>"/>
+        <input type="hidden" name="id" value="<?php echo JFactory::getApplication()->input->get('id'); ?>"/>
 		<?php echo JHtml::_('form.token'); ?>
 
-	</form>
+    </form>
 </div>

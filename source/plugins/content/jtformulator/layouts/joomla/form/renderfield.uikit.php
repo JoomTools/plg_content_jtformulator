@@ -6,7 +6,7 @@
  * @author      Guido De Gobbis
  * @copyright   (c) 2017 JoomTools.de - All rights reserved.
  * @license     GNU General Public License version 3 or later
-**/
+ **/
 
 defined('JPATH_BASE') or die;
 
@@ -24,24 +24,50 @@ if (!empty($options['showonEnabled']))
 {
 	JHtml::_('jquery.framework');
 	JHtml::_('script', 'jui/cms.js', array('version' => 'auto', 'relative' => true));
-	JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js');
+	JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js', array('version' => 'auto', 'relative' => true));
 }
 
 $rel   = empty($options['rel']) ? '' : ' ' . $options['rel'];
+$gridgroup = !empty($options['gridgroup']) ? ' class="' . $options['gridgroup'] . '"' : '';
 ?>
 
-<div class="<?php echo $options['gridgroup']; ?>"<?php echo $rel; ?>>
+<?php if (!empty($gridgroup) || !empty($rel)) : ?>
+<div<?php echo $gridgroup; ?><?php echo $rel; ?>>
+<?php endif; ?>
+
 	<?php if (empty($options['hiddenLabel'])) : ?>
-        <div class="<?php echo $options['gridlabel']; ?>"><?php echo $label; ?></div>
+
+		<?php if (!empty($options['gridlabel'])) : ?>
+            <div class="<?php echo $options['gridlabel']; ?>">
+		<?php endif; ?>
+
+		<?php echo $label; ?>
+
+		<?php if (!empty($options['gridlabel'])) : ?>
+            </div>
+		<?php endif; ?>
+
 	<?php endif; ?>
+
+	<?php if (!empty($options['gridfield'])) : ?>
     <div class="<?php echo $options['gridfield']; ?>">
-        <?php if (!empty($options['icon'])) : ?>
+    <?php endif; ?>
+
+		<?php if (!empty($options['icon'])) : ?>
         <div class="uk-form-icon">
             <i class="<?php echo $options['icon']; ?>"></i>
         <?php endif; ?>
-            <?php echo $input; ?>
+
+			<?php echo $input; ?>
+
         <?php if (!empty($options['icon'])) : ?>
         </div>
 	    <?php endif; ?>
+
+    <?php if (!empty($options['gridfield'])) : ?>
     </div>
+    <?php endif; ?>
+
+<?php if (!empty($gridgroup) || !empty($rel)) : ?>
 </div>
+<?php endif; ?>

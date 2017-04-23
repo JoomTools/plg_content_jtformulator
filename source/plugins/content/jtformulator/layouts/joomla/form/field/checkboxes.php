@@ -58,8 +58,9 @@ $format = '<input type="checkbox" id="%1$s" name="%2$s" value="%3$s" %4$s />';
 
 // The alt option for JText::alt
 $alt = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name);
-$labelclass = !empty($labelclass) ? ' class="' . $labelclass .'"' : '';
 $class = !empty($class) ? ' class="' . trim($class) . '"' : '';
+$optionlabel = !empty($optionlabel) ? explode(' ', $optionlabel) : '';
+$optionlabel[] = 'checkbox';
 ?>
 
 <fieldset id="<?php echo $id; ?>"<?php echo $class; ?>
@@ -85,7 +86,7 @@ $class = !empty($class) ? ' class="' . trim($class) . '"' : '';
 			$attributes = array_filter(array($checked, $optionClass, $disabled, $onchange, $onclick));
 		?>
 
-		<label for="<?php echo $oid; ?>"<?php echo $labelclass; ?>>
+		<label for="<?php echo $oid; ?>" class="<?php echo implode(' ', $optionlabel); ?>">
 			<?php echo sprintf($format, $oid, $name, $value, implode(' ', $attributes)); ?>
 		<?php echo JText::alt($option->text, $alt); ?></label>
 	<?php endforeach; ?>

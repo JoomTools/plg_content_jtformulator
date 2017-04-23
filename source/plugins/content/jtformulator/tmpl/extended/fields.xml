@@ -3,7 +3,7 @@
 	<fieldset>
 		<field name="anrede"
 		       type="list"
-		       icon="glyphicon glyphicon-th-list"
+		       icon="icon-list"
 		       description="JTF_ANREDE_DESC"
 		       label="JTF_ANREDE_LABEL"
 		       default=""

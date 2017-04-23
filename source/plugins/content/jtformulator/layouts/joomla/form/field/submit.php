@@ -44,48 +44,8 @@ extract($displayData);
 // Including fallback code for HTML5 non supported browsers.
 JHtml::_('jquery.framework');
 JHtml::_('script', 'system/html5fallback.js', array('version' => 'auto', 'relative' => true));
-
-/**
- * The format of the input tag to be filled in using sprintf.
- *     %1 - id
- *     %2 - name
- *     %3 - value
- *     %4 = any other attributes
- */
-$format = '<input type="radio" id="%1$s" name="%2$s" value="%3$s" %4$s />';
-$alt    = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name);
-$class = !empty($class) ? ' class="' . trim($class) . '"' : '';
-$optionlabel = !empty($optionlabel) ? explode(' ', $optionlabel) : array();
-$optionlabel[] = 'radio';
 ?>
-<fieldset id="<?php echo $id; ?>"<?php echo $class; ?>
-	<?php echo $disabled ? 'disabled' : ''; ?>
-	<?php echo $required ? 'required aria-required="true"' : ''; ?>
-	<?php echo $autofocus ? 'autofocus' : ''; ?>>
-
-	<?php if (!empty($options)) : ?>
-		<?php foreach ($options as $i => $option) : ?>
-			<?php
-				// Initialize some option attributes.
-				$checked  = ((string) $option->value === $value) ? 'checked="checked"' : '';
-				$optionClass    = !empty($option->class) ? 'class="' . trim($option->class) . '"' : '';
-				$disabled = !empty($option->disable) || ($disabled && !$checked) ? 'disabled' : '';
-
-				// Initialize some JavaScript option attributes.
-				$onclick    = !empty($option->onclick) ? 'onclick="' . $option->onclick . '"' : '';
-				$onchange   = !empty($option->onchange) ? 'onchange="' . $option->onchange . '"' : '';
-				$oid        = $id . $i;
-				$ovalue     = htmlspecialchars($option->value, ENT_COMPAT, 'UTF-8');
-				$attributes = array_filter(array($checked, $optionClass, $disabled, $onchange, $onclick));
-			?>
-
-			<?php if ($required) : ?>
-				<?php $attributes[] = 'required aria-required="true"'; ?>
-			<?php endif; ?>
-			<label for="<?php echo $oid; ?>" class="<?php echo implode(' ', $optionlabel); ?>">
-				<?php echo sprintf($format, $oid, $name, $ovalue, implode(' ', $attributes)); ?>
-				<?php echo JText::alt($option->text, $alt); ?>
-			</label>
-		<?php endforeach; ?>
-	<?php endif; ?>
-</fieldset>
+<button class="validate<?php echo !empty($class) ? ' ' . $class : ''; ?>"
+        type="submit">
+    <?php echo $label; ?>
+</button>
