@@ -38,20 +38,9 @@ class JFormFieldList extends JFormField
 	{
 		$html = array();
 		$attr = '';
-		$class = array();
-
-		if (!empty($this->class))
-		{
-			$class[] = $this->class;
-		}
-
-		if (!empty($this->form->framework) && $this->form->framework[0] == 'uikit3')
-		{
-			$class[] = 'uk-select';
-		}
 
 		// Initialize some field attributes.
-		$attr .= !empty($class) ? ' class="' . implode(' ', $class) . '"' : '';
+		$attr .= !empty($this->class) ? ' class="' . $this->class . '"' : '';
 		$attr .= !empty($this->size) ? ' size="' . $this->size . '"' : '';
 		$attr .= $this->multiple ? ' multiple' : '';
 		$attr .= $this->required ? ' required aria-required="true"' : '';
@@ -249,32 +238,61 @@ class JFormFieldList extends JFormField
 
 	public function setOptionsClass($classes = array())
 	{
-		$class = array();
-		$type = strtolower((string) $this->getAttribute('type'));
-		
+		$type           = strtolower((string) $this->getAttribute('type'));
+		$optionclass    = array();
+		$frameworkclass = array();
+
 		if (!empty($classes) && $this->element instanceof SimpleXMLElement)
 		{
+			if (!empty($this->getAttribute('optionclass')))
+			{
+				$optionclass = array_flip(explode(' ', $this->getAttribute('optionclass')));
+			}
+
 			$key = array_search($type, $classes['type'], true);
 
-			if ($key !== false && !empty($classes['class'][$key]['option']))
+			if ($key !== false && !empty($classes['class'][$key]['optionclass']))
 			{
-				$class[] =  $classes['class'][$key]['option'];
+				$frameworkclass = array_flip($classes['class'][$key]['optionclass']);
 			}
 
 			foreach ($this->element->xpath('option') as &$option)
 			{
-				if (!empty($option->class))
+				$fieldclass = array();
+
+				if (!empty($option['class']))
 				{
-					$class[] =  $option->class;
+					$fieldclass =  array_flip(explode(' ', (string) $option['class']));
 				}
+
+				$class = array_keys(array_merge($frameworkclass, $optionclass, $fieldclass));
 
 				if (!empty($class))
 				{
-					$option->addAttribute('class', implode(' ', $class));
+					$option['class'] = implode(' ', $class);
 				}
 			}
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Method to get certain otherwise inaccessible properties from the form field object.
+	 *
+	 * @param   string  $name  The property name for which to the the value.
+	 *
+	 * @return  mixed  The property value or null.
+	 *
+	 * @since   3.7.0
+	 */
+	public function __get($name)
+	{
+		if ($name == 'options')
+		{
+			return $this->getOptions();
+		}
+
+		return parent::__get($name);
 	}
 }

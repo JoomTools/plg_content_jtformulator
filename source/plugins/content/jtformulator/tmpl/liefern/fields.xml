@@ -1,39 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form class="form-horizontal">
+<form>
 	<fieldset>
 		<field name="anrede"
 		       type="checkboxes"
-		       icon="glyphicon glyphicon-th-list"
+		       icon="icon-th-list"
 		       description="JTF_ANREDE_DESC"
 		       label="JTF_ANREDE_LABEL"
 		       default=""
 		       validate="options"
 		       required="true"
+		       optionclass=""
+		       optionlabel="inline"
 		>
-			<option value="">JTF_ANREDE_OPTION_NONE</option>
+			<option labelclass="test" value="">JTF_ANREDE_OPTION_NONE</option>
 			<option value="JTF_ANREDE_OPTION_HERR">JTF_ANREDE_OPTION_HERR</option>
 			<option value="JTF_ANREDE_OPTION_FRAU">JTF_ANREDE_OPTION_FRAU</option>
 		</field>
+		<field name="active_vn"
+		       type="checkboxes"
+		       description="JTF_VNAME_DESC"
+		       label="JTF_VNAME_LABEL"
+		       hiddenLabel="1"
+		       validate="options"
+		       notmail="1"
+		>
+			<option value="1">JTF_VNAME_LABEL</option>
+		</field>
 		<field name="vorname"
 		       type="text"
-		       class="inputbox"
-		       size="30"
+		       maxlength="30"
 		       description="JTF_VNAME_DESC"
 		       label="JTF_VNAME_LABEL"
 		       required="true"
+		       showon="active_vn:1"
 		/>
 		<field name="nachname"
 		       type="text"
-		       class="inputbox"
-		       size="30"
+		       maxlength="30"
 		       description="JTF_NAME_DESC"
 		       label="JTF_NAME_LABEL"
 		       required="true"
 		/>
 		<field name="email"
 		       type="email"
-		       class="inputbox"
-		       size="30"
+		       maxlength="30"
 		       description="JTF_EMAIL_DESC"
 		       label="JTF_EMAIL_LABEL"
 		       validate="email"
@@ -41,23 +51,20 @@
 		/>
 		<field name="tel"
 		       type="tel"
-		       class="inputbox"
-		       size="30"
+		       maxlength="30"
 		       description="JTF_TEL_DESC"
 		       label="JTF_TEL_LABEL"
 		       validate="tel"
 		/>
 		<field name="subject"
 		       type="text"
-		       class="inputbox"
-		       size="30"
+		       maxlength="30"
 		       description="JTF_SUBJECT_DESC"
 		       label="JTF_SUBJECT_LABEL"
 		       required="true"
 		/>
 		<field name="message"
 		       type="textarea"
-		       class="inputbox"
 		       cols="25"
 		       rows="10"
 		       description="JTF_MESSAGE_DESC"

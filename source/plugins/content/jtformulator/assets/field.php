@@ -362,12 +362,20 @@ abstract class JFormField
 	protected $gridfield;
 
 	/**
-	 * The value of the orientation field.
+	 * The value of the optionclabel field.
 	 *
 	 * @var    string
 	 * @since  3.5
 	 */
-	protected $orientation;
+	protected $optionlabel;
+
+	/**
+	 * The value of the optionclass field.
+	 *
+	 * @var    string
+	 * @since  3.5
+	 */
+	protected $optionclass;
 
 	/**
 	 * The value of the icon field.
@@ -440,6 +448,8 @@ abstract class JFormField
 			case 'size':
 			case 'onchange':
 			case 'onclick':
+			case 'optionclass':
+			case 'optionlabel':
 			case 'fieldname':
 			case 'group':
 			case 'disabled':
@@ -451,7 +461,6 @@ abstract class JFormField
 			case 'gridgroup':
 			case 'gridlabel':
 			case 'gridfield':
-			case 'orientation':
 			case 'icon':
 				return $this->$name;
 
@@ -505,6 +514,8 @@ abstract class JFormField
 			case 'layout':
 			case 'onchange':
 			case 'onclick':
+			case 'optionclass':
+			case 'optionlabel':
 			case 'validate':
 			case 'pattern':
 			case 'group':
@@ -513,7 +524,6 @@ abstract class JFormField
 			case 'gridgroup':
 			case 'gridlabel':
 			case 'gridfield':
-			case 'orientation':
 			case 'icon':
 				$this->$name = (string) $value;
 				break;
@@ -636,7 +646,7 @@ abstract class JFormField
 		$attributes = array(
 			'multiple', 'name', 'id', 'hint', 'class', 'description', 'labelclass', 'onchange', 'onclick', 'validate', 'pattern', 'default',
 			'required', 'disabled', 'readonly', 'autofocus', 'hidden', 'autocomplete', 'spellcheck', 'translateHint', 'translateLabel',
-			'translate_label', 'translateDescription', 'translate_description', 'size', 'showon');
+			'translate_label', 'translateDescription', 'translate_description', 'size', 'showon', 'icon', 'gridgroup', 'gridlabel', 'gridfield', 'optionclass', 'optionlabel');
 
 		$this->default = isset($element['value']) ? (string) $element['value'] : $this->default;
 
@@ -1013,7 +1023,8 @@ abstract class JFormField
 		$options['gridgroup'] = $this->getAttribute('gridgroup');
 		$options['gridlabel'] = $this->getAttribute('gridlabel');
 		$options['gridfield'] = $this->getAttribute('gridfield');
-		$options['orientation'] = $this->getAttribute('orientation');
+		$options['optionlabel'] = $this->getAttribute('optionlabel');
+		$options['optionclass'] = $this->getAttribute('optionclass');
 		$options['icon'] = $this->getAttribute('icon');
 
 		$data = array(
@@ -1065,7 +1076,8 @@ abstract class JFormField
 			'name'         => $this->name,
 			'onchange'     => $this->onchange,
 			'onclick'      => $this->onclick,
-			'orientation'  => $this->orientation,
+			'optionlabel'  => $this->optionlabel,
+			'optionclass'  => $this->optionclass,
 			'pattern'      => $this->pattern,
 			'readonly'     => $this->readonly,
 			'repeat'       => $this->repeat,

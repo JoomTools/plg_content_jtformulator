@@ -1,12 +1,12 @@
 <?php
 /**
- * @package     Joomla.Plugin
- * @subpackage  Content.jtformulator
+ * @package         Joomla.Plugin
+ * @subpackage      Content.jtformulator
  *
- * @author      Guido De Gobbis
+ * @author          Guido De Gobbis
  * @copyright   (c) 2017 JoomTools.de - All rights reserved.
- * @license     GNU General Public License version 3 or later
-**/
+ * @license         GNU General Public License version 3 or later
+ **/
 
 defined('_JEXEC') or die('Restricted access');
 
@@ -111,10 +111,10 @@ class plgContentJtformulator extends JPlugin
 	/**
 	 * Plugin to generates Forms within content
 	 *
-	 * @param    string   $context  The context of the content being passed to the plugin.
-	 * @param    object   &article  The article object.  Note $article->text is also available
-	 * @param    mixed    &$params  The article params
-	 * @param    integer  $page     The 'page' number
+	 * @param    string    $context The context of the content being passed to the plugin.
+	 * @param    object    &article  The article object.  Note $article->text is also available
+	 * @param    mixed     &$params The article params
+	 * @param    integer   $page    The 'page' number
 	 *
 	 * @return   void
 	 * @since    1.6
@@ -132,13 +132,13 @@ class plgContentJtformulator extends JPlugin
 			return;
 		}
 
-		$msg       = '';
-		$error_msg = '';
+		$msg         = '';
+		$error_msg   = '';
 		$this->debug = (boolean) $this->params->get('debug', 0);
-		$cIndex    = 0;
-		$template  = $app->getTemplate();
-		$lang      = JFactory::getLanguage();
-		$langTag   = $lang->getTag();
+		$cIndex      = 0;
+		$template    = $app->getTemplate();
+		$lang        = JFactory::getLanguage();
+		$langTag     = $lang->getTag();
 
 		// Get all matches or return
 		if (!preg_match_all(self::PLUGIN_REGEX, $article->text, $matches))
@@ -163,7 +163,7 @@ class plgContentJtformulator extends JPlugin
 			$html = '';
 
 			$this->resetUserParams();
-			$this->loadLanguage('jtf_global',JPATH_PLUGINS . '/content/jtformulator/assets');
+			$this->loadLanguage('jtf_global', JPATH_PLUGINS . '/content/jtformulator/assets');
 
 			if (!empty($userParams[$rKey]))
 			{
@@ -182,11 +182,6 @@ class plgContentJtformulator extends JPlugin
 
 			if (!empty($formXmlPath))
 			{
-				$this->honeypot = '<input type="text"';
-				$this->honeypot .= ' name="' . $formTheme . '[information_number]"';
-				$this->honeypot .= ' style="position: absolute;top:-999em;left:-999em;height: 0;width: 0;"';
-				$this->honeypot .= ' value="" />';
-
 				$formLang = dirname(
 					dirname(
 						dirname(
@@ -229,23 +224,8 @@ class plgContentJtformulator extends JPlugin
 					JPATH_PLUGINS . '/content/jtformulator/layouts'
 				);
 
-				$issetCaptcha = $this->issetCaptcha();
-
-				if (!$issetCaptcha)
-				{
-					$setCaptcha   = $this->setCaptcha();
-					$issetCaptcha = $setCaptcha ? 'captcha' : false;
-				}
-
+				$this->setSubmit();
 				$this->setFrameworkFieldClass();
-
-				$this->issetCaptcha = $issetCaptcha;
-
-				// Remove Captcha if disabled by plugin
-				if (!$this->uParams['captcha'] && $issetCaptcha)
-				{
-					$this->form[$formTheme]->removeField($issetCaptcha);
-				}
 
 				// Get form submit task
 				$task = $app->input->get('task', false, 'post');
@@ -272,7 +252,7 @@ class plgContentJtformulator extends JPlugin
 
 					$this->form[$formTheme]->bind($submitValues);
 
-					if ($submitValues['information_number'] == '')
+					if ($submitValues['jtf_important_notices'] == '')
 					{
 						$valid = $this->validate();
 					}
@@ -294,7 +274,7 @@ class plgContentJtformulator extends JPlugin
 						$app->redirect(JRoute::_('index.php', false));
 					}
 
-					if (!empty($submitValues['information_number']))
+					if (!empty($submitValues['jtf_important_notices']))
 					{
 						$app->redirect(JRoute::_('index.php', false));
 					}
@@ -379,6 +359,45 @@ class plgContentJtformulator extends JPlugin
 		return $uParams;
 	}
 
+	/**
+	 * Checks if all needed files for Forms are found
+	 *
+	 * @return   bool
+	 * @since    1.0
+	 */
+	protected function getFieldsFile()
+	{
+		$app       = JFactory::getApplication();
+		$template  = $app->getTemplate();
+		$framework = !empty($this->uParams['framework']) ? '.' . $this->uParams['framework'] : '';
+		$file      = 'fields' . $framework . '.xml';
+
+		$formPath = array(
+			JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
+			JPATH_PLUGINS . '/content/jtformulator/tmpl/' . $this->uParams['theme']
+		);
+
+		foreach ($formPath as $path)
+		{
+			if (file_exists($path . '/' . $file))
+			{
+				return $path . '/' . $file;
+			}
+
+			if (file_exists($path . '/fields.xml'))
+			{
+				return $path . '/fields.xml';
+			}
+		}
+
+		$app->enqueueMessage(
+			JText::sprintf('JTF_THEME_ERROR', $this->uParams['theme'])
+			, 'error'
+		);
+
+		return false;
+	}
+
 	protected function getLanguagePath($filename)
 	{
 		$template = JFactory::getApplication()->getTemplate();
@@ -406,16 +425,51 @@ class plgContentJtformulator extends JPlugin
 		return false;
 	}
 
-	protected function issetCaptcha()
+	protected function setSubmit()
+	{
+		$form           = $this->getForm();
+		$captcha        = array();
+		$button         = array();
+		$submitFieldset = $form->getFieldset('submit');
+
+		if (!empty($submitFieldset))
+		{
+			if (!empty($this->issetField('captcha', 'submit')))
+			{
+				$captcha['submit'] = $this->issetField('captcha', 'submit');
+			}
+
+			if (!empty($this->issetField('submit', 'submit')))
+			{
+				$button['submit']  = $this->issetField('submit', 'submit');
+			}
+		}
+		else
+		{
+			$form->setField(new SimpleXMLElement('<fieldset name="submit"></fieldset>'));
+			$captcha = $this->issetField('captcha');
+			$button  = $this->issetField('submit');
+		}
+
+		$this->setCaptcha($captcha);
+		$this->setSubmitButton($button);
+	}
+
+	protected function getForm()
+	{
+		return $this->form[$this->uParams['theme'] . (int) $this->uParams['index']];
+	}
+
+	protected function issetField($fieldtype, $fieldsetname = null)
 	{
 		$form   = $this->getForm();
-		$fields = $form->getFieldset();
+		$fields = $form->getFieldset($fieldsetname);
 
 		foreach ($fields as $field)
 		{
 			$type = (string) $field->getAttribute('type');
 
-			if ($type == 'captcha')
+			if ($type == $fieldtype)
 			{
 				return (string) $field->getAttribute('name');
 			}
@@ -424,18 +478,269 @@ class plgContentJtformulator extends JPlugin
 		return false;
 	}
 
-	protected function setCaptcha()
+	protected function setFrameworkFieldClass()
 	{
-		$form = $this->getForm();
-		$xml  = '<form><fieldset name="submit"><field name="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field></fieldset></form>';
+		$form      = $this->getForm();
+		$classes   = array();
+		$formclass = explode(' ', $form->getAttribute('class'));
+		$framework = null;
 
-		return $form->load($xml, false);
+		if (!empty($form->framework[0]))
+		{
+			$framework = $form->framework[0];
+		}
+
+		if (empty($framework))
+		{
+			$classes['class']['default'][]   = 'input';
+
+			if (!in_array('form-inline', $formclass))
+			{
+				$classes['class']['gridgroup'][] = 'control-group';
+				$classes['class']['gridlabel'][] = 'control-label';
+				$classes['class']['gridfield'][] = 'controls';
+			}
+
+			$classes['type'][]  = 'checkbox';
+			$classes['class'][] = array('checkbox');
+
+			$classes['type'][]  = 'checkboxes';
+			$classes['class'][] = array('checkboxes', 'optionclass' => array());
+
+			$classes['type'][]  = 'radio';
+			$classes['class'][] = array('optionclass' => array());
+
+			$classes['type'][]  = 'textarea';
+			$classes['class'][] = array();
+
+			$classes['type'][]  = 'list';
+			$classes['class'][] = array();
+
+			$classes['type'][]  = 'submit';
+			$classes['class'][] = array('btn', 'btn-default');
+		}
+
+		if ($framework == 'bs3')
+		{
+			$classes['class']['default'][]   = 'form-control';
+
+			if (!in_array('form-inline', $formclass))
+			{
+				$classes['class']['gridgroup'][] = 'form-group';
+				$classes['class']['gridlabel'][] = 'control-label';
+				$classes['class']['gridfield'][] = 'control-field';
+			}
+
+			$classes['type'][]  = 'checkbox';
+			$classes['class'][] = array('checkbox');
+
+			$classes['type'][]  = 'checkboxes';
+			$classes['class'][] = array('checkbox', 'optionclass' => array());
+
+			$classes['type'][]  = 'radio';
+			$classes['class'][] = array('', 'optionclass' => array());
+
+			$classes['type'][]  = 'textarea';
+			$classes['class'][] = array();
+
+			$classes['type'][]  = 'list';
+			$classes['class'][] = array();
+
+			$classes['type'][]  = 'submit';
+			$classes['class'][] = array('btn', 'btn-default');
+		}
+
+		if ($framework == 'bs4')
+		{
+			$classes['class']['default'][]   = 'input';
+
+			if (!in_array('form-inline', $formclass))
+			{
+				$classes['class']['gridgroup'][] = 'control-group';
+				$classes['class']['gridlabel'][] = 'control-label';
+				$classes['class']['gridfield'][] = '';
+			}
+
+			$classes['type'][]  = 'checkbox';
+			$classes['class'][] = array('checkbox');
+
+			$classes['type'][]  = 'checkboxes';
+			$classes['class'][] = array('checkbox', 'optionclass' => array());
+
+			$classes['type'][]  = 'radio';
+			$classes['class'][] = array('radio', 'optionclass' => array());
+
+			$classes['type'][]  = 'textarea';
+			$classes['class'][] = array();
+
+			$classes['type'][]  = 'list';
+			$classes['class'][] = array();
+
+			$classes['type'][]  = 'submit';
+			$classes['class'][] = array('btn', 'btn-default');
+		}
+
+		if ($framework == 'uikit')
+		{
+			$classes['class']['default'][]   = 'uk-input';
+
+			if (!in_array('form-inline', $formclass))
+			{
+				$classes['class']['gridgroup'][] = 'uk-form-row';
+				$classes['class']['gridlabel'][] = 'uk-form-label';
+				$classes['class']['gridfield'][] = 'uk-form-controls';
+			}
+
+			$classes['type'][]  = 'checkbox';
+			$classes['class'][] = array('');
+
+			$classes['type'][]  = 'checkboxes';
+			$classes['class'][] = array('optionclass' => array('checkbox'));
+
+			$classes['type'][]  = 'radio';
+			$classes['class'][] = array('optionclass' => array('radio'));
+
+			$classes['type'][]  = 'textarea';
+			$classes['class'][] = array('uk-textarea');
+
+			$classes['type'][]  = 'list';
+			$classes['class'][] = array('uk-select');
+
+			$classes['type'][]  = 'submit';
+			$classes['class'][] = array('uk-button', 'uk-button-default');
+		}
+
+		if ($framework == 'uikit3')
+		{
+			$classes['class']['default'][]   = 'uk-input';
+
+			if (!in_array('form-inline', $formclass))
+			{
+				$classes['class']['gridgroup'][] = 'uk-margin';
+				$classes['class']['gridlabel'][] = 'uk-form-label';
+				$classes['class']['gridfield'][] = 'uk-form-controls';
+			}
+
+			$classes['type'][]  = 'checkbox';
+			$classes['class'][] = array('');
+
+			$classes['type'][]  = 'checkboxes';
+			$classes['class'][] = array('', 'option' => array('uk-checkbox'));
+
+			$classes['type'][]  = 'radio';
+			$classes['class'][] = array('', 'option' => array('uk-radio'));
+
+			$classes['type'][]  = 'textarea';
+			$classes['class'][] = array('uk-textarea');
+
+			$classes['type'][]  = 'list';
+			$classes['class'][] = array('uk-select');
+
+			$classes['type'][]  = 'submit';
+			$classes['class'][] = array('btn', 'btn-default');
+		}
+
+		if (!empty($form->getAttribute('gridlabel')))
+		{
+			$classes['class']['gridlabel'][] = (string) $form->getAttribute('gridlabel');
+		}
+
+		if (!empty($form->getAttribute('gridfield')))
+		{
+			$classes['class']['gridfield'][] = (string) $form->getAttribute('gridfield');
+		}
+
+		$fields = $form->getFieldset();
+
+		foreach ($fields as $field)
+		{
+			$this->setFieldClass((string) $field->getAttribute('name'), $classes);
+		}
+	}
+
+	protected function setFieldClass($fieldname, $classes)
+	{
+		$form                = $this->getform();
+		$field               = $form->getField($fieldname);
+		$fieldClass          = array();
+		$frameworkFieldClass = array();
+
+		$type = strtolower((string) $field->getAttribute('type'));
+		$key  = array_search($type, $classes['type'], true);
+
+		if (in_array($type, array('checkboxes', 'radio', 'submit', 'captcha')))
+		{
+			array_shift($classes['class']['default']);
+		}
+
+		if (in_array($type, array('checkboxes', 'radio')))
+		{
+			if (!empty((string) $form->getFieldAttribute($fieldname, 'icon')))
+			{
+				$form->setFieldAttribute($fieldname, 'icon', '');
+			}
+
+			$field->setOptionsClass($classes);
+		}
+
+		unset($classes['class'][$key]['optionclass']);
+
+		$frameworkDefaultClass = array_flip($classes['class']['default']);
+
+		if ($key !== false)
+		{
+			if (!empty($classes['class'][$key]))
+			{
+				$frameworkFieldClass = array_flip($classes['class'][$key]);
+			}
+		}
+
+		if (!empty((string) $form->getFieldAttribute($fieldname, 'class')))
+		{
+			$fieldClass = array_flip(explode(' ', (string) $form->getFieldAttribute($fieldname, 'class')));
+
+			if ($type == 'submit')
+			{
+				$frameworkFieldClass = array();
+			}
+		}
+
+		$class = array_merge((array) $frameworkDefaultClass, (array) $frameworkFieldClass, (array) $fieldClass);
+		$class = array_keys($class);
+
+		$form->setFieldAttribute($fieldname, 'class', implode(' ', $class));
+
+		$gridgroup = !empty($classes['class']['gridgroup']) ? $classes['class']['gridgroup'] : array();
+		$gridlabel = !empty($classes['class']['gridlabel']) ? $classes['class']['gridlabel'] : array();
+		$gridfield = !empty($classes['class']['gridfield']) ? $classes['class']['gridfield'] : array();
+
+		if (!empty((string) $form->getFieldAttribute($fieldname, 'gridgroup')))
+		{
+			$gridgroup[] = (string) $form->getFieldAttribute($fieldname, 'gridgroup');
+		}
+
+		if (!empty((string) $form->getFieldAttribute($fieldname, 'gridlabel')))
+		{
+			$gridlabel[] = (string) $form->getFieldAttribute($fieldname, 'gridlabel');
+		}
+
+		if (!empty((string) $form->getFieldAttribute($fieldname, 'gridfield')))
+		{
+			$gridfield[] = (string) $form->getFieldAttribute($fieldname, 'gridfield');
+		}
+
+		$form->setFieldAttribute($fieldname, 'gridgroup', implode(' ', $gridgroup));
+		$form->setFieldAttribute($fieldname, 'gridlabel', implode(' ', $gridlabel));
+		$form->setFieldAttribute($fieldname, 'gridfield', implode(' ', $gridfield));
+
+		return;
 	}
 
 	/**
 	 * Get and translate submitted Form values
 	 *
-	 * @param    array   $submittedValues
+	 * @param    array $submittedValues
+	 *
 	 * @return   array
 	 * @since    1.0
 	 */
@@ -469,21 +774,13 @@ class plgContentJtformulator extends JPlugin
 
 	protected function validate()
 	{
-		$form   = $this->getForm();
+		$form     = $this->getForm();
 		$token    = JSession::checkToken();
-		$fieldXML = $form->getXML();
+		$fields = $form->getFieldset();
 
-		foreach ($fieldXML as $fieldset)
+		foreach ($fields as $field)
 		{
-			$count = count($fieldset->field);
-
-			if ($count >= 1)
-			{
-				foreach ($fieldset->field as $field)
-				{
-					$this->validateField($field);
-				}
-			}
+			$this->validateField($field);
 		}
 
 		$valid = ($token && $this->validField) ? true : false;
@@ -515,44 +812,37 @@ class plgContentJtformulator extends JPlugin
 
 	protected function validateField($field)
 	{
-		$form   = $this->getForm();
-		$data          = $form->getData()->toArray();
-		$rule          = false;
-		$value         = '';
-		$showon        = (string) $field['showon'];
+		$form          = $this->getForm();
+		$value         = $field->value;
+		$showon        = $field->showon;
 		$showField     = true;
 		$validateField = true;
 		$valid         = false;
-		$type          = strtolower((string) $field['type']);
-		$validate      = (string) $field['validate'];
-		$required      = (string) $field['required'];
-		$fieldName     = (string) $field['name'];
+		$type          = strtolower($field->type);
+		$validate      = $field->validate;
+		$required      = $field->required;
+		$fieldName     = $field->fieldname;
 
 		if ($showon)
 		{
 			$_showon_value    = explode(':', $showon);
 			$_showon_value[1] = JText::_($_showon_value[1]);
-			$showon_value     = $form->getField($_showon_value[0])->value;
+			$showon_value     = $form->getValue($_showon_value[0]);
 
-			if ($_showon_value[1] != $showon_value)
+			if (!in_array($_showon_value[1], $showon_value))
 			{
 				$showField = false;
 				$valid     = true;
-				$this->form[$this->uParams['theme'] . $index]->setValue($fieldName, null, '');
+				$form->setValue($fieldName, null, '');
 
 				if ($type == 'spacer')
 				{
-					$this->form[$this->uParams['theme'] . $index]->setFieldAttribute($fieldName, 'label', '');
+					$form->setFieldAttribute($fieldName, 'label', '');
 				}
 			}
 		}
 
-		if (isset($data[$fieldName]))
-		{
-			$value = $data[$fieldName];
-		}
-
-		if ($required && !$value)
+		if ($required && empty($value))
 		{
 			if (!$showField)
 			{
@@ -567,13 +857,14 @@ class plgContentJtformulator extends JPlugin
 				$value = $this->getSubmittedFiles($fieldName);
 			}
 
-			if ($field->option)
+			if (in_array($type, array('radio', 'checkboxes', 'list')))
 			{
-				$oCount = count($field->option);
+				$oField = $form->getFieldXml($fieldName);
+				$oCount = count($oField->option);
 
 				for ($i = 0; $i < $oCount; $i++)
 				{
-					$_val = (string) $field->option[$i]->attributes()->value;
+					$_val = (string) $oField->option[$i]->attributes()->value;
 					if ($_val)
 					{
 						if (is_array($value))
@@ -585,14 +876,15 @@ class plgContentJtformulator extends JPlugin
 							$val = $value == JText::_($_val) ? $value : $_val;
 						}
 
-						$field->option[$i]->attributes()->value = $val;
+						$oField->option[$i]->attributes()->value = $val;
 					}
 				}
 			}
 
 			if ($type == 'email')
 			{
-				$field->addAttribute('tld', 'tld');
+				$form->setFieldAttribute($fieldName, 'tld', 'tld');
+
 				if ($required || !empty($value))
 				{
 					$this->mail['sender_email'] = 'email';
@@ -612,7 +904,7 @@ class plgContentJtformulator extends JPlugin
 			{
 				if ($type == 'captcha')
 				{
-					$valid = $rule->test($field, $value, null, null, $this->form[$this->uParams['theme'] . $index]);
+					$valid = $rule->test($form->getFieldXml($fieldName), $value, null, null, $form);
 
 					if ($valid !== true)
 					{
@@ -623,7 +915,7 @@ class plgContentJtformulator extends JPlugin
 				}
 				else
 				{
-					$valid = $rule->test($field, $value);
+					$valid = $rule->test($form->getFieldXml($fieldName), $value);
 				}
 			}
 			else
@@ -679,42 +971,30 @@ class plgContentJtformulator extends JPlugin
 
 	protected function invalidField($fieldName)
 	{
-		$form   = $this->getForm();
-		$errorClass = $this->params->get('error_class', 'invalid');
-		$label      = $form->getFieldAttribute($fieldName, 'label');
-		$label      = JText::_($label);
-		$class      = $form->getFieldAttribute($fieldName, 'class');
+		$form       = $this->getForm();
+		$label      = JText::_($form->getFieldAttribute($fieldName, 'label'));
+		$errorClass = 'invalid';
+
+		$class = $form->getFieldAttribute($fieldName, 'class');
+		$class = $class
+			? trim(str_replace($errorClass, '', $class)) . ' '
+			: '';
+
 		$labelClass = $form->getFieldAttribute($fieldName, 'labelclass');
+		$labelClass = $labelClass
+			? trim(str_replace($errorClass, '', $labelClass)) . ' '
+			: '';
+
+		$form->setFieldAttribute($fieldName, 'class', $class . $errorClass);
+		$form->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
 
 		if ($fieldName == $this->issetCaptcha)
 		{
-			$class = $class
-				? trim(str_replace($errorClass, '', $class)) . ' '
-				: '';
-
-			$labelClass = $labelClass
-				? trim(str_replace($errorClass, '', $labelClass)) . ' '
-				: '';
-
-			$form->setFieldAttribute($fieldName, 'class', $class . $errorClass);
-			$form->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
-
 			JFactory::getApplication()
 				->enqueueMessage((string) $this->validCaptcha, 'error');
 		}
 		else
 		{
-			$class = $class
-				? trim(str_replace($errorClass, '', $class)) . ' '
-				: '';
-
-			$labelClass = $labelClass
-				? trim(str_replace($errorClass, '', $labelClass)) . ' '
-				: '';
-
-			$form->setFieldAttribute($fieldName, 'class', $class . $errorClass);
-			$form->setFieldAttribute($fieldName, 'labelclass', $labelClass . $errorClass);
-
 			JFactory::getApplication()
 				->enqueueMessage(
 					JText::sprintf('JTF_FIELD_ERROR', $label), 'error'
@@ -768,9 +1048,7 @@ class plgContentJtformulator extends JPlugin
 		$submitedFiles = $this->submitedFiles;
 		$nowPath       = date('Ymd');
 
-		$filePath = !$this->params->get('file_path', 'uploads')
-			? 'images/uploads'
-			: 'images/' . $this->params->get('file_path');
+		$filePath = 'images/' . $this->params->get('file_path', 'uploads');
 
 		$uploadBase = JPATH_BASE . '/' . $filePath . '/' . $nowPath;
 		$uploadURL  = rtrim(JUri::base(), '/') . '/' . $filePath . '/' . $nowPath;
@@ -812,14 +1090,13 @@ class plgContentJtformulator extends JPlugin
 	{
 		$index = $this->uParams['index'];
 		$id    = $this->uParams['theme'];
-		$form   = $this->getForm();
+		$form  = $this->getForm();
 
 		$displayData = array(
-			'id' => $id,
-			'index' => (int) $index,
-			'honeypot' => $this->honeypot,
+			'id'        => $id,
+			'index'     => (int) $index,
 			'fileClear' => $this->params->get('file_clear'),
-			'form' => $form
+			'form'      => $form
 		);
 
 		$renderer = new JLayoutFile($filename);
@@ -914,230 +1191,94 @@ class plgContentJtformulator extends JPlugin
 	}
 
 	/**
-	 * Checks if all needed files for Forms are found
+	 * Set captcha to submit fieldset or remove it, if is set off global
 	 *
-	 * @return   bool
-	 * @since    1.0
+	 * @param    mixed   $captcha   Fieldname of captcha
+	 *
+	 * @return   void
+	 * @since    3.0
 	 */
-	protected function getFieldsFile()
-	{
-		$app      = JFactory::getApplication();
-		$template = $app->getTemplate();
-		$framework = !empty($this->uParams['framework']) ? '.' . $this->uParams['framework'] : '';
-		$file = 'fields' . $framework . '.xml';
-
-		$formPath = array(
-			JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/' . $this->uParams['theme'],
-			JPATH_PLUGINS . '/content/jtformulator/tmpl/' . $this->uParams['theme']
-		);
-
-		foreach ($formPath as $path)
-		{
-			if (file_exists($path . '/' . $file))
-			{
-				return $path . '/' . $file;
-			}
-
-			if (file_exists($path . '/fields.xml'))
-			{
-				return $path . '/fields.xml';
-			}
-		}
-
-		$app->enqueueMessage(
-			JText::sprintf('JTF_THEME_ERROR', $this->uParams['theme'])
-			, 'error'
-		);
-
-		return false;
-	}
-
-	protected function setFrameworkFieldClass()
+	protected function setCaptcha($captcha)
 	{
 		$form   = $this->getForm();
-		$framework = null;
+		$hField = new SimpleXMLElement('<field name="jtf_important_notices" type="text" gridgroup="jtfhp" notmail="1"></field>');
 
-		if (!empty($form->framework[0]))
+		$form->setField($hField, null, true, 'submit');
+		JFactory::getDocument()->addStyleDeclaration('.hidden{display:none;visibility:hidden;}.jtfhp{position:absolute;top:-999em;left:-999em;height:0;width:0;}');
+
+		// Set captcha to submit fieldset
+		if (!empty($this->uParams['captcha']))
 		{
-			$framework = $form->framework[0];
-		}
-
-		$classes = array();
-
-		if (empty($framework))
-		{
-			$classes['class']['default'][]   = 'input';
-			$classes['class']['gridgroup'][] = 'control-group';
-			$classes['class']['gridlabel'][] = 'control-label';
-			$classes['class']['gridfield'][] = 'controls';
-
-			$classes['type'][]    = 'checkbox';
-			$classes['class'][][] = 'checkbox';
-
-			$classes['type'][]    = 'checkboxes';
-			$classes['class'][] = array('', 'option' => 'checkbox');
-
-			$classes['type'][] = 'radio';
-			$classes['type'][] = 'textarea';
-			$classes['type'][] = 'list';
-		}
-
-		if ($framework == 'bs3')
-		{
-			$classes['class']['default'][]   = 'form-control';
-			$classes['class']['gridgroup'][] = 'form-group';
-			$classes['class']['gridlabel'][] = 'control-label';
-			$classes['class']['gridfield'][] = 'control-field';
-
-			$classes['type'][]    = 'checkbox';
-			$classes['class'][][] = 'checkbox';
-
-			$classes['type'][]    = 'checkboxes';
-			$classes['class'][][] = 'checkbox';
-
-			$classes['type'][] = 'radio';
-			$classes['type'][] = 'textarea';
-			$classes['type'][] = 'list';
-		}
-
-		if ($framework == 'bs4')
-		{
-			$classes['class']['default'][]   = 'input';
-			$classes['class']['gridgroup'][] = 'control-group';
-			$classes['class']['gridlabel'][] = 'control-label';
-			$classes['class']['gridfield'][] = '';
-
-			$classes['type'][]    = 'checkbox';
-			$classes['class'][][] = 'checkbox';
-
-			$classes['type'][]    = 'checkboxes';
-			$classes['class'][][] = 'checkbox';
-
-			$classes['type'][] = 'radio';
-			$classes['type'][] = 'textarea';
-			$classes['type'][] = 'list';
-		}
-
-		if ($framework == 'uikit')
-		{
-			$classes['class']['default'][]   = 'uk-input';
-			$classes['class']['gridgroup'][] = 'uk-form-row';
-			$classes['class']['gridlabel'][] = 'uk-form-label';
-			$classes['class']['gridfield'][] = 'uk-form-controls';
-
-			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array('', 'option' => 'uk-checkbox');
-
-			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array('', 'option' => 'uk-checkbox');
-
-			$classes['type'][]  = 'radio';
-			$classes['class'][] = array('', 'option' => 'uk-radio');
-
-			$classes['type'][]    = 'textarea';
-			$classes['class'][][] = 'uk-textarea';
-
-			$classes['type'][]    = 'list';
-			$classes['class'][][] = 'uk-select';
-		}
-
-		if ($framework == 'uikit3')
-		{
-			$classes['class']['default'][]   = 'uk-input';
-			$classes['class']['gridgroup'][] = 'uk-margin';
-			$classes['class']['gridlabel'][] = 'uk-form-label';
-			$classes['class']['gridfield'][] = 'uk-form-controls';
-
-			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array('', 'option' => 'uk-checkbox');
-
-			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array('', 'option' => 'uk-checkbox');
-
-			$classes['type'][]  = 'radio';
-			$classes['class'][] = array('', 'option' => 'uk-radio');
-
-			$classes['type'][]    = 'textarea';
-			$classes['class'][][] = 'uk-textarea';
-
-			$classes['type'][]    = 'list';
-			$classes['class'][][] = 'uk-select';
-		}
-
-		//$fieldsets = $form->getXml();
-		$fields = $form->getFieldset();
-
-		foreach ($fields as $field)
-		{
-			$this->setFieldClass((string)$field->fieldname, $classes);
-		}
-	}
-
-	protected function setFieldClass($fieldname, $classes)
-	{
-		$form                = $this->getform();
-		$field               = $form->getField($fieldname);
-		$fieldClass          = array();
-		$frameworkFieldClass = array();
-
-		$type  = strtolower((string) $field->getAttribute('type'));
-
-		if (in_array($type, array('checkbox', 'checkboxes', 'radio')))
-		{
-			$field->setOptionsClass($classes);
-		}
-
-		$frameworkDefaultClass = array_flip($classes['class']['default']);
-		$key   = array_search($type, $classes['type'], true);
-
-		if ($key !== false)
-		{
-			if (!empty($classes['class'][$key]))
+			if (!empty($captcha))
 			{
-				$frameworkFieldClass = array_flip($classes['class'][$key]);
+				if (empty($captcha['submit']))
+				{
+					$cField = $form->getFieldXml($captcha);
+
+					$form->removeField($captcha);
+					$form->setField($cField, null, true, 'submit');
+				}
+				else
+				{
+					$captcha = $captcha['submit'];
+				}
 			}
+			else
+			{
+				$captcha = 'captcha';
+				$cField  = new SimpleXMLElement('<field name="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field>');
+
+				$form->setField($cField, null, true, 'submit');
+			}
+
+			$form->setFieldAttribute($captcha, 'notmail', true);
 		}
 
-		if (!empty((string) $form->getFieldAttribute($field->fieldname, 'class')))
+		// Remove Captcha if disabled by plugin
+		if (empty($this->uParams['captcha']) && !empty($captcha))
 		{
-			$fieldClass = array_flip(explode(' ', (string) $form->getFieldAttribute($field->fieldname, 'class')));
+			$captcha = false;
+
+			$form->removeField($captcha);
 		}
 
-		$class = array_merge((array) $frameworkDefaultClass, (array) $frameworkFieldClass, (array) $fieldClass);
-		$class = array_keys($class);
-		
-		$form->setFieldAttribute($field->fieldname, 'class', implode(' ', $class));
-
-		$gridgroup = !empty($classes['class']['gridgroup']) ? $classes['class']['gridgroup'] : array();
-		$gridlabel = !empty($classes['class']['gridlabel']) ? $classes['class']['gridlabel'] : array();
-		$gridfield = !empty($classes['class']['gridfield']) ? $classes['class']['gridfield'] : array();
-
-		if (strtolower((string) $field->getAttribute('type')))
-
-		if (!empty((string) $form->getFieldAttribute($field->fieldname, 'gridgroup')))
-		{
-			$gridgroup[] = (string) $form->getFieldAttribute($field->fieldname, 'gridgroup');
-		}
-
-		if (!empty((string) $form->getFieldAttribute($field->fieldname, 'gridlabel')))
-		{
-			$gridlabel[] = (string) $form->getFieldAttribute($field->fieldname, 'gridlabel');
-		}
-
-		if (!empty((string) $form->getFieldAttribute($field->fieldname, 'gridfield')))
-		{
-			$gridfield[] = (string) $form->getFieldAttribute($field->fieldname, 'gridfield');
-		}
-
-		$form->setFieldAttribute($field->fieldname, 'gridgroup', implode(' ', $gridgroup));
-		$form->setFieldAttribute($field->fieldname, 'gridlabel', implode(' ', $gridlabel));
-		$form->setFieldAttribute($field->fieldname, 'gridfield', implode(' ', $gridfield));
-
-		return;
+		$this->issetCaptcha = $captcha;
 	}
 
-	protected function getForm()
+	/**
+	 * Set submit button to submit fieldset
+	 *
+	 * @param    mixed   $submit   Fieldname of submit button
+	 *
+	 * @return   void
+	 * @since    3.0
+	 */
+	protected function setSubmitButton($submit)
 	{
-		return $this->form[$this->uParams['theme'] . (int) $this->uParams['index']];
+		$form = $this->getForm();
+
+	// Set submit button to submit fieldset
+		if (!empty($submit))
+		{
+			if (empty($submit['submit']))
+			{
+				$cField = $form->getFieldXml($submit);
+				$form->removeField($submit);
+				$form->setField($cField, null, true, 'submit');
+			}
+			else
+			{
+				$cField = $form->getFieldXml($submit['submit']);
+				$form->removeField($submit['submit']);
+				$form->setField($cField, null, true, 'submit');
+			}
+
+			$form->setFieldAttribute($submit, 'notmail', true);
+		}
+		else
+		{
+			$cField = new SimpleXMLElement('<field name="submit" type="submit" label="JSUBMIT" notmail="1"></field>');
+			$form->setField($cField, null, true, 'submit');
+		}
 	}
 }

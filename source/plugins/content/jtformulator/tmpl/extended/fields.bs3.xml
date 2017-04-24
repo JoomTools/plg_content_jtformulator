@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form orientation="horizontal">
+<form class="form-horizontal"
+      gridlabel="col-sm-3"
+      gridfield="col-sm-9"
+>
 	<fieldset>
 		<field name="anrede"
 		       type="list"
 		       icon="glyphicon glyphicon-th-list"
-		       gridfield="col-sm-9"
-		       labelclass="col-sm-3"
 		       description="JTF_ANREDE_DESC"
 		       label="JTF_ANREDE_LABEL"
 		       default=""
@@ -18,8 +19,6 @@
 		</field>
 		<field name="vorname"
 		       type="text"
-		       gridfield="col-sm-9"
-		       labelclass="col-sm-3"
 		       icon="glyphicon glyphicon-user"
 		       size="30"
 		       description="JTF_VNAME_DESC"
@@ -28,8 +27,6 @@
 		/>
 		<field name="nachname"
 		       type="text"
-		       gridfield="col-sm-9"
-		       labelclass="col-sm-3"
 		       icon="glyphicon glyphicon-user"
 		       size="30"
 		       description="JTF_NAME_DESC"
@@ -38,8 +35,6 @@
 		/>
 		<field name="email"
 		       type="email"
-		       gridfield="col-sm-9"
-		       labelclass="col-sm-3"
 		       icon="glyphicon glyphicon-envelope"
 		       size="30"
 		       description="JTF_EMAIL_DESC"
@@ -49,8 +44,6 @@
 		/>
 		<field name="tel"
 		       type="tel"
-		       gridfield="col-sm-9"
-		       labelclass="col-sm-3"
 		       size="30"
 		       description="JTF_TEL_DESC"
 		       label="JTF_TEL_LABEL"
@@ -58,8 +51,6 @@
 		/>
 		<field name="subject"
 		       type="text"
-		       gridfield="col-sm-9"
-		       labelclass="col-sm-3"
 		       size="30"
 		       description="JTF_SUBJECT_DESC"
 		       label="JTF_SUBJECT_LABEL"
@@ -67,8 +58,6 @@
 		/>
 		<field name="message"
 		       type="textarea"
-		       gridfield="col-sm-9"
-		       labelclass="col-sm-3"
 		       cols="25"
 		       rows="10"
 		       description="JTF_MESSAGE_DESC"

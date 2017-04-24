@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+<form class="form-horizontal"
+      gridlabel="col-sm-3"
+      gridfield="col-sm-9"
+>
+-->
+<form>
+	<fieldset>
+		<field name="list"
+		       type="list"
+		       icon="icon-list"
+		       description="JTF_LIST_DESC"
+		       label="JTF_LIST_LABEL"
+		       default=""
+		       validate="options"
+		       required="true"
+		>
+			<option value="">JTF_OPTION_NONE</option>
+			<option value="JTF_OPTION1">JTF_OPTION1</option>
+			<option value="JTF_OPTION2">JTF_OPTION2</option>
+		</field>
+		<field name="checkbox"
+		       type="checkboxes"
+		       description="JTF_CHK_DESC"
+		       label="JTF_CHK_LABEL"
+		       validate="options"
+		>
+			<option value="JTF_OPTION1">JTF_OPTION1</option>
+			<option value="JTF_OPTION2">JTF_OPTION2</option>
+			<option value="JTF_OPTION3">JTF_OPTION3</option>
+		</field>
+		<field name="checkbox_inline"
+		       type="checkboxes"
+		       description="JTF_CHK_INLINE_DESC"
+		       label="JTF_CHK_INLINE_LABEL"
+		       validate="options"
+		       optionlabel="inline"
+		>
+			<option value="JTF_OPTION1">JTF_OPTION1</option>
+			<option value="JTF_OPTION2">JTF_OPTION2</option>
+			<option value="JTF_OPTION3">JTF_OPTION3</option>
+		</field>
+		<field name="radiobox"
+		       type="radio"
+		       description="JTF_RADIO_DESC"
+		       label="JTF_RADIO_LABEL"
+		       default="JTF_OPTION1"
+		       validate="options"
+		>
+			<option value="JTF_OPTION1">JTF_OPTION1</option>
+			<option value="JTF_OPTION2">JTF_OPTION2</option>
+		</field>
+		<field name="radiobox_inline"
+		       type="radio"
+		       description="JTF_RADIO_INLINE_DESC"
+		       label="JTF_RADIO_INLINE_LABEL"
+		       default="JTF_OPTION2"
+		       validate="options"
+		       optionlabel="inline"
+		>
+			<option value="JTF_OPTION1">JTF_OPTION1</option>
+			<option value="JTF_OPTION2">JTF_OPTION2</option>
+		</field>
+		<field name="showon_switch"
+		       type="radio"
+		       description="JTF_SHW_SWITCH_DESC"
+		       label="JTF_SHW_SWITCH_LABEL"
+		       default="0"
+		       validate="options"
+		       notmail="1"
+		>
+			<option value="0">JON</option>
+			<option value="1">JOFF</option>
+		</field>
+		<field name="vorname"
+		       type="text"
+		       icon="icon-user"
+		       maxlength="30"
+		       description="JTF_VNAME_DESC"
+		       label="JTF_VNAME_LABEL"
+		       required="true"
+		       showon="active_vn:1"
+		/>
+		<field name="nachname"
+		       type="text"
+		       icon="icon-user"
+		       maxlength="30"
+		       description="JTF_NAME_DESC"
+		       label="JTF_NAME_LABEL"
+		       required="true"
+		/>
+		<field name="email"
+		       type="email"
+		       icon="icon-envelope"
+		       maxlength="30"
+		       description="JTF_EMAIL_DESC"
+		       label="JTF_EMAIL_LABEL"
+		       validate="email"
+		       required="true"
+		/>
+		<field name="tel"
+		       type="tel"
+		       icon="icon-headphones"
+		       maxlength="30"
+		       description="JTF_TEL_DESC"
+		       label="JTF_TEL_LABEL"
+		       validate="tel"
+		/>
+		<field name="subject"
+		       type="text"
+		       icon="icon-info-sign"
+		       maxlength="30"
+		       description="JTF_SUBJECT_DESC"
+		       label="JTF_SUBJECT_LABEL"
+		       required="true"
+		/>
+		<field name="message"
+		       type="textarea"
+		       icon="icon-pencil"
+		       cols="25"
+		       rows="10"
+		       description="JTF_MESSAGE_DESC"
+		       label="JTF_MESSAGE_LABEL"
+		       required="true"
+		/>
+	</fieldset>
+</form>

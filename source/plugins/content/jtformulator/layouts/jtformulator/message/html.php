@@ -1,12 +1,12 @@
 <?php
 /**
- * @package     Joomla.Plugin
- * @subpackage  Content.jtformulator
+ * @package         Joomla.Plugin
+ * @subpackage      Content.jtformulator
  *
- * @author      Guido De Gobbis
+ * @author          Guido De Gobbis
  * @copyright   (c) 2017 JoomTools.de - All rights reserved.
- * @license     GNU General Public License version 3 or later
-**/
+ * @license         GNU General Public License version 3 or later
+ **/
 
 defined('_JEXEC') or die;
 
@@ -16,20 +16,30 @@ $fieldsets = $form->getXML();
 
 foreach ($fieldsets->fieldset as $fieldset)
 {
+	if (!empty($fieldset['name']) && (string) $fieldset['name'] == 'submit')
+	{
+		continue;
+	}
+
 	$fieldsetLabel = (string) $fieldset['label'];
 
 	if (count($fieldset->field)) : ?>
-		<?php if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
-			<h1><?php echo $legend; ?></h1>
+		<?php if (!empty($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
+            <h1><?php echo $legend; ?></h1>
 		<?php endif; ?>
 
-		<table cellpadding="2" border="1">
-			<tbody>
+        <table cellpadding="2" border="1">
+            <tbody>
 			<?php foreach ($fieldset->field as $field) :
-				$label = trim(JText::_((string) $field['label']));
-				$value = $form->getValue((string) $field['name']);
-				$type  = (string) $form->getFieldAttribute((string) $field['name'], 'type');
+				$label       = trim(JText::_((string) $field['label']));
+				$value       = $form->getValue((string) $field['name']);
+				$type        = (string) $field['type'];
 				$fileTimeOut = '';
+
+				if (!empty($field['notmail']))
+				{
+					continue;
+				}
 
 				if ($type == 'file' && $fileClear > 0)
 				{
@@ -71,15 +81,15 @@ foreach ($fieldsets->fieldset as $fieldset)
 				{
 					$value = trim(JText::_($value));
 				} ?>
-				<tr>
-					<th style="width:30%; text-align: left;">
+                <tr>
+                    <th style="width:30%; text-align: left;">
 						<?php echo strip_tags($label); ?>
-					</th>
-					<td><?php echo $value ? nl2br($value) : '--'; ?></td>
-				</tr>
+                    </th>
+                    <td><?php echo $value ? nl2br($value) : '--'; ?></td>
+                </tr>
 				<?php echo $fileTimeOut; ?>
 			<?php endforeach; ?>
-			</tbody>
-		</table>
+            </tbody>
+        </table>
 	<?php endif;
 }
