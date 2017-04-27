@@ -140,12 +140,13 @@ class JFormFieldList extends JFormField
 			$selected = ($selected == 'true' || $selected == 'selected' || $selected == '1');
 
 			$tmp = array(
-					'value'    => $value,
-					'text'     => JText::alt($text, $fieldname),
-					'disable'  => $disabled,
-					'class'    => (string) $option['class'],
-					'selected' => ($checked || $selected),
-					'checked'  => ($checked || $selected),
+				'value'      => $value,
+				'text'       => JText::alt($text, $fieldname),
+				'disable'    => $disabled,
+				'class'      => (string) $option['class'],
+				'labelclass' => (string) $option['labelclass'],
+				'selected'   => ($checked || $selected),
+				'checked'    => ($checked || $selected),
 			);
 
 			// Set some event handler attributes. But really, should be using unobtrusive js.
@@ -238,39 +239,67 @@ class JFormFieldList extends JFormField
 
 	public function setOptionsClass($classes = array())
 	{
-		$type           = strtolower((string) $this->getAttribute('type'));
-		$optionclass    = array();
-		$frameworkclass = array();
-
 		if (!empty($classes) && $this->element instanceof SimpleXMLElement)
 		{
-			if (!empty($this->getAttribute('optionclass')))
+			$fieldclass      = array();
+			$fieldlabelclass = array();
+			$frwklabel       = !empty($classes['labelclass']) ? array_flip($classes['labelclass']) : array();
+			$frwkclass       = !empty($classes['class']) ? array_flip($classes['class']) : array();
+
+			if (!empty($this->getAttribute('optionlabelclass')))
 			{
-				$optionclass = array_flip(explode(' ', $this->getAttribute('optionclass')));
+				$fieldlabelclass = array_flip(
+					explode(' ', $this->getAttribute('optionlabelclass'))
+				);
 			}
 
-			$key = array_search($type, $classes['type'], true);
-
-			if ($key !== false && !empty($classes['class'][$key]['optionclass']))
+			if (!empty($this->getAttribute('optionclass')))
 			{
-				$frameworkclass = array_flip($classes['class'][$key]['optionclass']);
+				$fieldclass = array_flip(
+					explode(' ', $this->getAttribute('optionclass'))
+				);
 			}
 
 			foreach ($this->element->xpath('option') as &$option)
 			{
-				$fieldclass = array();
+				$optionlabelclass = array();
+				$optionclass      = array();
 
 				if (!empty($option['class']))
 				{
-					$fieldclass =  array_flip(explode(' ', (string) $option['class']));
+					$optionclass =  array_flip(
+						explode(' ', (string) $option['class'])
+					);
 				}
 
-				$class = array_keys(array_merge($frameworkclass, $optionclass, $fieldclass));
+				$class = array_keys(array_merge($frwkclass, $optionclass, $fieldclass));
+
+				if (!empty($label))
+				{
+					$option['optionlabel'] = implode(' ', $label);
+				}
+
+				$class = array_keys(array_merge($framework_o_class, $optionclass, $fieldclass));
 
 				if (!empty($class))
 				{
 					$option['class'] = implode(' ', $class);
 				}
+
+				if (!empty($option['labelclass']))
+				{
+					$optionlabelclass =  array_flip(
+						explode(' ', (string) $option['labelclass'])
+					);
+				}
+
+				$label = array_keys(array_merge($frwklabel, $optionlabelclass, $fieldlabelclass));
+
+				if (!empty($label))
+				{
+					$option['labelclass'] = implode(' ', $label);
+				}
+
 			}
 		}
 

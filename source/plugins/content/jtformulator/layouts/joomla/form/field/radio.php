@@ -53,10 +53,10 @@ JHtml::_('script', 'system/html5fallback.js', array('version' => 'auto', 'relati
  *     %4 = any other attributes
  */
 $format = '<input type="radio" id="%1$s" name="%2$s" value="%3$s" %4$s />';
-$alt    = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name);
+
+// The alt option for JText::alt
+$alt   = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name);
 $class = !empty($class) ? ' class="' . trim($class) . '"' : '';
-$optionlabel = !empty($optionlabel) ? explode(' ', $optionlabel) : array();
-$optionlabel[] = 'radio';
 ?>
 <fieldset id="<?php echo $id; ?>"<?php echo $class; ?>
 	<?php echo $disabled ? 'disabled' : ''; ?>
@@ -67,11 +67,12 @@ $optionlabel[] = 'radio';
 		<?php foreach ($options as $i => $option) : ?>
 			<?php
 				// Initialize some option attributes.
-				$checked  = ((string) $option->value === $value) ? 'checked="checked"' : '';
-				$optionClass    = !empty($option->class) ? 'class="' . trim($option->class) . '"' : '';
-				$disabled = !empty($option->disable) || ($disabled && !$checked) ? 'disabled' : '';
+                $checked          = ((string) $option->value === $value) ? 'checked="checked"' : '';
+                $optionClass      = !empty($option->class) ? 'class="' . $option->class . '"' : '';
+                $optionLabelClass = !empty($option->labelclass) ? 'class="' . $option->labelclass . '"' : '';
+                $disabled         = !empty($option->disable) || ($disabled && !$checked) ? 'disabled' : '';
 
-				// Initialize some JavaScript option attributes.
+			// Initialize some JavaScript option attributes.
 				$onclick    = !empty($option->onclick) ? 'onclick="' . $option->onclick . '"' : '';
 				$onchange   = !empty($option->onchange) ? 'onchange="' . $option->onchange . '"' : '';
 				$oid        = $id . $i;
@@ -82,7 +83,7 @@ $optionlabel[] = 'radio';
 			<?php if ($required) : ?>
 				<?php $attributes[] = 'required aria-required="true"'; ?>
 			<?php endif; ?>
-			<label for="<?php echo $oid; ?>" class="<?php echo implode(' ', $optionlabel); ?>">
+            <label for="<?php echo $oid; ?>"<?php echo $optionLabelClass; ?>>
 				<?php echo sprintf($format, $oid, $name, $ovalue, implode(' ', $attributes)); ?>
 				<?php echo JText::alt($option->text, $alt); ?>
 			</label>
