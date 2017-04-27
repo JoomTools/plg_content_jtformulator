@@ -24,15 +24,24 @@ if (!empty($options['showonEnabled']))
 {
 	JHtml::_('jquery.framework');
 	JHtml::_('script', 'jui/cms.js', array('version' => 'auto', 'relative' => true));
-	JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js', array('version' => 'auto', 'relative' => true));
+	JHtml::_('script', 'plugins/content/jtformulator/assets/js/showon.js', array('version' => 'auto', 'relative' => false));
 }
 
-$rel   = empty($options['rel']) ? '' : ' ' . $options['rel'];
-$gridgroup = !empty($options['gridgroup']) ? ' class="' . $options['gridgroup'] . '"' : '';
+$container   = array();
+
+if (!empty($options['gridgroup']))
+{
+	$container[] = ' class="' . $options['gridgroup'] . '"';
+}
+
+if (!empty($options['rel']))
+{
+	$container[] = $options['rel'];
+}
 ?>
 
-<?php if (!empty($gridgroup) || !empty($rel)) : ?>
-<div<?php echo $gridgroup; ?><?php echo $rel; ?>>
+<?php if (!empty($container)) : ?>
+<div<?php echo implode(' ', $container); ?>>
 <?php endif; ?>
 
 <?php if (empty($options['hiddenLabel'])) : ?>
@@ -56,7 +65,7 @@ $gridgroup = !empty($options['gridgroup']) ? ' class="' . $options['gridgroup'] 
     <?php if (!empty($options['icon'])) : ?>
         <div class="input-prepend">
             <span class="add-on">
-                <i class="<?php echo $options['icon']; ?>"></i>
+                <span class="<?php echo $options['icon']; ?>"></span>
             </span>
     <?php endif; ?>
 
@@ -70,6 +79,6 @@ $gridgroup = !empty($options['gridgroup']) ? ' class="' . $options['gridgroup'] 
     </div>
 <?php endif; ?>
 
-<?php if (!empty($gridgroup) || !empty($rel)) : ?>
+<?php if (!empty($container)) : ?>
 </div>
 <?php endif; ?>

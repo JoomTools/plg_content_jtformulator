@@ -38,55 +38,36 @@ extract($displayData);
  * @var   boolean  $spellcheck      Spellcheck state for the form field.
  * @var   string   $validate        Validation rules to apply.
  * @var   string   $value           Value attribute of the field.
- * @var   array    $checkedOptions  Options that will be set as checked.
- * @var   boolean  $hasValue        Has this field a value assigned?
  * @var   array    $options         Options available for this field.
  */
 
 // Including fallback code for HTML5 non supported browsers.
 JHtml::_('jquery.framework');
 JHtml::_('script', 'system/html5fallback.js', array('version' => 'auto', 'relative' => true));
+JHtml::_('behavior.combobox');
 
-/**
- * The format of the input tag to be filled in using sprintf.
- *     %1 - id
- *     %2 - name
- *     %3 - value
- *     %4 = any other attributes
- */
-$format = '<input type="checkbox" id="%1$s" name="%2$s" value="%3$s" %4$s />';
+$html[] = '<div class="combobox input-append">';
 
-// The alt option for JText::alt
-$alt   = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name);
-$class = !empty($class) ? ' class="' . trim($class) . '"' : '';
+// Build the input for the combo box.
+$html[] = '<input type="text" name="' . $data['name'] . '" id="' . $data['id'] . '" value="'
+	. htmlspecialchars($data['value'], ENT_COMPAT, 'UTF-8') . '"' . $attr . ' autocomplete="off" />';
+
+$html[] = '<div class="btn-group">';
+$html[] = '<button type="button" class="btn dropdown-toggle">';
+$html[] = '		<span class="caret"></span>';
+$html[] = '</button>';
+
+// Build the list for the combo box.
+$html[] = '<ul class="dropdown-menu">';
+
+foreach ($options as $option)
+{
+	$html[] = '<li><a href="#">' . $option->text . '</a></li>';
+}
+
+$html[] = '</ul>';
+
+$html[] = '</div></div>';
+
+echo implode($html);
 ?>
-
-<fieldset id="<?php echo $id; ?>"<?php echo $class; ?>
-	<?php echo $required ? 'required aria-required="true"' : ''; ?>
-	<?php echo $autofocus ? 'autofocus' : ''; ?>>
-
-	<?php foreach ($options as $i => $option) : ?>
-		<?php
-			// Initialize some option attributes.
-			$checked = in_array((string) $option->value, $checkedOptions) ? 'checked' : '';
-
-			// In case there is no stored value, use the option's default state.
-            $checked          = (!$hasValue && $option->checked) ? 'checked' : $checked;
-            $optionClass      = !empty($option->class) ? 'class="' . $option->class . '"' : '';
-            $optionLabelClass = !empty($option->labelclass) ? 'class="' . $option->labelclass . '"' : '';
-            $disabled         = !empty($option->disable) || $disabled ? 'disabled' : '';
-
-		// Initialize some JavaScript option attributes.
-			$onclick  = !empty($option->onclick) ? 'onclick="' . $option->onclick . '"' : '';
-			$onchange = !empty($option->onchange) ? 'onchange="' . $option->onchange . '"' : '';
-
-			$oid        = $id . $i;
-			$value      = htmlspecialchars($option->value, ENT_COMPAT, 'UTF-8');
-			$attributes = array_filter(array($checked, $optionClass, $disabled, $onchange, $onclick));
-		?>
-
-		<label for="<?php echo $oid; ?>"<?php echo $optionLabelClass; ?>>
-			<?php echo sprintf($format, $oid, $name, $value, implode(' ', $attributes)); ?>
-		<?php echo JText::alt($option->text, $alt); ?></label>
-	<?php endforeach; ?>
-</fieldset>
