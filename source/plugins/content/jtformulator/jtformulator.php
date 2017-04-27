@@ -482,7 +482,7 @@ class plgContentJtformulator extends JPlugin
 	{
 		$form      = $this->getForm();
 		$classes   = array();
-		$formclass = explode(' ', $form->getAttribute('class'));
+		$formclass = explode(' ', $form->getAttribute('class', array()));
 		$framework = null;
 
 		if (!empty($form->framework[0]))
@@ -505,10 +505,17 @@ class plgContentJtformulator extends JPlugin
 			$classes['class'][] = array('checkbox');
 
 			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array('checkboxes', 'optionclass' => array());
+			$classes['class'][] = array(
+				'checkboxes',
+				'optionlabelclass' => array('checkbox'),
+				'optionclass' => array()
+			);
 
 			$classes['type'][]  = 'radio';
-			$classes['class'][] = array('optionclass' => array());
+			$classes['class'][] = array(
+				'optionlabelclass' => array('radio'),
+				'optionclass' => array()
+			);
 
 			$classes['type'][]  = 'textarea';
 			$classes['class'][] = array();
@@ -584,30 +591,67 @@ class plgContentJtformulator extends JPlugin
 		{
 			$classes['class']['default'][]   = 'uk-input';
 
-			if (!in_array('form-inline', $formclass))
+			if (!in_array('uk-form-stacked', $formclass))
 			{
 				$classes['class']['gridgroup'][] = 'uk-form-row';
 				$classes['class']['gridlabel'][] = 'uk-form-label';
 				$classes['class']['gridfield'][] = 'uk-form-controls';
 			}
 
+			$classes['type'][]  = 'calendar';
+			$classes['class'][] = array(
+//				'field'   => array(),
+//				'options' => array(),
+				'buttons' => array(
+					'class' => 'uk-button uk-button-small',
+					'icon'  => 'uk-icon-calendar',
+				),
+			);
+
 			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array('');
+			$classes['class'][] = array(
+//				'field' => array(),
+//				'options' => array(),
+//				'buttons' => array(),
+			);
 
 			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array('optionclass' => array('checkbox'));
+			$classes['class'][] = array(
+				'field' => array('checkboxes'),
+				'options' => array(
+//					'labelclass' => array(),
+					'class' => array('uk-checkbox'),
+				),
+//				'buttons' => array(),
+			);
 
 			$classes['type'][]  = 'radio';
-			$classes['class'][] = array('optionclass' => array('radio'));
+			$classes['class'][] = array(
+//				'field' => array(),
+				'options' => array(
+//					'labelclass' => array(),
+					'class' => array('uk-radio'),
+				),
+//				'buttons' => array(),
+			);
 
 			$classes['type'][]  = 'textarea';
-			$classes['class'][] = array('uk-textarea');
+			$classes['class'][] = array(
+				'field' => array('uk-textarea'),
+			);
 
 			$classes['type'][]  = 'list';
-			$classes['class'][] = array('uk-select');
+			$classes['class'][] = array(
+				'field' => array('uk-select'),
+			);
 
 			$classes['type'][]  = 'submit';
-			$classes['class'][] = array('uk-button', 'uk-button-default');
+			$classes['class'][] = array(
+				'buttons' => array(
+					'class' => 'uk-button uk-button-default',
+					'icon'  => 'uk-icon-calendar',
+				),
+			);
 		}
 
 		if ($framework == 'uikit3')
@@ -622,112 +666,187 @@ class plgContentJtformulator extends JPlugin
 			}
 
 			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array('');
+			$classes['class'][] = array();
 
 			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array('', 'option' => array('uk-checkbox'));
+			$classes['class'][] = array(
+				'field' => array(),
+				'optionclass' => array('uk-checkbox')
+			);
 
 			$classes['type'][]  = 'radio';
-			$classes['class'][] = array('', 'option' => array('uk-radio'));
+			$classes['class'][] = array(
+				'field' => array(),
+				'optionclass' => array('uk-radio')
+			);
 
 			$classes['type'][]  = 'textarea';
-			$classes['class'][] = array('uk-textarea');
+			$classes['class'][] = array(
+				'field' => array('uk-textarea'),
+				);
 
 			$classes['type'][]  = 'list';
-			$classes['class'][] = array('uk-select');
+			$classes['class'][] = array(
+				'field' => array('uk-select'),
+			);
 
 			$classes['type'][]  = 'submit';
+			$classes['class'][] = array(
+				'field' => array(),
+			);
 			$classes['class'][] = array('btn', 'btn-default');
 		}
 
 		if (!empty($form->getAttribute('gridlabel')))
 		{
-			$classes['class']['gridlabel'][] = (string) $form->getAttribute('gridlabel');
+			$classes['class']['gridlabel'][] = $form->getAttribute('gridlabel');
 		}
 
 		if (!empty($form->getAttribute('gridfield')))
 		{
-			$classes['class']['gridfield'][] = (string) $form->getAttribute('gridfield');
+			$classes['class']['gridfield'][] = $form->getAttribute('gridfield');
 		}
 
 		$fields = $form->getFieldset();
 
 		foreach ($fields as $field)
 		{
-			$this->setFieldClass((string) $field->getAttribute('name'), $classes);
+			$this->setFieldClass($field->getAttribute('name'), $classes);
 		}
 	}
 
-	protected function setFieldClass($fieldname, $classes)
+	protected function setFieldClass($fieldname, $frwkClasses)
 	{
-		$form                = $this->getform();
-		$field               = $form->getField($fieldname);
-		$fieldClass          = array();
-		$frameworkFieldClass = array();
+		$form  = $this->getform();
+		$field = $form->getField($fieldname);
+		$type  = strtolower($field->getAttribute('type'));
+		$key   = array_search($type, $frwkClasses['type'], true);
+		$classes = array(
+			'frwkDefaultClass' => array(),
+			'frwkFieldClass'   => array(),
+			'fieldClass'       => array(),
+		);
 
-		$type = strtolower((string) $field->getAttribute('type'));
-		$key  = array_search($type, $classes['type'], true);
-
-		if (in_array($type, array('checkboxes', 'radio', 'submit', 'captcha')))
+		if (in_array($type, array('text', 'plz', 'tel')))
 		{
-			array_shift($classes['class']['default']);
+			if (!empty($frwkClasses['class']['default']))
+			{
+				$classes['frwkDefaultClass'] = array_flip($frwkClasses['class']['default']);
+			}
+		}
+
+		if ($key !== false)
+		{
+			if (!empty($frwkClasses['class'][$key]['field']))
+			{
+				$classes['frwkFieldClass'] = array_flip($frwkClasses['class'][$key]['field']);
+			}
+		}
+
+		if (!empty($form->getFieldAttribute($fieldname, 'class')))
+		{
+			$classes['fieldClass'] = array_flip(
+				explode(' ', $form->getFieldAttribute($fieldname, 'class'))
+			);
+		}
+
+		if (in_array($type, array('checkboxes', 'radio', 'textarea', 'captcha')))
+		{
+			$form->setFieldAttribute($fieldname, 'icon', null);
+
 		}
 
 		if (in_array($type, array('checkboxes', 'radio')))
 		{
-			if (!empty((string) $form->getFieldAttribute($fieldname, 'icon')))
+			$field->setOptionsClass($frwkClasses['class'][$key]['options']);
+		}
+
+		if (in_array($type, array('submit', 'calendar', 'color')))
+		{
+			$buttonicon  = null;
+
+			if (!empty($frwkClasses['class'][$key]['buttons']['icon']))
 			{
-				$form->setFieldAttribute($fieldname, 'icon', '');
+				$buttonicon = $frwkClasses['class'][$key]['buttons']['icon'];
 			}
 
-			$field->setOptionsClass($classes);
-		}
-
-		unset($classes['class'][$key]['optionclass']);
-
-		$frameworkDefaultClass = array_flip($classes['class']['default']);
-
-		if ($key !== false)
-		{
-			if (!empty($classes['class'][$key]))
+			if (!empty($form->getFieldAttribute($fieldname, 'icon')))
 			{
-				$frameworkFieldClass = array_flip($classes['class'][$key]);
+				$buttonicon = $form->getFieldAttribute($fieldname, 'icon');
 			}
-		}
 
-		if (!empty((string) $form->getFieldAttribute($fieldname, 'class')))
-		{
-			$fieldClass = array_flip(explode(' ', (string) $form->getFieldAttribute($fieldname, 'class')));
-
-			if ($type == 'submit')
+			if (!empty($form->getFieldAttribute($fieldname, 'buttonicon')))
 			{
-				$frameworkFieldClass = array();
+				$buttonicon = $form->getFieldAttribute($fieldname, 'buttonicon');
 			}
+
+			if (!empty($buttonicon))
+			{
+				$form->setFieldAttribute($fieldname, 'buttonicon', $buttonicon);
+				$form->setFieldAttribute($fieldname, 'icon', null);
+			}
+
+			$buttonclass = null;
+
+			if (!empty($frwkClasses['class'][$key]['buttons']['class']))
+			{
+				$buttonclass = $frwkClasses['class'][$key]['buttons']['class'];
+			}
+
+			if ($type == 'submit' && !empty($classes['fieldClass']))
+			{
+				$buttonclass = implode(' ', array_keys($classes['fieldClass']));
+				$classes['fieldClass'] = array();
+			}
+
+			if (!empty($form->getFieldAttribute($fieldname, 'buttonclass')))
+			{
+				$buttonclass = $form->getFieldAttribute($fieldname, 'buttonclass');
+			}
+
+			if (!empty($buttonclass))
+			{
+				$form->setFieldAttribute($fieldname, 'buttonclass', $buttonclass);
+			}
+
 		}
 
-		$class = array_merge((array) $frameworkDefaultClass, (array) $frameworkFieldClass, (array) $fieldClass);
-		$class = array_keys($class);
+		$class = array_merge($classes['frwkDefaultClass'], $classes['frwkFieldClass'], $classes['fieldClass']);
+		$fieldClass = array_keys($class);
 
-		$form->setFieldAttribute($fieldname, 'class', implode(' ', $class));
+		$form->setFieldAttribute($fieldname, 'class', implode(' ', $fieldClass));
 
-		$gridgroup = !empty($classes['class']['gridgroup']) ? $classes['class']['gridgroup'] : array();
-		$gridlabel = !empty($classes['class']['gridlabel']) ? $classes['class']['gridlabel'] : array();
-		$gridfield = !empty($classes['class']['gridfield']) ? $classes['class']['gridfield'] : array();
+		$grid['group']['frwk'] = !empty($frwkClasses['class']['gridgroup']) ? array_flip($frwkClasses['class']['gridgroup']) : array();
+		$grid['label']['frwk'] = !empty($frwkClasses['class']['gridlabel']) ? array_flip($frwkClasses['class']['gridlabel']) : array();
+		$grid['field']['frwk'] = !empty($frwkClasses['class']['gridfield']) ? array_flip($frwkClasses['class']['gridfield']) : array();
+		$grid['group']['field'] = array();
+		$grid['label']['field'] = array();
+		$grid['field']['field'] = array();
 
-		if (!empty((string) $form->getFieldAttribute($fieldname, 'gridgroup')))
+		if (!empty($form->getFieldAttribute($fieldname, 'gridgroup')))
 		{
-			$gridgroup[] = (string) $form->getFieldAttribute($fieldname, 'gridgroup');
+			$grid['group']['field'] = array_flip(
+				explode(' ', $form->getFieldAttribute($fieldname, 'gridgroup'))
+			);
 		}
 
-		if (!empty((string) $form->getFieldAttribute($fieldname, 'gridlabel')))
+		if (!empty($form->getFieldAttribute($fieldname, 'gridlabel')))
 		{
-			$gridlabel[] = (string) $form->getFieldAttribute($fieldname, 'gridlabel');
+			$grid['label']['field'] = array_flip(
+				explode(' ', $form->getFieldAttribute($fieldname, 'gridlabel'))
+			);
 		}
 
-		if (!empty((string) $form->getFieldAttribute($fieldname, 'gridfield')))
+		if (!empty($form->getFieldAttribute($fieldname, 'gridfield')))
 		{
-			$gridfield[] = (string) $form->getFieldAttribute($fieldname, 'gridfield');
+			$grid['field']['field'] = array_flip(
+				explode(' ', $form->getFieldAttribute($fieldname, 'gridfield'))
+			);
 		}
+
+		$gridgroup = array_keys(array_merge($grid['group']['frwk'], $grid['group']['field']));
+		$gridlabel = array_keys(array_merge($grid['label']['frwk'], $grid['label']['field']));
+		$gridfield = array_keys(array_merge($grid['field']['frwk'], $grid['field']['field']));
 
 		$form->setFieldAttribute($fieldname, 'gridgroup', implode(' ', $gridgroup));
 		$form->setFieldAttribute($fieldname, 'gridlabel', implode(' ', $gridlabel));

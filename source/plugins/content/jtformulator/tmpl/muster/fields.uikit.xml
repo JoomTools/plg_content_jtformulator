@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<form class="uk-form-horizontal">
 <!--
-<form class="form-horizontal"
-      gridlabel="col-sm-3"
-      gridfield="col-sm-9"
->
--->
 <form>
+-->
 	<fieldset>
 		<field name="list"
 		       type="list"
@@ -20,12 +18,12 @@
 			<option value="JTF_OPTION1">JTF_OPTION1</option>
 			<option value="JTF_OPTION2">JTF_OPTION2</option>
 		</field>
-		<field name="checkbox"
+		<field name="checkboxes"
 		       type="checkboxes"
 		       description="JTF_CHK_DESC"
 		       label="JTF_CHK_LABEL"
 		       validate="options"
-		       optionlabel="uk-display-block"
+		       optionlabelclass="uk-display-block"
 		>
 			<option value="JTF_OPTION1">JTF_OPTION1</option>
 			<option value="JTF_OPTION2">JTF_OPTION2</option>
@@ -47,7 +45,7 @@
 		       label="JTF_RADIO_LABEL"
 		       default="JTF_OPTION1"
 		       validate="options"
-		       optionlabel="uk-display-block"
+		       optionlabelclass="uk-display-block"
 		>
 			<option value="JTF_OPTION1">JTF_OPTION1</option>
 			<option value="JTF_OPTION2">JTF_OPTION2</option>
@@ -70,24 +68,24 @@
 		       validate="options"
 		       notmail="1"
 		>
-			<option value="0">JON</option>
-			<option value="1">JOFF</option>
+			<option value="1">JON</option>
+			<option value="0">JOFF</option>
 		</field>
-		<field name="vorname"
+		<field name="showon_text"
 		       type="text"
-		       icon="uk-icon-user"
+		       icon="uk-icon-pencil"
 		       maxlength="30"
-		       description="JTF_VNAME_DESC"
-		       label="JTF_VNAME_LABEL"
+		       description="JTF_SHW_TXT_DESC"
+		       label="JTF_SHW_TXT_LABEL"
 		       required="true"
-		       showon="active_vn:1"
+		       showon="showon_switch:1"
 		/>
-		<field name="nachname"
+		<field name="text"
 		       type="text"
-		       icon="uk-icon-user"
+		       icon="uk-icon-pencil"
 		       maxlength="30"
-		       description="JTF_NAME_DESC"
-		       label="JTF_NAME_LABEL"
+		       description="JTF_TXT_DESC"
+		       label="JTF_TXT_LABEL"
 		       required="true"
 		/>
 		<field name="email"
@@ -101,28 +99,69 @@
 		/>
 		<field name="tel"
 		       type="tel"
-		       icon="uk-icon-headphones"
+		       icon="uk-icon-phone"
 		       maxlength="30"
 		       description="JTF_TEL_DESC"
 		       label="JTF_TEL_LABEL"
 		       validate="tel"
+		       required="true"
+		/>
+		<field name="plz"
+		       type="plz"
+		       icon="uk-icon-map-marker"
+		       maxlength="30"
+		       description="JTF_PLZ_DESC"
+		       label="JTF_PLZ_LABEL"
+		       validate="plz"
+		       required="true"
 		/>
 		<field name="subject"
 		       type="text"
-		       icon="uk-icon-info-sign"
+		       icon="uk-icon-info"
 		       maxlength="30"
 		       description="JTF_SUBJECT_DESC"
 		       label="JTF_SUBJECT_LABEL"
-		       required="true"
 		/>
-		<field name="message"
+		<field name="textarea"
 		       type="textarea"
-		       icon="uk-icon-pencil"
 		       cols="25"
 		       rows="10"
 		       description="JTF_MESSAGE_DESC"
 		       label="JTF_MESSAGE_LABEL"
 		       required="true"
 		/>
+		<field name="calendar"
+		       type="calendar"
+		       default="NOW"
+		       description="JTF_CAL_DESC"
+		       label="JTF_CAL_LABEL"
+		       format="%d.%m.%Y %H:%I:%S"
+		/>
+		<field name="color_simple"
+		       type="color"
+		       control="simple"
+		       colors="none, #049cdb, #46a546, #9d261d, #eeeeee, #ffc40d, #f89406, #c3325f, #7a43b6, #ffffff, #999999, #555555, #000000"
+		       split="4"
+		       description="JTF_COLOR_SIMPLE_DESC"
+		       label="JTF_COLOR_SIMPLE_LABEL"
+		/>
+		<field name="color"
+		       type="color"
+		       default="#eee"
+		       description="JTF_COLOR_DESC"
+		       label="JTF_COLOR_LABEL"
+		/>
+		<field name="tinymce"
+		       type="editor"
+		       description="JTF_EDITOR_TINYMCE_DESC"
+		       label="JTF_EDITOR_TINYMCE_LABEL"
+		       width="300"
+		       editor="tinymce"
+		       filter="safehtml"
+		/>
+		<field name="myeditbox" type="combo" label="MyEditBox" description="myeditbox_Desc" size="7">
+			<option value="1">Option 1</option>
+			<option value="2">Option 2</option>
+		</field>
 	</fieldset>
 </form>

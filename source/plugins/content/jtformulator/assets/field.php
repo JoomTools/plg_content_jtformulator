@@ -362,12 +362,12 @@ abstract class JFormField
 	protected $gridfield;
 
 	/**
-	 * The value of the optionclabel field.
+	 * The value of the optionlabelclass field.
 	 *
 	 * @var    string
 	 * @since  3.5
 	 */
-	protected $optionlabel;
+	protected $optionlabelclass;
 
 	/**
 	 * The value of the optionclass field.
@@ -384,6 +384,22 @@ abstract class JFormField
 	 * @since  3.5
 	 */
 	protected $icon;
+
+	/**
+	 * The value of the icon field.
+	 *
+	 * @var    string
+	 * @since  3.5
+	 */
+	protected $buttonclass;
+
+	/**
+	 * The value of the icon field.
+	 *
+	 * @var    string
+	 * @since  3.5
+	 */
+	protected $buttonicon;
 
 
 	/**
@@ -449,7 +465,7 @@ abstract class JFormField
 			case 'onchange':
 			case 'onclick':
 			case 'optionclass':
-			case 'optionlabel':
+			case 'optionlabelclass':
 			case 'fieldname':
 			case 'group':
 			case 'disabled':
@@ -462,6 +478,8 @@ abstract class JFormField
 			case 'gridlabel':
 			case 'gridfield':
 			case 'icon':
+			case 'buttonclass':
+			case 'buttonicon':
 				return $this->$name;
 
 			case 'input':
@@ -515,7 +533,7 @@ abstract class JFormField
 			case 'onchange':
 			case 'onclick':
 			case 'optionclass':
-			case 'optionlabel':
+			case 'optionlabelclass':
 			case 'validate':
 			case 'pattern':
 			case 'group':
@@ -525,6 +543,8 @@ abstract class JFormField
 			case 'gridlabel':
 			case 'gridfield':
 			case 'icon':
+			case 'buttonclass':
+			case 'buttonicon':
 				$this->$name = (string) $value;
 				break;
 
@@ -646,7 +666,7 @@ abstract class JFormField
 		$attributes = array(
 			'multiple', 'name', 'id', 'hint', 'class', 'description', 'labelclass', 'onchange', 'onclick', 'validate', 'pattern', 'default',
 			'required', 'disabled', 'readonly', 'autofocus', 'hidden', 'autocomplete', 'spellcheck', 'translateHint', 'translateLabel',
-			'translate_label', 'translateDescription', 'translate_description', 'size', 'showon', 'icon', 'gridgroup', 'gridlabel', 'gridfield', 'optionclass', 'optionlabel');
+			'translate_label', 'translateDescription', 'translate_description', 'size', 'showon', 'icon', 'buttonclass', 'buttonicon', 'gridgroup', 'gridlabel', 'gridfield', 'optionclass', 'optionlabelclass');
 
 		$this->default = isset($element['value']) ? (string) $element['value'] : $this->default;
 
@@ -1020,12 +1040,14 @@ abstract class JFormField
 			$options['showonEnabled'] = true;
 		}
 
-		$options['gridgroup'] = $this->getAttribute('gridgroup');
-		$options['gridlabel'] = $this->getAttribute('gridlabel');
-		$options['gridfield'] = $this->getAttribute('gridfield');
-		$options['optionlabel'] = $this->getAttribute('optionlabel');
-		$options['optionclass'] = $this->getAttribute('optionclass');
-		$options['icon'] = $this->getAttribute('icon');
+		$options['icon']             = $this->getAttribute('icon');
+		$options['buttonclass']      = $this->getAttribute('buttonclass');
+		$options['buttonicon']       = $this->getAttribute('buttonicon');
+		$options['gridgroup']        = $this->getAttribute('gridgroup');
+		$options['gridlabel']        = $this->getAttribute('gridlabel');
+		$options['gridfield']        = $this->getAttribute('gridfield');
+		$options['optionlabelclass'] = $this->getAttribute('optionlabelclass');
+		$options['optionclass']      = $this->getAttribute('optionclass');
 
 		$data = array(
 			'input'   => $this->getInput(),
@@ -1056,36 +1078,38 @@ abstract class JFormField
 		$alt = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $this->fieldname);
 
 		return array(
-			'autocomplete' => $this->autocomplete,
-			'autofocus'    => $this->autofocus,
-			'class'        => $this->class,
-			'description'  => $description,
-			'disabled'     => $this->disabled,
-			'field'        => $this,
-			'gridgroup'    => $this->gridgroup,
-			'gridlabel'    => $this->gridlabel,
-			'gridfield'    => $this->gridfield,
-			'group'        => $this->group,
-			'hidden'       => $this->hidden,
-			'hint'         => $this->translateHint ? JText::alt($this->hint, $alt) : $this->hint,
-			'icon'         => $this->icon,
-			'id'           => $this->id,
-			'label'        => $label,
-			'labelclass'   => $this->labelclass,
-			'multiple'     => $this->multiple,
-			'name'         => $this->name,
-			'onchange'     => $this->onchange,
-			'onclick'      => $this->onclick,
-			'optionlabel'  => $this->optionlabel,
-			'optionclass'  => $this->optionclass,
-			'pattern'      => $this->pattern,
-			'readonly'     => $this->readonly,
-			'repeat'       => $this->repeat,
-			'required'     => (bool) $this->required,
-			'size'         => $this->size,
-			'spellcheck'   => $this->spellcheck,
-			'validate'     => $this->validate,
-			'value'        => $this->value,
+			'autocomplete'     => $this->autocomplete,
+			'autofocus'        => $this->autofocus,
+			'class'            => $this->class,
+			'description'      => $description,
+			'disabled'         => $this->disabled,
+			'field'            => $this,
+			'gridgroup'        => $this->gridgroup,
+			'gridlabel'        => $this->gridlabel,
+			'gridfield'        => $this->gridfield,
+			'group'            => $this->group,
+			'hidden'           => $this->hidden,
+			'hint'             => $this->translateHint ? JText::alt($this->hint, $alt) : $this->hint,
+			'icon'             => $this->icon,
+			'buttonclass'      => $this->buttonclass,
+			'buttonicon'       => $this->buttonicon,
+			'id'               => $this->id,
+			'label'            => $label,
+			'labelclass'       => $this->labelclass,
+			'multiple'         => $this->multiple,
+			'name'             => $this->name,
+			'onchange'         => $this->onchange,
+			'onclick'          => $this->onclick,
+			'optionlabelclass' => $this->optionlabelclass,
+			'optionclass'      => $this->optionclass,
+			'pattern'          => $this->pattern,
+			'readonly'         => $this->readonly,
+			'repeat'           => $this->repeat,
+			'required'         => (bool) $this->required,
+			'size'             => $this->size,
+			'spellcheck'       => $this->spellcheck,
+			'validate'         => $this->validate,
+			'value'            => $this->value,
 		);
 	}
 
