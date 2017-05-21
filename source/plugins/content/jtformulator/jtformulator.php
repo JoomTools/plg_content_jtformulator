@@ -480,51 +480,32 @@ class plgContentJtformulator extends JPlugin
 
 	protected function setFrameworkFieldClass()
 	{
-		$form      = $this->getForm();
-		$classes   = array();
-		$formclass = explode(' ', $form->getAttribute('class', array()));
-		$framework = null;
+		$form          = $this->getForm();
+		$formclass     = explode(' ', $form->getAttribute('class', ''));
+		$path = dirname(__FILE__);
+		$framework = 'joomla';
 
 		if (!empty($form->framework[0]))
 		{
 			$framework = $form->framework[0];
 		}
 
-		if (empty($framework))
+		if (file_exists($path . '/assets/frameworks/' . $framework . '.php'))
 		{
-			$classes['class']['default'][]   = 'input';
+			include $path . '/assets/frameworks/' . $framework . '.php';
+		}
+		else
+		{
+			include $path . '/assets/frameworks/joomla.php';
+			$framework = 'joomla';
+		}
 
-			if (!in_array('form-inline', $formclass))
-			{
-				$classes['class']['gridgroup'][] = 'control-group';
-				$classes['class']['gridlabel'][] = 'control-label';
-				$classes['class']['gridfield'][] = 'controls';
-			}
+		$frwkClassName = 'JTFFramework' . ucfirst($framework);
+		$frwkClasses = new $frwkClassName($formclass);
+		$classes = $frwkClasses->getClasses();
 
-			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array('checkbox');
-
-			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array(
-				'checkboxes',
-				'optionlabelclass' => array('checkbox'),
-				'optionclass' => array()
-			);
-
-			$classes['type'][]  = 'radio';
-			$classes['class'][] = array(
-				'optionlabelclass' => array('radio'),
-				'optionclass' => array()
-			);
-
-			$classes['type'][]  = 'textarea';
-			$classes['class'][] = array();
-
-			$classes['type'][]  = 'list';
-			$classes['class'][] = array();
-
-			$classes['type'][]  = 'submit';
-			$classes['class'][] = array('btn', 'btn-default');
+		if ($framework == 'joomla')
+		{
 		}
 
 		if ($framework == 'bs3')
@@ -587,116 +568,6 @@ class plgContentJtformulator extends JPlugin
 			$classes['class'][] = array('btn', 'btn-default');
 		}
 
-		if ($framework == 'uikit')
-		{
-			$classes['class']['default'][]   = 'uk-input';
-
-			if (!in_array('uk-form-stacked', $formclass))
-			{
-				$classes['class']['gridgroup'][] = 'uk-form-row';
-				$classes['class']['gridlabel'][] = 'uk-form-label';
-				$classes['class']['gridfield'][] = 'uk-form-controls';
-			}
-
-			$classes['type'][]  = 'calendar';
-			$classes['class'][] = array(
-//				'field'   => array(),
-//				'options' => array(),
-				'buttons' => array(
-					'class' => 'uk-button uk-button-small',
-					'icon'  => 'uk-icon-calendar',
-				),
-			);
-
-			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array(
-//				'field' => array(),
-//				'options' => array(),
-//				'buttons' => array(),
-			);
-
-			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array(
-				'field' => array('checkboxes'),
-				'options' => array(
-//					'labelclass' => array(),
-					'class' => array('uk-checkbox'),
-				),
-//				'buttons' => array(),
-			);
-
-			$classes['type'][]  = 'radio';
-			$classes['class'][] = array(
-//				'field' => array(),
-				'options' => array(
-//					'labelclass' => array(),
-					'class' => array('uk-radio'),
-				),
-//				'buttons' => array(),
-			);
-
-			$classes['type'][]  = 'textarea';
-			$classes['class'][] = array(
-				'field' => array('uk-textarea'),
-			);
-
-			$classes['type'][]  = 'list';
-			$classes['class'][] = array(
-				'field' => array('uk-select'),
-			);
-
-			$classes['type'][]  = 'submit';
-			$classes['class'][] = array(
-				'buttons' => array(
-					'class' => 'uk-button uk-button-default',
-					'icon'  => 'uk-icon-calendar',
-				),
-			);
-		}
-
-		if ($framework == 'uikit3')
-		{
-			$classes['class']['default'][]   = 'uk-input';
-
-			if (!in_array('form-inline', $formclass))
-			{
-				$classes['class']['gridgroup'][] = 'uk-margin';
-				$classes['class']['gridlabel'][] = 'uk-form-label';
-				$classes['class']['gridfield'][] = 'uk-form-controls';
-			}
-
-			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array();
-
-			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array(
-				'field' => array(),
-				'optionclass' => array('uk-checkbox')
-			);
-
-			$classes['type'][]  = 'radio';
-			$classes['class'][] = array(
-				'field' => array(),
-				'optionclass' => array('uk-radio')
-			);
-
-			$classes['type'][]  = 'textarea';
-			$classes['class'][] = array(
-				'field' => array('uk-textarea'),
-				);
-
-			$classes['type'][]  = 'list';
-			$classes['class'][] = array(
-				'field' => array('uk-select'),
-			);
-
-			$classes['type'][]  = 'submit';
-			$classes['class'][] = array(
-				'field' => array(),
-			);
-			$classes['class'][] = array('btn', 'btn-default');
-		}
-
 		if (!empty($form->getAttribute('gridlabel')))
 		{
 			$classes['class']['gridlabel'][] = $form->getAttribute('gridlabel');
@@ -720,7 +591,7 @@ class plgContentJtformulator extends JPlugin
 		$form  = $this->getform();
 		$field = $form->getField($fieldname);
 		$type  = strtolower($field->getAttribute('type'));
-		$key   = array_search($type, $frwkClasses['type'], true);
+//		$key   = array_search($type, $frwkClasses['type'], true);
 		$classes = array(
 			'frwkDefaultClass' => array(),
 			'frwkFieldClass'   => array(),
@@ -735,13 +606,13 @@ class plgContentJtformulator extends JPlugin
 			}
 		}
 
-		if ($key !== false)
-		{
-			if (!empty($frwkClasses['class'][$key]['field']))
+//		if ($key !== false)
+//		{
+			if (!empty($frwkClasses['class'][$type]['field']))
 			{
-				$classes['frwkFieldClass'] = array_flip($frwkClasses['class'][$key]['field']);
+				$classes['frwkFieldClass'] = array_flip($frwkClasses['class'][$type]['field']);
 			}
-		}
+//		}
 
 		if (!empty($form->getFieldAttribute($fieldname, 'class')))
 		{
@@ -758,16 +629,16 @@ class plgContentJtformulator extends JPlugin
 
 		if (in_array($type, array('checkboxes', 'radio')))
 		{
-			$field->setOptionsClass($frwkClasses['class'][$key]['options']);
+			$field->setOptionsClass($frwkClasses['class'][$type]['options']);
 		}
 
 		if (in_array($type, array('submit', 'calendar', 'color')))
 		{
 			$buttonicon  = null;
 
-			if (!empty($frwkClasses['class'][$key]['buttons']['icon']))
+			if (!empty($frwkClasses['class'][$type]['buttons']['icon']))
 			{
-				$buttonicon = $frwkClasses['class'][$key]['buttons']['icon'];
+				$buttonicon = $frwkClasses['class'][$type]['buttons']['icon'];
 			}
 
 			if (!empty($form->getFieldAttribute($fieldname, 'icon')))
@@ -788,9 +659,9 @@ class plgContentJtformulator extends JPlugin
 
 			$buttonclass = null;
 
-			if (!empty($frwkClasses['class'][$key]['buttons']['class']))
+			if (!empty($frwkClasses['class'][$type]['buttons']['class']))
 			{
-				$buttonclass = $frwkClasses['class'][$key]['buttons']['class'];
+				$buttonclass = $frwkClasses['class'][$type]['buttons']['class'];
 			}
 
 			if ($type == 'submit' && !empty($classes['fieldClass']))
@@ -1247,13 +1118,10 @@ class plgContentJtformulator extends JPlugin
 
 		if ($this->mail)
 		{
-
 			foreach ($this->mail as $key => $field)
 			{
-
 				if (is_array($field))
 				{
-
 					foreach ($field as $value)
 					{
 						$_field[] = isset($data[$value]) ? $data[$value] : $value;
@@ -1270,7 +1138,6 @@ class plgContentJtformulator extends JPlugin
 
 				$mail[$key] = $field;
 			}
-
 		}
 
 		$replayToEmail = !empty($mail['sender_email'])
@@ -1312,7 +1179,7 @@ class plgContentJtformulator extends JPlugin
 	/**
 	 * Set captcha to submit fieldset or remove it, if is set off global
 	 *
-	 * @param    mixed   $captcha   Fieldname of captcha
+	 * @param   mixed  $captcha  Fieldname of captcha
 	 *
 	 * @return   void
 	 * @since    3.0
@@ -1376,7 +1243,7 @@ class plgContentJtformulator extends JPlugin
 	{
 		$form = $this->getForm();
 
-	// Set submit button to submit fieldset
+		// Set submit button to submit fieldset
 		if (!empty($submit))
 		{
 			if (empty($submit['submit']))
@@ -1396,7 +1263,7 @@ class plgContentJtformulator extends JPlugin
 		}
 		else
 		{
-			$cField = new SimpleXMLElement('<field name="submit" type="submit" label="JSUBMIT" notmail="1"></field>');
+			$cField = new SimpleXMLElement('<field name="submit" type="submit" label="JTF_SUBMIT_BUTTON" notmail="1"></field>');
 			$form->setField($cField, null, true, 'submit');
 		}
 	}

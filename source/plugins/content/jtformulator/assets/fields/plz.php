@@ -62,8 +62,7 @@ class JFormFieldPlz extends JFormField
 		// Including fallback code for HTML5 non supported browsers.
 		JHtml::_('jquery.framework');
 		JHtml::_('script', 'system/html5fallback.js', false, true);
-
-		JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/plz.js');
+		JHtml::_('script', 'plugins/content/jtformulator/assets/js/plz.js', array('version' => 'auto'));
 
 		return '<input type="text" name="' . $this->name . '" id="' . $this->id . '"' . $dirname . ' value="'
 		. htmlspecialchars($this->value, ENT_COMPAT, 'UTF-8') . '"' . $class . $size . $disabled . $readonly

@@ -9,15 +9,10 @@
 
 defined('JPATH_PLATFORM') or die;
 
-JFormHelper::loadFieldClass('text');
-
 /**
  * Form Field class for the Joomla Platform.
- * Supports a text field telephone numbers.
+ * Supports a submit button.
  *
- * @link   http://www.w3.org/TR/html-markup/input.tel.html
- * @see    JFormRuleTel for telephone number validation
- * @see    JHtmlTel for rendering of telephone numbers
  * @since  11.1
  */
 class JFormFieldSubmit extends JFormField
@@ -48,28 +43,26 @@ class JFormFieldSubmit extends JFormField
 	 */
 	protected function getLabel()
 	{
-		if ($this->hidden)
+		$data = parent::getLayoutData();
+
+		if ($data['label'] == $this->fieldname)
 		{
-			return '';
+			$data['label'] = JText::_('JSUBMIT');
 		}
 
-		$data  = parent::getLayoutData();
-		$label = $data['label'] == $this->fieldname ? 'JSUBMIT' : $data['label'];
-
-		// Forcing the Alias field to display the tip below
-		$position = $this->element['name'] == 'alias' ? ' data-placement="bottom" ' : '';
-
 		// Here mainly for B/C with old layouts. This can be done in the layouts directly
-		$extraData = array(
-			'text'        => JText::_($label),
-			'for'         => $this->id,
+		$labelData = array(
+			'text'        => $data['label'],
+			'description' => null,
+			'for'         => $data['id'],
+			'required'    => false,
 			'classes'     => explode(' ', $data['labelclass']),
-			'position'    => $position,
+			'position'    => false,
 		);
 
-		$extraData['classes'][] = 'hidden';
+		$labelData['classes'][] = 'hidden';
 
-		return $this->getRenderer($this->renderLabelLayout)->render(array_merge($data, $extraData));
+		return $this->getRenderer($this->renderLabelLayout)->render($labelData);
 	}
 
 	/**
@@ -81,8 +74,12 @@ class JFormFieldSubmit extends JFormField
 	 */
 	protected function getInput()
 	{
-		// Trim the trailing line in the layout file
-		return rtrim($this->getRenderer($this->layout)->render($this->getLayoutData()), PHP_EOL);
+		if (empty($this->layout))
+		{
+			throw new UnexpectedValueException(sprintf('%s has no layout assigned.', $this->name));
+		}
+
+		return $this->getRenderer($this->layout)->render($this->getLayoutData());
 	}
 
 	/**
@@ -96,13 +93,11 @@ class JFormFieldSubmit extends JFormField
 	{
 		$data = parent::getLayoutData();
 
-		// Initialize some field attributes.
-		$label    = $data['label'] == $this->fieldname ? 'JSUBMIT' : $data['label'];
+		if ($data['label'] == $this->fieldname)
+		{
+			$data['label'] = JText::_('JSUBMIT');
+		}
 
-		$extraData = array(
-			'label' => JText::_($label),
-		);
-
-		return array_merge($data, $extraData);
+		return $data;
 	}
 }
