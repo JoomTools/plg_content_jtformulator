@@ -136,6 +136,7 @@
 		       description="JTF_CAL_DESC"
 		       label="JTF_CAL_LABEL"
 		       format="%d.%m.%Y %H:%I:%S"
+		       showtime="false"
 		/>
 		<field name="color_simple"
 		       type="color"
@@ -159,9 +160,20 @@
 		       editor="tinymce"
 		       filter="safehtml"
 		/>
-		<field name="myeditbox" type="combo" label="MyEditBox" description="myeditbox_Desc" size="7">
+		<field name="combobox"
+		       type="combo"
+		       description="JTF_COMBO_DESC"
+		       label="JTF_COMBO_LABEL"
+		       size="7"
+		>
 			<option value="1">Option 1</option>
 			<option value="2">Option 2</option>
 		</field>
+		<field name="category_com_content"
+		       type="category"
+		       extension="com_content"
+		       description="JTF_CATEGORY_DESC"
+		       label="JTF_CATEGORY_LABEL"
+		/>
 	</fieldset>
 </form>

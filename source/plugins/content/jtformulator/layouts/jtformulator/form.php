@@ -14,9 +14,9 @@ extract($displayData);
 $formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAttribute('class') : '';
 
 JHtml::_('behavior.keepalive');
-JHtml::_('behavior.formvalidation');
+JHtml::_('behavior.formvalidator');
 $invalisColor = '#ff0000';
-$invalidStylesheet =".invalid{border-color:{$invalisColor}!important;color:{$invalisColor}!important;}label.invalid{color:{$invalisColor}!important;}";
+$invalidStylesheet =".inline{display:inline-block!important;}.hidden{display:none!important;}.invalid{border-color:{$invalisColor}!important;color:{$invalisColor}!important;}label.invalid{color:{$invalisColor}!important;}";
 JFactory::getDocument()->addStyleDeclaration($invalidStylesheet);
 ?>
 <div class="contact-form">
@@ -64,3 +64,20 @@ JFactory::getDocument()->addStyleDeclaration($invalidStylesheet);
 
     </form>
 </div>
+<script type="text/javascript">
+
+	jQuery(document).ready(function($){
+		$("body").on('DOMSubtreeModified', "#system-message-container", function() {
+			var error = $(this).find('alert-error');
+			if (undefined !== error) {
+				var $invalid = jQuery('.invalid').get(0);
+				console.log($invalid);
+				if (undefined !== $invalid) {
+					$invalid.focus();
+				}
+			}
+		});
+	});
+
+
+</script>

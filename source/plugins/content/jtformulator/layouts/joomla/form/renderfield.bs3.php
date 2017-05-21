@@ -24,7 +24,7 @@ if (!empty($options['showonEnabled']))
 {
 	JHtml::_('jquery.framework');
 	JHtml::_('script', 'jui/cms.js', array('version' => 'auto', 'relative' => true));
-	JHtml::_('script', 'plugins/content/jtformulator/assets/js/showon.js', array('version' => 'auto', 'relative' => false));
+	JHtml::_('script', 'plugins/content/jtformulator/assets/js/showon.js', array('version' => 'auto'));
 }
 
 $container   = array();
