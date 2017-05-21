@@ -502,19 +502,33 @@ class plgContentJtformulator extends JPlugin
 			}
 
 			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array('checkbox');
+			$classes['class'][] = array(
+				'field' => array('checkbox')
+			);
 
 			$classes['type'][]  = 'checkboxes';
 			$classes['class'][] = array(
-				'checkboxes',
-				'optionlabelclass' => array('checkbox'),
-				'optionclass' => array()
+//				'field' => array('checkboxes'),
+				'options' => array(
+					'labelclass' => array('checkbox'),
+				),
+//				'buttons' => array(),
+			);
+
+			$classes['type'][]  = 'calendar';
+			$classes['class'][] = array(
+				'buttons' => array(
+					'class' => 'btn btn-default',
+					'icon'  => 'icon-calendar',
+				),
 			);
 
 			$classes['type'][]  = 'radio';
 			$classes['class'][] = array(
-				'optionlabelclass' => array('radio'),
-				'optionclass' => array()
+//				'field' => array('radio'),
+				'options' => array(
+					'labelclass' => array('radio'),
+				),
 			);
 
 			$classes['type'][]  = 'textarea';
@@ -758,7 +772,10 @@ class plgContentJtformulator extends JPlugin
 
 		if (in_array($type, array('checkboxes', 'radio')))
 		{
-			$field->setOptionsClass($frwkClasses['class'][$key]['options']);
+			if (!empty($frwkClasses['class'][$key]['options']))
+			{
+				$field->setOptionsClass($frwkClasses['class'][$key]['options']);
+			}
 		}
 
 		if (in_array($type, array('submit', 'calendar', 'color')))
