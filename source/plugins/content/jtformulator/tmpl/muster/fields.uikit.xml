@@ -175,5 +175,15 @@
 		       description="JTF_CATEGORY_DESC"
 		       label="JTF_CATEGORY_LABEL"
 		/>
+		<field name="file"
+		       type="file"
+		       description="JTF_FILE_DESC"
+		       label="JTF_FILE_LABEL"
+		       required="true"
+		       validate="file"
+		       accept=".zip,.pdf,image/*"
+		       multiple="multiple"
+		       uploadmaxsize="1"
+		/>
 	</fieldset>
 </form>

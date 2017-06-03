@@ -1,12 +1,12 @@
 <?php
 /**
- * @package     Joomla.Plugin
- * @subpackage  Content.jtformulator
+ * @package         Joomla.Plugin
+ * @subpackage      Content.jtformulator
  *
- * @author      Guido De Gobbis
+ * @author          Guido De Gobbis
  * @copyright   (c) 2017 JoomTools.de - All rights reserved.
- * @license     GNU General Public License version 3 or later
-**/
+ * @license         GNU General Public License version 3 or later
+ **/
 
 defined('JPATH_PLATFORM') or die;
 
@@ -50,7 +50,7 @@ class JFormRuleFile extends JFormRule
 		{
 			return true;
 		}
-		
+
 		$acceptFileType = array();
 		$acceptFileMime = array();
 		$accept         = explode(',', (string) $element['accept']);
@@ -73,6 +73,7 @@ class JFormRuleFile extends JFormRule
 		foreach ($value as $file)
 		{
 			$test = false;
+
 			if ($allowedMime)
 			{
 				$test = preg_match('@^(' . $allowedMime . ')$@i', $file['type']);
