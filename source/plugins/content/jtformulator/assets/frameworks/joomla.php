@@ -79,6 +79,13 @@ class JTFFrameworkJoomla
 			),
 		);
 
+		$classes['class']['file'] = array(
+			'buttons' => array(
+				'class' => 'btn btn-success',
+				'icon'  => 'icon-copy',
+			),
+		);
+
 		$classes['class']['submit'] = array(
 			'buttons' => array(
 				'class' => 'btn',

@@ -45,6 +45,14 @@ class plgContentJtformulator extends JPlugin
 	protected $validCaptcha = true;
 
 	/**
+	 * Set enctype in form field if a file field is set
+	 *
+	 * @var     boolean
+	 * @since   1.0
+	 */
+	protected $setEnctype = false;
+
+	/**
 	 * JFormField validation
 	 *
 	 * @var     boolean
@@ -111,10 +119,10 @@ class plgContentJtformulator extends JPlugin
 	/**
 	 * Plugin to generates Forms within content
 	 *
-	 * @param    string    $context The context of the content being passed to the plugin.
-	 * @param    object    &article  The article object.  Note $article->text is also available
-	 * @param    mixed     &$params The article params
-	 * @param    integer   $page    The 'page' number
+	 * @param   string   $context  The context of the content being passed to the plugin.
+	 * @param   object   $article  The article object.  Note $article->text is also available
+	 * @param   mixed    $params   The article params
+	 * @param   integer  $page     The 'page' number
 	 *
 	 * @return   void
 	 * @since    1.6
@@ -132,8 +140,6 @@ class plgContentJtformulator extends JPlugin
 			return;
 		}
 
-		$msg         = '';
-		$error_msg   = '';
 		$this->debug = (boolean) $this->params->get('debug', 0);
 		$cIndex      = 0;
 		$template    = $app->getTemplate();
@@ -190,7 +196,6 @@ class plgContentJtformulator extends JPlugin
 					)
 				);
 
-				//$lang->load('JTF_theme', $formLang);
 				$lang->load('jtf_theme', $formLang);
 
 				$form = new JForm($formTheme, array('control' => $formTheme));
@@ -591,12 +596,16 @@ class plgContentJtformulator extends JPlugin
 		$form  = $this->getform();
 		$field = $form->getField($fieldname);
 		$type  = strtolower($field->getAttribute('type'));
-//		$key   = array_search($type, $frwkClasses['type'], true);
 		$classes = array(
 			'frwkDefaultClass' => array(),
 			'frwkFieldClass'   => array(),
 			'fieldClass'       => array(),
 		);
+
+		if (in_array($type, array('file')))
+		{
+			$this->setEnctype = true;
+		}
 
 		if (in_array($type, array('text', 'plz', 'tel')))
 		{
@@ -606,13 +615,10 @@ class plgContentJtformulator extends JPlugin
 			}
 		}
 
-//		if ($key !== false)
-//		{
-			if (!empty($frwkClasses['class'][$type]['field']))
-			{
-				$classes['frwkFieldClass'] = array_flip($frwkClasses['class'][$type]['field']);
-			}
-//		}
+		if (!empty($frwkClasses['class'][$type]['field']))
+		{
+			$classes['frwkFieldClass'] = array_flip($frwkClasses['class'][$type]['field']);
+		}
 
 		if (!empty($form->getFieldAttribute($fieldname, 'class')))
 		{
@@ -632,7 +638,7 @@ class plgContentJtformulator extends JPlugin
 			$field->setOptionsClass($frwkClasses['class'][$type]['options']);
 		}
 
-		if (in_array($type, array('submit', 'calendar', 'color')))
+		if (in_array($type, array('submit', 'calendar', 'color', 'file')))
 		{
 			$buttonicon  = null;
 
@@ -855,6 +861,7 @@ class plgContentJtformulator extends JPlugin
 				for ($i = 0; $i < $oCount; $i++)
 				{
 					$_val = (string) $oField->option[$i]->attributes()->value;
+
 					if ($_val)
 					{
 						if (is_array($value))
@@ -1078,15 +1085,22 @@ class plgContentJtformulator extends JPlugin
 
 	protected function getTmpl($filename)
 	{
-		$index = $this->uParams['index'];
-		$id    = $this->uParams['theme'];
-		$form  = $this->getForm();
+		$index   = $this->uParams['index'];
+		$id      = $this->uParams['theme'];
+		$form    = $this->getForm();
+		$enctype = '';
+
+		if ($this->setEnctype)
+		{
+			$enctype = ' enctype="multipart/form-data"';
+		}
 
 		$displayData = array(
 			'id'        => $id,
 			'index'     => (int) $index,
 			'fileClear' => $this->params->get('file_clear'),
-			'form'      => $form
+			'form'      => $form,
+			'enctype'   => $enctype,
 		);
 
 		$renderer = new JLayoutFile($filename);

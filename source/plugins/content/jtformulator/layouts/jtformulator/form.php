@@ -11,24 +11,48 @@
 defined('_JEXEC') or die;
 
 extract($displayData);
-$formClass = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAttribute('class') : '';
 
 JHtml::_('behavior.keepalive');
 JHtml::_('behavior.formvalidator');
-$invalisColor = '#ff0000';
-$invalidStylesheet =".inline{display:inline-block!important;}.hidden{display:none!important;}.invalid{border-color:{$invalisColor}!important;color:{$invalisColor}!important;}label.invalid{color:{$invalisColor}!important;}";
-JFactory::getDocument()->addStyleDeclaration($invalidStylesheet);
+
+$formClass    = !empty($form->getAttribute('class')) ? ' ' . (string) $form->getAttribute('class') : '';
+$invalidColor = '#ff0000';
+
+JFactory::getDocument()->addScriptDeclaration(
+<<<JS
+	jQuery(document).ready(function($){
+		$("body").on('DOMSubtreeModified', "#system-message-container", function() {
+			var error = $(this).find('alert-error');
+			if (undefined !== error) {
+				$('html, body').animate({
+						scrollTop: $(this).offset().top-100
+					}, 1000);
+			}
+		});
+	});
+JS
+);
+
+JFactory::getDocument()->addStyleDeclaration(
+<<<CSS
+	.invalid { 
+		border-color:{$invalidColor}!important;
+		color:{$invalidColor}!important;
+	}
+	label.invalid { color:{$invalidColor}!important; }
+	.inline { display:inline-block!important; }
+CSS
+);
 ?>
 <div class="contact-form">
-    <p><strong><?php echo JText::_('JTF_REQUIRED_FIELDS_LABEL'); ?></strong></p>
-    <form name="<?php echo $id . $index; ?>_form"
-          id="<?php echo $id . $index; ?>_form"
-          action="<?php echo JRoute::_("index.php"); ?>"
-          method="post"
-          class="form-validate<?php echo $formClass; ?>"
-          enctype="multipart/form-data">
+	<p><strong><?php echo JText::_('JTF_REQUIRED_FIELDS_LABEL'); ?></strong></p>
+	<form name="<?php echo $id . $index; ?>_form"
+		  id="<?php echo $id . $index; ?>_form"
+		  action="<?php echo JRoute::_("index.php"); ?>"
+		  method="post"
+		  class="form-validate<?php echo $formClass; ?>"
+		<?php echo $enctype ?>>
 		<?php
-
 		$fieldsets = $form->getXML();
 
 		foreach ($fieldsets->fieldset as $fieldset) :
@@ -40,44 +64,27 @@ JFactory::getDocument()->addStyleDeclaration($invalidStylesheet);
 				: '';
 			?>
 
-            <fieldset<?php echo $fieldsetClass; ?>>
+			<fieldset<?php echo $fieldsetClass; ?>>
 				<?php if (!empty($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
-                    <legend><?php echo $legend; ?></legend>
+					<legend><?php echo $legend; ?></legend>
 				<?php endif; ?>
 				<?php if (!empty($fieldsetDesc) && strlen($desc = trim(JText::_($fieldsetDesc)))) : ?>
-                    <p><?php echo $desc; ?></p>
+					<p><?php echo $desc; ?></p>
 				<?php endif; ?>
 				<?php foreach ($fieldset->field as $field)
 				{
 					echo $form->renderField((string) $field['name']);
 				}
 				?>
-            </fieldset>
+			</fieldset>
 		<?php endforeach; ?>
 
-        <input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>"/>
-        <input type="hidden" name="task" value="<?php echo $id . $index; ?>_sendmail"/>
-        <input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>"/>
-        <input type="hidden" name="itemid" value="<?php echo JFactory::getApplication()->input->get('idemid'); ?>"/>
-        <input type="hidden" name="id" value="<?php echo JFactory::getApplication()->input->get('id'); ?>"/>
+		<input type="hidden" name="option" value="<?php echo JFactory::getApplication()->input->get('option'); ?>" />
+		<input type="hidden" name="task" value="<?php echo $id . $index; ?>_sendmail" />
+		<input type="hidden" name="view" value="<?php echo JFactory::getApplication()->input->get('view'); ?>" />
+		<input type="hidden" name="itemid" value="<?php echo JFactory::getApplication()->input->get('idemid'); ?>" />
+		<input type="hidden" name="id" value="<?php echo JFactory::getApplication()->input->get('id'); ?>" />
 		<?php echo JHtml::_('form.token'); ?>
 
-    </form>
+	</form>
 </div>
-<script type="text/javascript">
-
-	jQuery(document).ready(function($){
-		$("body").on('DOMSubtreeModified', "#system-message-container", function() {
-			var error = $(this).find('alert-error');
-			if (undefined !== error) {
-				var $invalid = jQuery('.invalid').get(0);
-				console.log($invalid);
-				if (undefined !== $invalid) {
-					$invalid.focus();
-				}
-			}
-		});
-	});
-
-
-</script>

@@ -9,7 +9,7 @@
 	<fieldset>
 		<field name="list"
 		       type="list"
-		       icon="uk-icon-list"
+		       icon="icon-list"
 		       description="JTF_LIST_DESC"
 		       label="JTF_LIST_LABEL"
 		       default=""
@@ -75,7 +75,7 @@
 		</field>
 		<field name="showon_text"
 		       type="text"
-		       icon="uk-icon-pencil"
+		       icon="icon-pencil"
 		       maxlength="30"
 		       description="JTF_SHW_TXT_DESC"
 		       label="JTF_SHW_TXT_LABEL"
@@ -126,7 +126,7 @@
 		/>
 		<field name="textarea"
 		       type="textarea"
-		       cols="25"
+		       cols="30"
 		       rows="10"
 		       description="JTF_MESSAGE_DESC"
 		       label="JTF_MESSAGE_LABEL"
@@ -176,6 +176,16 @@
 		       extension="com_content"
 		       description="JTF_CATEGORY_DESC"
 		       label="JTF_CATEGORY_LABEL"
+		/>
+		<field name="file"
+		       type="file"
+		       description="JTF_FILE_DESC"
+		       label="JTF_FILE_LABEL"
+		       required="true"
+		       validate="file"
+		       accept=".zip,.pdf,image/*"
+		       multiple="multiple"
+		       uploadmaxsize="1"
 		/>
 	</fieldset>
 </form>

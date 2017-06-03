@@ -85,6 +85,13 @@ class JTFFrameworkUikit
 			'field' => array('uk-select'),
 		);
 
+		$classes['class']['file'] = array(
+			'buttons' => array(
+				'class' => 'uk-button uk-button-success',
+				'icon'  => 'uk-icon-copy',
+			),
+		);
+
 		$classes['class']['submit'] = array(
 			'buttons' => array(
 				'class' => 'uk-button uk-button-default',
