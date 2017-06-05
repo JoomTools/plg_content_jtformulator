@@ -41,6 +41,7 @@ defined('_JEXEC') or die('Restricted access');
 class JTFFrameworkUikit
 {
 	public static $name = 'UIKit v2';
+
 	private $classes;
 
 	public function __construct($formclass = array())
@@ -86,7 +87,8 @@ class JTFFrameworkUikit
 		);
 
 		$classes['class']['file'] = array(
-			'buttons' => array(
+			'uploadicon' => 'uk-icon-upload',
+			'buttons'    => array(
 				'class' => 'uk-button uk-button-success',
 				'icon'  => 'uk-icon-copy',
 			),

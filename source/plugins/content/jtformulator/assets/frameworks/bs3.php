@@ -38,8 +38,10 @@ defined('_JEXEC') or die('Restricted access');
  * @since 3.0
  **/
 
-class JTFFrameworkJoomla
+class JTFFrameworkBs3
 {
+	public static $name = 'Bootsrap v3';
+
 	private $classes;
 
 	public function __construct($formclass = array())
@@ -48,12 +50,12 @@ class JTFFrameworkJoomla
 		$inline = in_array('form-inline', $formclass);
 
 		$classes['class']['default'][]   = 'input';
-		$classes['class']['gridgroup'][] = 'control-group';
+		$classes['class']['gridgroup'][] = 'form-group';
 
 		if (!$inline)
 		{
 			$classes['class']['gridlabel'][] = 'control-label';
-			$classes['class']['gridfield'][] = 'controls';
+			$classes['class']['gridfield'][] = 'control-field';
 		}
 
 		$classes['class']['calendar'] = array(
