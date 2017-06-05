@@ -39,12 +39,14 @@ jQuery(document).ready(function($) {
 				uploadsize  = getFilesize(files);
 
 			for (var i = 0, f; f = files[i]; i++) {
+				//uploadsize += f.size;
 				output.push('<li><strong>', f.name, '</strong> (',
 					Math.round((f.size / 1024 / 1024) * 100) / 100, ' MB)</li>');
 			}
 
 			if (uploadsize > maxsize) {
-				uploadError = '<p>' + errorMessage + '</p>';
+				uploadError = '<p><strong>Upload: ' + Math.round((uploadsize / 1024 / 1024) * 100) / 100
+					+ ' MB</strong> - ' + errorMessage + '</p>';
 				setInvalid();
 				document.formvalidator.setHandler('file', function() {
 					return false;

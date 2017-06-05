@@ -84,7 +84,7 @@ JFactory::getDocument()->addStyleDeclaration(
 		color: #999;
 	}
 
-	.dragarea .uk-icon-upload {
+	.dragarea .upload-icon {
 		font-size: 48px;
 		width: auto;
 		height: auto;
@@ -99,7 +99,7 @@ JFactory::getDocument()->addStyleDeclaration(
 		background-color: #eee;
 	}
 
-	dragarea.hover #upload-icon,
+	dragarea.hover .upload-icon,
 	dragarea p.lead {
 		color: #666;
 	}
@@ -113,7 +113,7 @@ CSS
 	<div class="dragarea">
 		<div class="dragarea-content">
 			<p>
-				<span class="uk-icon-upload" aria-hidden="true"></span>
+				<span class="upload-icon <?php echo $uploadicon;?>" aria-hidden="true"></span>
 			</p>
 			<p class="lead">
 				<?php echo JText::_('JTF_DRAG_FILE_HERE'); ?>
@@ -135,10 +135,10 @@ CSS
 		<input type="file"
 			   name="<?php echo $name; ?>"
 			   id="<?php echo $id; ?>"
+			   class="validate-file<?php echo !empty($class) ? ' ' . $class : ''; ?>"
 			   maxlength="<?php echo $uploadmaxsize; ?>"
 			<?php echo !empty($size) ? ' size="' . $size . '"' : ''; ?>
 			<?php echo !empty($accept) ? ' accept="' . $accept . '"' : ''; ?>
-			<?php echo !empty($class) ? ' class="validate-file ' . $class . '"' : ' class="validate-file'; ?>
 			<?php echo !empty($multiple) ? ' multiple' : ''; ?>
 			<?php echo $disabled ? ' disabled' : ''; ?>
 			<?php echo $autofocus ? ' autofocus' : ''; ?>

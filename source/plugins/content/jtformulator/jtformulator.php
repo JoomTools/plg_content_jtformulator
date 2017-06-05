@@ -272,16 +272,20 @@ class plgContentJtformulator extends JPlugin
 
 				if ($task == $formTheme . "_sendmail")
 				{
-					$sendmail = $this->sendMail();
-					if ($valid && $sendmail)
-					{
-						$app->enqueueMessage(JText::_('JTF_EMAIL_THANKS'), 'message');
-						$app->redirect(JRoute::_('index.php', false));
-					}
-
 					if (!empty($submitValues['jtf_important_notices']))
 					{
 						$app->redirect(JRoute::_('index.php', false));
+					}
+
+					if ($valid)
+					{
+						$sendmail = $this->sendMail();
+
+						if ($sendmail)
+						{
+							$app->enqueueMessage(JText::_('JTF_EMAIL_THANKS'), 'message');
+							$app->redirect(JRoute::_('index.php', false));
+						}
 					}
 
 				}
@@ -509,70 +513,6 @@ class plgContentJtformulator extends JPlugin
 		$frwkClasses = new $frwkClassName($formclass);
 		$classes = $frwkClasses->getClasses();
 
-		if ($framework == 'joomla')
-		{
-		}
-
-		if ($framework == 'bs3')
-		{
-			$classes['class']['default'][]   = 'form-control';
-
-			if (!in_array('form-inline', $formclass))
-			{
-				$classes['class']['gridgroup'][] = 'form-group';
-				$classes['class']['gridlabel'][] = 'control-label';
-				$classes['class']['gridfield'][] = 'control-field';
-			}
-
-			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array('checkbox');
-
-			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array('checkbox', 'optionclass' => array());
-
-			$classes['type'][]  = 'radio';
-			$classes['class'][] = array('', 'optionclass' => array());
-
-			$classes['type'][]  = 'textarea';
-			$classes['class'][] = array();
-
-			$classes['type'][]  = 'list';
-			$classes['class'][] = array();
-
-			$classes['type'][]  = 'submit';
-			$classes['class'][] = array('btn', 'btn-default');
-		}
-
-		if ($framework == 'bs4')
-		{
-			$classes['class']['default'][]   = 'input';
-
-			if (!in_array('form-inline', $formclass))
-			{
-				$classes['class']['gridgroup'][] = 'control-group';
-				$classes['class']['gridlabel'][] = 'control-label';
-				$classes['class']['gridfield'][] = '';
-			}
-
-			$classes['type'][]  = 'checkbox';
-			$classes['class'][] = array('checkbox');
-
-			$classes['type'][]  = 'checkboxes';
-			$classes['class'][] = array('checkbox', 'optionclass' => array());
-
-			$classes['type'][]  = 'radio';
-			$classes['class'][] = array('radio', 'optionclass' => array());
-
-			$classes['type'][]  = 'textarea';
-			$classes['class'][] = array();
-
-			$classes['type'][]  = 'list';
-			$classes['class'][] = array();
-
-			$classes['type'][]  = 'submit';
-			$classes['class'][] = array('btn', 'btn-default');
-		}
-
 		if (!empty($form->getAttribute('gridlabel')))
 		{
 			$classes['class']['gridlabel'][] = $form->getAttribute('gridlabel');
@@ -640,7 +580,19 @@ class plgContentJtformulator extends JPlugin
 
 		if (in_array($type, array('submit', 'calendar', 'color', 'file')))
 		{
+			$uploadicon  = null;
 			$buttonicon  = null;
+			$buttonclass = null;
+
+			if (!empty($frwkClasses['class'][$type]['uploadicon']))
+			{
+				$uploadicon = $frwkClasses['class'][$type]['uploadicon'];
+			}
+
+			if (!empty($frwkClasses['class'][$type]['buttons']['class']))
+			{
+				$buttonclass = $frwkClasses['class'][$type]['buttons']['class'];
+			}
 
 			if (!empty($frwkClasses['class'][$type]['buttons']['icon']))
 			{
@@ -649,7 +601,19 @@ class plgContentJtformulator extends JPlugin
 
 			if (!empty($form->getFieldAttribute($fieldname, 'icon')))
 			{
-				$buttonicon = $form->getFieldAttribute($fieldname, 'icon');
+				if ($type == 'file')
+				{
+					$uploadicon = $form->getFieldAttribute($fieldname, 'icon');
+				}
+				else
+				{
+					$buttonicon = $form->getFieldAttribute($fieldname, 'icon');
+				}
+			}
+
+			if (!empty($form->getFieldAttribute($fieldname, 'uploadicon')))
+			{
+				$uploadicon = $form->getFieldAttribute($fieldname, 'uploadicon');
 			}
 
 			if (!empty($form->getFieldAttribute($fieldname, 'buttonicon')))
@@ -657,20 +621,7 @@ class plgContentJtformulator extends JPlugin
 				$buttonicon = $form->getFieldAttribute($fieldname, 'buttonicon');
 			}
 
-			if (!empty($buttonicon))
-			{
-				$form->setFieldAttribute($fieldname, 'buttonicon', $buttonicon);
-				$form->setFieldAttribute($fieldname, 'icon', null);
-			}
-
-			$buttonclass = null;
-
-			if (!empty($frwkClasses['class'][$type]['buttons']['class']))
-			{
-				$buttonclass = $frwkClasses['class'][$type]['buttons']['class'];
-			}
-
-			if ($type == 'submit' && !empty($classes['fieldClass']))
+			if ($type == 'submit' || $type == 'file' && !empty($classes['fieldClass']))
 			{
 				$buttonclass = implode(' ', array_keys($classes['fieldClass']));
 				$classes['fieldClass'] = array();
@@ -681,9 +632,24 @@ class plgContentJtformulator extends JPlugin
 				$buttonclass = $form->getFieldAttribute($fieldname, 'buttonclass');
 			}
 
+			if (!empty($uploadicon))
+			{
+				$form->setFieldAttribute($fieldname, 'uploadicon', $uploadicon);
+			}
+
+			if (!empty($buttonicon))
+			{
+				$form->setFieldAttribute($fieldname, 'buttonicon', $buttonicon);
+			}
+
 			if (!empty($buttonclass))
 			{
 				$form->setFieldAttribute($fieldname, 'buttonclass', $buttonclass);
+			}
+
+			if (!empty($uploadicon) || !empty($buttonicon) || !empty($buttonclass))
+			{
+				$form->setFieldAttribute($fieldname, 'icon', null);
 			}
 
 		}
@@ -735,7 +701,7 @@ class plgContentJtformulator extends JPlugin
 	/**
 	 * Get and translate submitted Form values
 	 *
-	 * @param    array $submittedValues
+	 * @param   array  $submittedValues  Array of submitted values
 	 *
 	 * @return   array
 	 * @since    1.0
@@ -1248,7 +1214,7 @@ class plgContentJtformulator extends JPlugin
 	/**
 	 * Set submit button to submit fieldset
 	 *
-	 * @param    mixed   $submit   Fieldname of submit button
+	 * @param   mixed  $submit  Fieldname of submit button
 	 *
 	 * @return   void
 	 * @since    3.0

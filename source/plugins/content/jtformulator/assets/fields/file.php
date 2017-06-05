@@ -35,6 +35,14 @@ class JFormFieldFile extends JFormField
 	protected $accept;
 
 	/**
+	 * The icon shown for upload.
+	 *
+	 * @var    mixed
+	 * @since  3.7.2
+	 */
+	protected $uploadicon = null;
+
+	/**
 	 * The max upload size.
 	 *
 	 * @var    mixed
@@ -64,6 +72,7 @@ class JFormFieldFile extends JFormField
 		switch ($name)
 		{
 			case 'accept':
+			case 'uploadicon':
 			case 'uploadmaxsize':
 				return $this->{$name};
 		}
@@ -86,6 +95,7 @@ class JFormFieldFile extends JFormField
 		switch ($name)
 		{
 			case 'accept':
+			case 'uploadicon':
 				$this->{$name} = (string) $value;
 				break;
 
@@ -119,6 +129,7 @@ class JFormFieldFile extends JFormField
 		if ($return)
 		{
 			$this->accept        = (string) $this->element['accept'];
+			$this->uploadicon    = isset($this->element['uploadicon']) ? (string) $this->element['uploadicon'] : null;
 			$this->uploadmaxsize = isset($this->element['uploadmaxsize']) ? (int) $this->element['uploadmaxsize'] : null;
 		}
 
@@ -168,8 +179,9 @@ class JFormFieldFile extends JFormField
 		}
 
 		$extraData = array(
-			'accept'   => $this->accept,
-			'multiple' => $this->multiple,
+			'accept'        => $this->accept,
+			'multiple'      => $this->multiple,
+			'uploadicon'    => $this->uploadicon,
 			'uploadmaxsize' => $uploadmaxsize,
 		);
 

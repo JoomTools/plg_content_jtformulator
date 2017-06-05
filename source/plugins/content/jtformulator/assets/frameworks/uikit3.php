@@ -40,6 +40,8 @@ defined('_JEXEC') or die('Restricted access');
 
 class JTFFrameworkUikit3
 {
+	public static $name = 'UIKit v3';
+
 	private $classes;
 
 	public function __construct($formclass = array())
