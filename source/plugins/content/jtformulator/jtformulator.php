@@ -621,7 +621,7 @@ class plgContentJtformulator extends JPlugin
 				$buttonicon = $form->getFieldAttribute($fieldname, 'buttonicon');
 			}
 
-			if ($type == 'submit' || $type == 'file' && !empty($classes['fieldClass']))
+			if (($type == 'submit' || $type == 'file') && !empty($classes['fieldClass']))
 			{
 				$buttonclass = implode(' ', array_keys($classes['fieldClass']));
 				$classes['fieldClass'] = array();

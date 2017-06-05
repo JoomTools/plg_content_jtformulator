@@ -40,7 +40,7 @@ defined('_JEXEC') or die('Restricted access');
 
 class JTFFrameworkBs4
 {
-	public static $name = 'Bootsrap 4';
+	public static $name = 'Bootsrap v4';
 
 	private $classes;
 
