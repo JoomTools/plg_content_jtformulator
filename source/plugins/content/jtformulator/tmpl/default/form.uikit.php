@@ -10,8 +10,7 @@
 
 defined('_JEXEC') or die;
 JHtml::_('behavior.keepalive');
-//JHtml::_('behavior.formvalidation');
-JHtml::_('behavior.formvalidator');
+JHtml::_('behavior.formvalidation');
 
 // Set Fieldname or own value
 $this->mail['sender_name'] = 'name';
@@ -19,17 +18,16 @@ $this->mail['sender_name'] = 'name';
 // If you have to concatenate more fields, use an array like this
 //$this->mail['sender_name'] = array('anrede', 'vname', 'nname');
 
-//$this->mail['sender_email'] = 'promapartner';
 $this->mail['sender_email'] = 'email';
 
 $invalidColor = '#ff0000';
 
 JFactory::getDocument()->addStyleDeclaration("
-	.invalid { 
+	.invalid:not(label) { 
 		border-color: " . $invalidColor . " !important;
-		color: " . $invalidColor . " !important;
+		background-color: #f2dede !important;
 	}
-	label.invalid { color: " . $invalidColor . " !important; }
+	.invalid { color: " . $invalidColor . " !important; }
 	.inline { display: inline-block !important; }
 ");
 ?>

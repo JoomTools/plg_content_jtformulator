@@ -19,7 +19,28 @@ JHtml::_('behavior.formvalidation');
 $renderOptions              = array();
 $this->mail['sender_name']  = array('vname', 'name');
 $this->mail['sender_email'] = 'email';
+
+$invalidColor = '#ff0000';
+
+JFactory::getDocument()->addStyleDeclaration("
+	.invalid:not(label) { 
+		border-color: " . $invalidColor . " !important;
+		background-color: #f2dede !important;
+	}
+	.invalid { color: " . $invalidColor . " !important; }
+	.inline { display: inline-block !important; }
+");
 ?>
+
+<script>
+	jQuery(function ($) {
+		$('#<?php echo $id . $index; ?>_form button[type=submit]').click(function () {
+			if ($('#system-message-container').html().trim()) {
+				$('#tm-anchor-bottom').click();
+			}
+		});
+	});
+</script>
 
 {emailcloak=off}
 <div class="contact-form">
