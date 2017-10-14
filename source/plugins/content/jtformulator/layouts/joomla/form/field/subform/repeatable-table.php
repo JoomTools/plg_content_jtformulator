@@ -102,3 +102,9 @@ else
 		</div>
 	</div>
 </div>
+<script>
+	jQuery(document).on('subform-row-add', function(event, row){
+		console.log('ROW: ', row);
+		document.formvalidator = new JFormValidator();
+	})
+</script>
