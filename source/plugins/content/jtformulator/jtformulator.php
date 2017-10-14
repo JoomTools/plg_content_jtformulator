@@ -213,22 +213,7 @@ class plgContentJtformulator extends JPlugin
 					// Get Form values
 					$submitValues = JFactory::getApplication()->input->get($uParams['theme'] . $cIndex, array(), 'post', 'array');
 
-					foreach ($submitValues as $subKey => $_subValue)
-					{
-						if (is_array($_subValue))
-						{
-							$subValue = array();
-							foreach ($_subValue as $sValue)
-							{
-								$subValue[] = JText::_($sValue);
-							}
-						}
-						else
-						{
-							$subValue = JText::_($_subValue);
-						}
-						$submitValues[$subKey] = $subValue;
-					}
+					$this->translate($submitValues);
 
 					switch (true)
 					{
@@ -789,5 +774,28 @@ class plgContentJtformulator extends JPlugin
 		$send = $mailer->Send();
 
 		return $send;
+	}
+
+	/**
+	 * @param $submitValues
+	 *
+	 *
+	 * @since version
+	 */
+	protected function translate(&$submitValues)
+	{
+		foreach ($submitValues as $subKey => $subValue)
+		{
+			if (is_array($subValue))
+			{
+				$this->translate($subValue);
+			}
+			else
+			{
+				$subValue = JText::_($subValue);
+			}
+
+			$submitValues[$subKey] = $subValue;
+		}
 	}
 }
