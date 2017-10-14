@@ -10,78 +10,159 @@
 
 defined('_JEXEC') or die;
 
-$fieldsets = $form->getXML();
+$fieldsets = $form->getXML(); ?>
 
-foreach ($fieldsets->fieldset as $fieldset)
-{
+<table cellpadding="8" cellspacing="0" border="1">
+	<tbody>
+	<?php
+	foreach ($fieldsets->fieldset as $fieldset)
+	{
 	$fieldsetLabel = (string) $fieldset['label'];
 
 	if (count($fieldset->field)) : ?>
-		<?php if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
-			<h1><?php echo $legend; ?></h1>
-		<?php endif; ?>
+	<?php if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel)))) : ?>
+	</tbody>
+</table>
+<h1><?php echo $legend; ?></h1>
+<table cellpadding="8" cellspacing="0" border="1">
+	<tbody>
+	<?php endif; ?>
+	<?php foreach ($fieldset->field as $field) :
+		$label = trim(JText::_((string) $field['label']));
+		$value = $form->getValue((string) $field['name']);
+		$type = (string) $form->getFieldAttribute((string) $field['name'], 'type');
+		$fileTimeOut = '';
 
-		<table cellpadding="2" border="1">
-			<tbody>
-			<?php foreach ($fieldset->field as $field) :
-				$label       = strip_tags(trim(JText::_((string) $field['label'])));
-				$value       = $form->getValue((string) $field['name']);
-				$type        = (string) $form->getFieldAttribute((string) $field['name'], 'type');
-				$fileTimeOut = '';
+		if ($type == 'file' && $this->params->get('file_clear'))
+		{
+			$fileTimeOut .= '<tr><td colspan="2">';
+			$fileTimeOut .= JText::sprintf('PLG_JT_FORMULATOR_FILE_TIMEOUT', $this->params->get('file_clear'));
+			$fileTimeOut .= '</td></tr>';
+		}
 
-				if ($type == 'file' && $this->params->get('file_clear'))
+		if ($type == 'spacer')
+		{
+			$label = '&nbsp;';
+			$value = trim(JText::_((string) $field['label']));
+		}
+
+		if (empty($value))
+		{
+			// Comment out 'continue', if you want to submit only filled fields
+			//continue;
+		}
+
+		if (is_array($value))
+		{
+			if ($type != 'subform')
+			{
+				foreach ($value as $_key => $_value)
 				{
-					$fileTimeOut .= '<tr><td colspan="2">';
-					$fileTimeOut .= JText::sprintf('PLG_JT_FORMULATOR_FILE_TIMEOUT', $this->params->get('file_clear'));
-					$fileTimeOut .= '</td></tr>';
-				}
-
-				if ($type == 'spacer')
-				{
-					if ($label)
+					if ($type == 'file')
 					{
-						$value = $label;
-						$label = '&nbsp;';
+						$values[] = '<a href="' . strip_tags(trim(JText::_($_value))) . '" download>' . $_key . '</a> *';
+					}
+					else
+					{
+						$values[] = strip_tags(trim(JText::_($_value)));
 					}
 				}
 
-				if (is_array($value))
+				$value = implode(", ", $values);
+				unset($values);
+			}
+		}
+		else
+		{
+			$value = strip_tags(trim(JText::_($value)));
+		} ?>
+		<tr>
+			<th style="width:30%; text-align: left;">
+				<?php echo strip_tags($label); ?>
+			</th>
+			<td><?php if (!is_array($value))
 				{
-					foreach ($value as $_key => $_value)
+					echo $value ? nl2br($value) : '--';
+				}
+
+				if (!empty($value))
+				{
+					if ($type == 'subform')
 					{
-						if ($type == 'file')
+						$formname   = $form->getFormControl();
+						$fieldname  = (string) $field['name'];
+						$control    = $formname . '[' . $fieldname . ']' . '[' . $fieldname . 'X]';
+						$formsource = (string) $field['formsource'];
+						$setTable   = false;
+						$counter    = count($value) - 1;
+
+						$setTable = true; ?>
+						<table cellpadding="8" cellspacing="0" border="1">
+						<tbody>
+						<?php
+
+						foreach ($value as $valuesKey => $subValues)
 						{
-							$values[] = '<a href="' . $_value . '" download>' . $_key . '</a> *';
+							$subForm = $form::getInstance(
+								'subform.' . $fieldname . $valuesKey,
+								$formsource,
+								array('control' => $control)
+							);
+
+							foreach ($subForm->getGroup('') as $subFormField)
+							{
+								$subFormLabel = $subFormField->getAttribute('label');
+								$subFormValue = $subValues[$subFormField->fieldname];
+
+								if (empty($subFormValue))
+								{
+									// Comment out 'continue', if you want to submit only filled fields
+									//continue;
+								}
+
+								if (is_array($subFormValue))
+								{
+									$subFormValue = trim($subFormValue[0]);
+								} ?>
+								<tr>
+									<th style="width:30%; text-align: left;">
+										<?php echo strip_tags(JText::_($subFormLabel)); ?>
+									</th>
+									<td><?php echo $subFormValue
+											? nl2br(strip_tags(JText::_($subFormValue)))
+											: '--'; ?>
+									</td>
+								</tr>
+								<?php
+								//unset($subFormValue);
+							}
+
+							if ($valuesKey < $counter)
+							{
+								?>
+								<tr>
+									<td colspan="2">---------------------------</td>
+								</tr>
+								<?php
+							}
+
 						}
-						else
+
+						if ($setTable)
 						{
-							$values[] = strip_tags(trim(JText::_($_value)));
+							?>
+							</tbody>
+							</table>
+							<?php
 						}
 					}
-
-					$value = implode(", ", $values);
-					unset($values);
 				}
-				else
-				{
-					$value = strip_tags(trim(JText::_($value)));
-				}
-
-				if (empty($value) || $type == 'captcha')
-				{
-					// Comment out 'continue', if you want to submit only filled fields
-					continue;
-				} ?>
-				<tr>
-					<th style="width:40%; text-align: left;">
-						<?php echo $label; ?>
-					</th>
-					<td><?php echo $value ? nl2br($value) : '--'; ?></td>
-				</tr>
-				<?php echo $fileTimeOut; ?>
-			<?php endforeach; ?>
-			</tbody>
-		</table>
-		<br />
+				?></td>
+		</tr>
+		<?php echo $fileTimeOut; ?>
+	<?php endforeach; ?>
 	<?php endif;
-}
+	} ?>
+	</tbody>
+</table>
+
