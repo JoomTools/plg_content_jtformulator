@@ -124,3 +124,15 @@ JFactory::getDocument()->addStyleDeclaration("
 
 	</form>
 </div>
+<script>
+	jQuery(function($){
+		$("body").on('DOMSubtreeModified', "#system-message-container", function() {
+			var error = $(this).find('alert-error');
+			if (undefined !== error) {
+				$('html, body').animate({
+					scrollTop: $(this).offset().top-100
+				}, 0);
+			}
+		});
+	});
+</script>

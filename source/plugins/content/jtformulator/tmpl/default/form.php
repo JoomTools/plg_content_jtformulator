@@ -32,16 +32,6 @@ JFactory::getDocument()->addStyleDeclaration("
 ");
 ?>
 
-<script>
-	jQuery(function ($) {
-		$('#<?php echo $id . $index; ?>_form button[type=submit]').click(function () {
-			if ($('#system-message-container').html().trim()) {
-				$('#tm-anchor-bottom').click();
-			}
-		});
-	});
-</script>
-
 {emailcloak=off}
 <div class="contact-form">
 	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
@@ -133,3 +123,15 @@ JFactory::getDocument()->addStyleDeclaration("
 
 	</form>
 </div>
+<script>
+	jQuery(function($){
+		$("body").on('DOMSubtreeModified', "#system-message-container", function() {
+			var error = $(this).find('alert-error');
+			if (undefined !== error) {
+				$('html, body').animate({
+					scrollTop: $(this).offset().top-100
+				}, 0);
+			}
+		});
+	});
+</script>
