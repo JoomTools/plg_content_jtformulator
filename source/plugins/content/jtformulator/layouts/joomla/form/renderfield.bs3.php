@@ -23,7 +23,7 @@ if (!empty($options['showonEnabled']))
 {
 	JHtml::_('jquery.framework');
 	JHtml::_('script', 'jui/cms.js', false, true);
-	JFactory::getDocument()->addScript(JUri::root(true) . '/plugins/content/jtformulator/assets/js/showon.js');
+	JHtml::_('script', 'plugins/content/jtformulator/assets/js/showon.js', array('version' => 'auto'));
 }
 
 $gridgroup = empty($options['gridgroup']) ? '': ' ' . $options['gridgroup'];
