@@ -33,6 +33,8 @@ if ($multiple)
 	JHtml::_('script', 'plugins/content/jtformulator/assets/js/system/subform-repeatable.js', array('version' => 'auto'));
 }
 
+$layoutPaths = $this->getIncludePaths();
+
 // Build heading
 $table_head = '';
 
@@ -89,14 +91,34 @@ else
 			<tbody>
 			<?php
 			foreach ($forms as $k => $form) :
-				echo $this->sublayout($sublayout, array('form' => $form, 'basegroup' => $fieldname, 'group' => $fieldname . $k, 'buttons' => $buttons));
+				// Set Layouts override
+				$form->layoutPaths = $layoutPaths;
+
+				echo $this->sublayout($sublayout,
+					array(
+						'form' => $form,
+						'basegroup' => $fieldname,
+						'group' => $fieldname . $k,
+						'buttons' => $buttons)
+				);
 			endforeach;
 			?>
 			</tbody>
 		</table>
 		<?php if ($multiple) : ?>
 		<script type="text/subform-repeatable-template-section" class="subform-repeatable-template-section">
-		<?php echo $this->sublayout($sublayout, array('form' => $tmpl, 'basegroup' => $fieldname, 'group' => $fieldname . 'X', 'buttons' => $buttons)); ?>
+			<?php
+			// Set Layouts override
+			$tmpl->layoutPaths = $layoutPaths;
+
+			echo $this->sublayout($sublayout,
+				array(
+					'form' => $tmpl,
+					'basegroup' => $fieldname,
+					'group' => $fieldname . 'X',
+					'buttons' => $buttons)
+			);
+			?>
 		</script>
 		<?php endif; ?>
 		</div>
@@ -104,7 +126,6 @@ else
 </div>
 <script>
 	jQuery(document).on('subform-row-add', function(event, row){
-		console.log('ROW: ', row);
 		document.formvalidator = new JFormValidator();
 	})
 </script>

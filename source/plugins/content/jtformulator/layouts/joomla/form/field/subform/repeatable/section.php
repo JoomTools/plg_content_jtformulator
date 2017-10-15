@@ -21,7 +21,7 @@ extract($displayData);
 
 ?>
 
-<div class="subform-repeatable-group uk-width-1-1 uk-width-medium-1-4" data-base-name="<?php echo $basegroup; ?>" data-group="<?php echo $group; ?>">
+<div class="subform-repeatable-group" data-base-name="<?php echo $basegroup; ?>" data-group="<?php echo $group; ?>">
 
 <?php foreach ($form->getGroup('') as $field) : ?>
 	<?php echo $field->renderField(); ?>

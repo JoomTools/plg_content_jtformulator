@@ -34,34 +34,56 @@ if ($multiple)
 }
 
 $sublayout = empty($groupByFieldset) ? 'section' : 'section-byfieldsets';
+$layoutPaths = $this->getIncludePaths();
+
 ?>
 
 <div class="row-fluid">
 	<div class="subform-repeatable-wrapper subform-layout">
-		<div class="subform-repeatable uk-grid"
-			data-bt-add="a.group-add" data-bt-remove="a.group-remove" data-bt-move="a.group-move"
-			data-repeatable-element="div.subform-repeatable-group" data-minimum="<?php echo $min; ?>" data-maximum="<?php echo $max; ?>">
-			<div class="btn-toolbar uk-width-1-1">
+		<div class="subform-repeatable"
+			 data-bt-add="a.group-add" data-bt-remove="a.group-remove" data-bt-move="a.group-move"
+			 data-repeatable-element="div.subform-repeatable-group" data-minimum="<?php echo $min; ?>"
+			 data-maximum="<?php echo $max; ?>">
+			<div class="btn-toolbar">
 				<div class="btn-group">
 					<a class="group-add btn btn-mini button btn-success"><span class="icon-plus"></span> </a>
 				</div>
 			</div>
-		<?php
-		foreach ($forms as $k => $form) :
-			echo $this->sublayout($sublayout, array('form' => $form, 'basegroup' => $fieldname, 'group' => $fieldname . $k, 'buttons' => $buttons));
-		endforeach;
-		?>
-		<?php if ($multiple) : ?>
-		<script type="text/subform-repeatable-template-section" class="subform-repeatable-template-section">
-		<?php echo $this->sublayout($sublayout, array('form' => $tmpl, 'basegroup' => $fieldname, 'group' => $fieldname . 'X', 'buttons' => $buttons)); ?>
-		</script>
-		<?php endif; ?>
+			<?php
+			foreach ($forms as $k => $form) :
+				// Set Layouts override
+				$form->layoutPaths = $layoutPaths;
+
+				echo $this->sublayout($sublayout,
+					array(
+						'form' => $form,
+						'basegroup' => $fieldname,
+						'group' => $fieldname . $k,
+						'buttons' => $buttons)
+				);
+			endforeach;
+			?>
+			<?php if ($multiple) : ?>
+				<script type="text/subform-repeatable-template-section" class="subform-repeatable-template-section">
+					<?php
+					// Set Layouts override
+					$tmpl->layoutPaths = $layoutPaths;
+
+					echo $this->sublayout($sublayout,
+						array(
+							'form' => $tmpl,
+							'basegroup' => $fieldname,
+							'group' => $fieldname . 'X',
+							'buttons' => $buttons)
+					);
+					?>
+				</script>
+			<?php endif; ?>
 		</div>
 	</div>
 </div>
 <script>
-	jQuery(document).on('subform-row-add', function(event, row){
-		console.log('ROW: ', row);
+	jQuery(document).on('subform-row-add', function (event, row) {
 		document.formvalidator = new JFormValidator();
 	})
 </script>
