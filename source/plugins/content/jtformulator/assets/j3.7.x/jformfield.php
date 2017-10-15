@@ -515,15 +515,8 @@ abstract class JFormField
 		$renderer = new JLayoutFile($layoutId);
 
 		// Set Framwork as Layout->Suffix
-		if (!empty($this->form->framework))
+		if (!empty($this->form->framework) && $this->form->framework[0] != 'joomla')
 		{
-			if (!method_exists($renderer, 'setSuffixes'))
-			{
-				unset($renderer);
-				JLoader::register('JTLayoutFile', dirname(__FILE__) . '/file.php');
-				$renderer = new JTLayoutFile($layoutId);
-			}
-
 			$renderer->setSuffixes($this->form->framework);
 		}
 
@@ -538,9 +531,9 @@ abstract class JFormField
 		}
 
 		// Set Plugin Layouts override
-		if (!empty($this->form->addLayoutsPath))
+		if (!empty($this->form->layoutPaths))
 		{
-			$renderer->addIncludePath($this->form->addLayoutsPath);
+			$renderer->addIncludePath($this->form->layoutPaths);
 		}
 
 		return $renderer;
