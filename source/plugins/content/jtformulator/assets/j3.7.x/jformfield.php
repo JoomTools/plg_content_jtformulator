@@ -527,13 +527,7 @@ abstract class JFormField
 
 		if ($layoutPaths)
 		{
-			$renderer->setIncludePaths($layoutPaths);
-		}
-
-		// Set Plugin Layouts override
-		if (!empty($this->form->layoutPaths))
-		{
-			$renderer->addIncludePath($this->form->layoutPaths);
+			$renderer->addIncludePaths($layoutPaths);
 		}
 
 		return $renderer;
@@ -591,6 +585,11 @@ abstract class JFormField
 	 */
 	protected function getLayoutPaths()
 	{
+		if (!empty($this->form->layoutPaths))
+		{
+			return $this->form->layoutPaths;
+		}
+
 		return array();
 	}
 

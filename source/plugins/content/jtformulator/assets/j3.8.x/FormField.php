@@ -1132,7 +1132,12 @@ abstract class FormField
 	 */
 	protected function getLayoutPaths()
 	{
-		return $this->form->layoutPaths;
+		if (!empty($this->form->layoutPaths))
+		{
+			return $this->form->layoutPaths;
+		}
+
+		return array();
 	}
 
 	/**
