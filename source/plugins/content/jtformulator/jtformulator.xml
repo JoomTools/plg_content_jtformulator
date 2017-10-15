@@ -68,6 +68,6 @@
 	</config>
 
 	<updateservers>
-		<server type="extension" name="PLG_JT_FORMULATOR_XML_NAME">https://raw.githubusercontent.com/JoomTools/updateserver/master/plg_content_jtformulator.xml</server></server>
+		<server type="extension" name="PLG_JT_FORMULATOR_XML_NAME">https://raw.githubusercontent.com/JoomTools/updateserver/master/plg_content_jtformulator.xml</server>
 	</updateservers>
 </extension>
