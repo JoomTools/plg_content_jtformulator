@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="3.5" type="plugin" group="content" method="upgrade">
+<extension version="3.7" type="plugin" group="content" method="upgrade">
 	<name>PLG_JT_FORMULATOR_XML_NAME</name>
 	<creationDate>##DATE##</creationDate>
 	<author>Guido De Gobbis</author>
@@ -68,6 +68,6 @@
 	</config>
 
 	<updateservers>
-		<server type="collection" name="joomtools.de - Updateserver">http://updates.joomtools.de/extensions.xml</server>
+		<server type="extension" name="PLG_JT_FORMULATOR_XML_NAME">https://raw.githubusercontent.com/JoomTools/updateserver/master/plg_content_jtformulator.xml</server>
 	</updateservers>
 </extension>

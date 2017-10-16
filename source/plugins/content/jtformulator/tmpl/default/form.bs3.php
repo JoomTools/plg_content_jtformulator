@@ -19,6 +19,18 @@ JHtml::_('behavior.formvalidation');
 $renderOptions              = array();
 $this->mail['sender_name']  = array('vname', 'name');
 $this->mail['sender_email'] = 'email';
+
+$invalidColor = '#ff0000';
+
+JFactory::getDocument()->addStyleDeclaration("
+	.invalid:not(label) { 
+		border-color: " . $invalidColor . " !important;
+		background-color: #f2dede !important;
+		color: " . $invalidColor . " !important;
+	}
+	label.invalid { color: " . $invalidColor . " !important; }
+	.inline { display: inline-block !important; }
+");
 ?>
 
 {emailcloak=off}
@@ -112,3 +124,15 @@ $this->mail['sender_email'] = 'email';
 
 	</form>
 </div>
+<script>
+	jQuery(function($){
+		$("body").on('DOMSubtreeModified', "#system-message-container", function() {
+			var error = $(this).find('alert-error');
+			if (undefined !== error) {
+				$('html, body').animate({
+					scrollTop: $(this).offset().top-100
+				}, 0);
+			}
+		});
+	});
+</script>

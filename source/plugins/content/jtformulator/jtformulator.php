@@ -10,7 +10,7 @@
 
 defined('_JEXEC') or die('Restricted access');
 
-class plgContentJtformulator extends JPlugin
+class PlgContentJtformulator extends JPlugin
 {
 
 	protected $honeypot;
@@ -29,38 +29,34 @@ class plgContentJtformulator extends JPlugin
 	// Mail
 	protected $mail = array();
 
-	public function __construct(&$subject, $params)
-	{
-		if (JFactory::getApplication()->isAdmin())
-		{
-			return true;
-		}
-
-		parent::__construct($subject, $params);
-
-		$version                   = new JVersion();
-		$joomla_main_version       = substr($version->RELEASE, 0, strpos($version->RELEASE, '.'));
-		$this->uParams['jversion'] = $joomla_main_version;
-
-		$this->loadLanguage();
-	}
+	/**
+	 * Affects constructor behavior. If true, language files will be loaded automatically.
+	 *
+	 * @var     boolean
+	 * @since   3.1
+	 */
+	protected $autoloadLanguage = true;
 
 	public function onContentPrepare($context, &$row, &$params, $page = 0)
 	{
-		if (JFactory::getApplication()->isAdmin()
-			|| strpos($row->text, '{jtformulator') === false
+		$call1 = strpos($row->text, '{jtformulator ');
+		$call2 = strpos($row->text, '{jtformulator}');
+		$call = $call1 === false && $call2 === false ? false : true;
+
+
+		if (JFactory::getApplication()->isClient('administrator')
+			|| $context == 'com_finder.indexer'
+			|| $call === false
 		)
 		{
 			return;
 		}
 
-		$msg             = '';
-		$error_msg       = '';
 		$cIndex          = 0;
-		$checkThemeFiles = array('fields'        => 'xml',
-		                         'form'          => 'php',
-		                         'message_html'  => 'php',
-		                         'message_plain' => 'php'
+		$lang            = JFactory::getLanguage();
+		$tag             = $lang->getTag();
+		$checkThemeFiles = array(
+			'fields' => 'xml',
 		);
 
 		$template = JFactory::getApplication()->getTemplate();
@@ -72,11 +68,52 @@ class plgContentJtformulator extends JPlugin
 			return;
 		}
 
-		JLoader::register('JFormField', dirname(__FILE__) . '/assets/jformfield.php');
+		$code = array_keys($matches[1], '<code>');
+		$pre = array_keys($matches[1], '<pre>');
 
-		// add form fields
+		if (!empty($code) || !empty($pre))
+		{
+			array_walk($matches,
+				function (&$array, $key, $tags) {
+					foreach ($tags as $tag)
+					{
+						if ($tag !== null && $tag !== false)
+						{
+							unset($array[$tag]);
+						}
+					}
+				},
+				array_merge($code, $pre)
+			);
+
+			foreach ($matches as $key => $match)
+			{
+				if (empty($match))
+				{
+					unset($matches[$key]);
+				}
+			}
+
+				if (empty($matches))
+			{
+				return;
+			}
+		}
+
+		if (version_compare(JVERSION, '3.8', 'lt'))
+		{
+			JLoader::register('JFormField', dirname(__FILE__) . '/assets/j3.7.x/jformfield.php');
+		}
+		else
+		{
+			JLoader::register('JForm', dirname(__FILE__) . '/assets/j3.8.x/Form.php');
+			JLoader::register('JFormField', dirname(__FILE__) . '/assets/j3.8.x/FormField.php');
+		}
+
+		// Add form fields
 		JFormHelper::addFieldPath(dirname(__FILE__) . '/assets/fields');
-		// add form rules
+
+		// Add form rules
 		JFormHelper::addRulePath(dirname(__FILE__) . '/assets/rules');
 
 
@@ -89,8 +126,6 @@ class plgContentJtformulator extends JPlugin
 		{
 			$html    = '';
 			$uParams = array();
-			$lang    = JFactory::getLanguage();
-			$tag     = $lang->getTag();
 			$vars    = $matches[3][$matchKey] ? explode('|', $matches[3][$matchKey]) : array();
 
 			if (!empty($vars))
@@ -180,10 +215,10 @@ class plgContentJtformulator extends JPlugin
 				$this->form[$uParams['theme'] . $cIndex] = $field;
 
 				// Set Layouts override
-				$this->form[$uParams['theme'] . $cIndex]->addLayoutsPath = array(
+				$this->form[$uParams['theme'] . $cIndex]->layoutPaths = array(
 					JPATH_THEMES . '/' . $template . '/html/plg_content_jtformulator/layouts',
 					JPATH_THEMES . '/' . $template . '/html/layouts',
-					JPATH_PLUGINS . '/content/jtformulator/layouts'
+					JPATH_PLUGINS . '/content/jtformulator/layouts',
 				);
 
 				// Set Framework as Layout->Suffix
@@ -213,22 +248,7 @@ class plgContentJtformulator extends JPlugin
 					// Get Form values
 					$submitValues = JFactory::getApplication()->input->get($uParams['theme'] . $cIndex, array(), 'post', 'array');
 
-					foreach ($submitValues as $subKey => $_subValue)
-					{
-						if (is_array($_subValue))
-						{
-							$subValue = array();
-							foreach ($_subValue as $sValue)
-							{
-								$subValue[] = JText::_($sValue);
-							}
-						}
-						else
-						{
-							$subValue = JText::_($_subValue);
-						}
-						$submitValues[$subKey] = $subValue;
-					}
+					$this->translate($submitValues);
 
 					switch (true)
 					{
@@ -265,7 +285,6 @@ class plgContentJtformulator extends JPlugin
 
 				if ($task == $this->uParams['theme'] . $cIndex . "_sendmail")
 				{
-
 					if ($valid)
 					{
 						if ($this->_sendemail())
@@ -277,14 +296,13 @@ class plgContentJtformulator extends JPlugin
 								->redirect(JRoute::_('index.php', false));
 						}
 					}
+
 					if ($submitValues['information_number'])
 					{
 						JFactory::getApplication()
 							->redirect(JRoute::_('index.php', false));
 					}
-
 				}
-
 			}
 
 			$pos = strpos($row->text, $matchValue);
@@ -375,6 +393,29 @@ class plgContentJtformulator extends JPlugin
 		$xml  = '<form><fieldset name="submit"><field name="captcha" type="captcha" validate="captcha" description="JTF_CAPTCHA_DESC" label="JTF_CAPTCHA_LABEL"></field></fieldset></form>';
 
 		return $form->load($xml, false);
+	}
+
+	/**
+	 * @param $submitValues
+	 *
+	 *
+	 * @since version
+	 */
+	protected function translate(&$submitValues)
+	{
+		foreach ($submitValues as $subKey => $subValue)
+		{
+			if (is_array($subValue))
+			{
+				$this->translate($subValue);
+			}
+			else
+			{
+				$subValue = JText::_($subValue);
+			}
+
+			$submitValues[$subKey] = $subValue;
+		}
 	}
 
 	protected function _validate()

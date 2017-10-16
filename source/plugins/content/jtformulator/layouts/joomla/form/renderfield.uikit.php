@@ -31,9 +31,9 @@ $gridlabel = empty($options['gridlabel']) ? '': ' ' . $options['gridlabel'];
 $gridfield = empty($options['gridfield']) ? '': ' ' . $options['gridfield'];
 ?>
 
-<div class="control-group<?php echo $gridgroup; ?>" <?php echo $options['rel']; ?>>
+<div class="uk-form-row<?php echo $gridgroup; ?>" <?php echo $options['rel']; ?>>
 	<?php if (empty($options['hiddenLabel'])) : ?>
-		<div class="control-label<?php echo $gridlabel; ?> "><?php echo $label; ?></div>
+		<div class="uk-form-label<?php echo $gridlabel; ?>"><?php echo $label; ?></div>
 	<?php endif; ?>
-	<div class="controls<?php echo $gridfield; ?>"><?php echo $input; ?></div>
+	<div class="uk-form-controls<?php echo $gridfield; ?>"><?php echo $input; ?></div>
 </div>
