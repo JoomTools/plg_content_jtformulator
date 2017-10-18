@@ -1,3 +1,11 @@
+/**
+ * @package     Joomla.Plugin
+ * @subpackage  Content.jtformulator
+ *
+ * @author      Guido De Gobbis
+ * @copyright   (c) 2017 JoomTools.de - All rights reserved.
+ * @license     GNU General Public License version 3 or later
+**/
 jQuery(function ($) {
 	"use strict";
 
@@ -53,6 +61,7 @@ jQuery(function ($) {
 			$setter = $('[name^="' + dataShowonId + '"]'),
 			setterVal = $setter.val(),
 			isCheckbox = $setter.is('[type="checkbox"]'),
+			isSelect = $setter.is('select'),
 			isRadio = $setter.is('[type="radio"]');
 
 //				 console.log('$elm', $elm);
@@ -62,26 +71,31 @@ jQuery(function ($) {
 //				 console.log('$setter', $setter);
 //				 console.log('setterVal', setterVal);
 //				 console.log('isCheckbox', isCheckbox);
+				 console.log('isSelect', isSelect);
 //				 console.log('isRadio', isRadio);
 
 		if (isRadio) {
 			setterVal = $setter.filter(':checked').val();
 		}
 
+		if (isSelect) {
+			setterVal = $setter.val();
+		}
+
 		if (setterVal === undefined) {
 			setterVal = 0;
 		}
 
-//		console.log('setterVal', setterVal);
+		console.log('setterVal', setterVal);
 
 		$elm.find('input').setNovalidate();
 		$elm.find('select').setNovalidate();
 		$elm.find('textarea').setNovalidate();
 
-//		console.log('PRÜFUNG', $.inArray(setterVal.toString(), dataShowonValues));
+		console.log('PRÜFUNG', $.inArray(setterVal.toString(), dataShowonValues));
 		if ($.inArray(setterVal.toString(), dataShowonValues) != -1) {
-			if ((isCheckbox && $setter.prop('checked')) || isRadio) {
-//				console.log('In PRÜFUNG');
+			if ((isCheckbox && $setter.prop('checked')) || (isSelect && $setter.prop('selected')) || isRadio) {
+				console.log('In PRÜFUNG');
 				$elm.find('input').removeNovalidate();
 				$elm.find('select').removeNovalidate();
 				$elm.find('textarea').removeNovalidate();
@@ -93,10 +107,16 @@ jQuery(function ($) {
 			var toggler = 0,
 				setterVal = $(this).filter(':checked').val();
 
+			if (isSelect) {
+				setterVal = $setter.val();
+			}
+
+			console.log('setterVal', $(this).val());
+
 			if (setterVal === undefined) {
 				setterVal = 0;
 			}
-//			console.log('setterVal', setterVal);
+			console.log('setterVal', setterVal);
 
 //			console.log('PRÜFUNG-CHANGE', $.inArray(setterVal.toString(), dataShowonValues));
 			if ($.inArray(setterVal.toString(), dataShowonValues) != -1) {
