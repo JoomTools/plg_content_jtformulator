@@ -1,12 +1,12 @@
 <?php
 /**
- * @Copyright    (c) 2016 JoomTools.de - All rights reserved.
- * @package        JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
- * @author         Guido De Gobbis
- * @link           http://www.joomtools.de
+ * @package     Joomla.Plugin
+ * @subpackage  Content.jtformulator
  *
- * @license        GPL v3
- **/
+ * @author      Guido De Gobbis
+ * @copyright   (c) 2017 JoomTools.de - All rights reserved.
+ * @license     GNU General Public License version 3 or later
+**/
 
 defined('_JEXEC') or die('Restricted access');
 
@@ -805,6 +805,8 @@ class PlgContentJtformulator extends JPlugin
 		$recipient = $this->uParams['mailto']
 			? $this->uParams['mailto']
 			: $jConfig->get('mailfrom');
+
+		$recipient = explode(';', $recipient);
 
 		$subject = (isset($mail['subject']) && !empty($mail['subject']))
 			? $mail['subject']
