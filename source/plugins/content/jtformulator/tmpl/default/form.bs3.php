@@ -35,7 +35,6 @@ JFactory::getDocument()->addStyleDeclaration("
 
 {emailcloak=off}
 <div class="contact-form">
-	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
 	<form name="<?php echo $id . $index; ?>_form"
 	      id="<?php echo $id . $index; ?>_form"
 	      action="<?php echo JRoute::_("index.php"); ?>"
@@ -43,6 +42,7 @@ JFactory::getDocument()->addStyleDeclaration("
 	      class="row form-validate"
 	      enctype="multipart/form-data"
 	>
+	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
 		<?php
 
 		$fieldsets         = $form->getXML();

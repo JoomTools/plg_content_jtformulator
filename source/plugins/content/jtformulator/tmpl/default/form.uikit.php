@@ -1,12 +1,12 @@
 <?php
 /**
- * @Copyright    (c) 2016 JoomTools.de - All rights reserved.
- * @package        JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
- * @author         Guido De Gobbis
- * @link           http://www.joomtools.de
+ * @package     Joomla.Plugin
+ * @subpackage  Content.jtformulator
  *
- * @license        GPL v3
- **/
+ * @author      Guido De Gobbis
+ * @copyright   (c) 2017 JoomTools.de - All rights reserved.
+ * @license     GNU General Public License version 3 or later
+**/
 
 defined('_JEXEC') or die;
 JHtml::_('behavior.keepalive');
@@ -34,10 +34,10 @@ JFactory::getDocument()->addStyleDeclaration("
 
 {emailcloak=off}
 <div class="uk-grid contact-form">
-	<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
 	<form name="<?php echo $id . $index; ?>_form" id="<?php echo $id . $index; ?>_form"
 		  action="<?php echo JRoute::_("index.php"); ?>" method="post" enctype="multipart/form-data"
 		  class="form-validate uk-form uk-width-1-1">
+		<p><strong><?php echo JText::_('JT_FORMULATOR_REQUIRED_FIELDS_FORM_LABEL'); ?></strong></p>
 		<?php
 
 		$fieldsets         = $form->getXML();
