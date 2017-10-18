@@ -1,12 +1,12 @@
 <?php
 /**
- * @Copyright    (c) 2016 JoomTools.de - All rights reserved.
- * @package        JT - Formulator - Plugin for Joomla! 2.5.x and 3.x
- * @author         Guido De Gobbis
- * @link           http://www.joomtools.de
+ * @package     Joomla.Plugin
+ * @subpackage  Content.jtformulator
  *
- * @license        GPL v3
- **/
+ * @author      Guido De Gobbis
+ * @copyright   (c) 2017 JoomTools.de - All rights reserved.
+ * @license     GNU General Public License version 3 or later
+**/
 
 defined('_JEXEC') or die;
 
@@ -44,6 +44,12 @@ $fieldsets = $form->getXML(); ?>
 		{
 			$label = '&nbsp;';
 			$value = trim(JText::_((string) $field['label']));
+		}
+
+		if ($type == 'captcha')
+		{
+			// Comment out 'continue', if you want to submit only filled fields
+			continue;
 		}
 
 		if (empty($value))
