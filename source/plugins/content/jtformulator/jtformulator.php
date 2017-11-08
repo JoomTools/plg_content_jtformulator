@@ -1,12 +1,12 @@
 <?php
 /**
- * @package     Joomla.Plugin
- * @subpackage  Content.jtformulator
+ * @package         Joomla.Plugin
+ * @subpackage      Content.jtformulator
  *
- * @author      Guido De Gobbis
+ * @author          Guido De Gobbis
  * @copyright   (c) 2017 JoomTools.de - All rights reserved.
- * @license     GNU General Public License version 3 or later
-**/
+ * @license         GNU General Public License version 3 or later
+ **/
 
 defined('_JEXEC') or die('Restricted access');
 
@@ -41,7 +41,7 @@ class PlgContentJtformulator extends JPlugin
 	{
 		$call1 = strpos($row->text, '{jtformulator ');
 		$call2 = strpos($row->text, '{jtformulator}');
-		$call = $call1 === false && $call2 === false ? false : true;
+		$call  = $call1 === false && $call2 === false ? false : true;
 
 
 		if (JFactory::getApplication()->isClient('administrator')
@@ -69,7 +69,7 @@ class PlgContentJtformulator extends JPlugin
 		}
 
 		$code = array_keys($matches[1], '<code>');
-		$pre = array_keys($matches[1], '<pre>');
+		$pre  = array_keys($matches[1], '<pre>');
 
 		if (!empty($code) || !empty($pre))
 		{
@@ -94,7 +94,7 @@ class PlgContentJtformulator extends JPlugin
 				}
 			}
 
-				if (empty($matches))
+			if (empty($matches))
 			{
 				return;
 			}
@@ -137,16 +137,11 @@ class PlgContentJtformulator extends JPlugin
 				}
 			}
 
-			$this->uParams['mailto'] = isset($uParams['mailto'])
-				? str_replace('#', '@', $uParams['mailto'])
-				: null;
-
-			$uParams['theme'] = isset($uParams['theme'])
-				? $uParams['theme']
-				: 'default';
-
-			$this->uParams['theme'] = $uParams['theme'];
-			$this->uParams['index'] = $cIndex;
+			$uParams['mailto']       = empty($uParams['mailto']) ? null : $uParams['mailto'];
+			$this->uParams['mailto'] = null;
+			$uParams['theme']        = isset($uParams['theme']) ? $uParams['theme'] : 'default';
+			$this->uParams['theme']  = $uParams['theme'];
+			$this->uParams['index']  = $cIndex;
 
 			if (isset($uParams['subject']))
 			{
@@ -265,6 +260,8 @@ class PlgContentJtformulator extends JPlugin
 							$submitValues['subject'] = $this->mail['subject'] = '';
 							break;
 					}
+
+					$this->setRecipient($uParams['mailto'], $submitValues);
 
 					$this->form[$uParams['theme'] . $cIndex]->bind($submitValues);
 
@@ -415,6 +412,41 @@ class PlgContentJtformulator extends JPlugin
 			}
 
 			$submitValues[$subKey] = $subValue;
+		}
+	}
+
+	protected function setRecipient($mailto, $submitValues)
+	{
+		$jConfig = JFactory::getConfig();
+
+		if ($mailto !== null)
+		{
+			$mailto = explode(';', $mailto);
+			$i = 0;
+
+			foreach ($mailto as $item)
+			{
+				$item = trim($item);
+
+				if (strpos($item, '#') !== false || strpos($item, '@') !== false)
+				{
+					$this->uParams['mailto'][str_replace('#', '@', $item)] = $i++;
+				}
+				else if (!empty($submitValues[$item]) && strpos($submitValues[$item], '@') !== false)
+				{
+					$this->uParams['mailto'][$submitValues[$item]] = $i++;
+				}
+				else
+				{
+					$this->uParams['mailto'][$jConfig->get('mailfrom')] = $i++;
+				}
+			}
+
+			$this->uParams['mailto'] = array_flip($this->uParams['mailto']);
+		}
+		else
+		{
+			$this->uParams['mailto'][] = $jConfig->get('mailfrom');
 		}
 	}
 
@@ -802,11 +834,7 @@ class PlgContentJtformulator extends JPlugin
 			? $mail['sender_name']
 			: '';
 
-		$recipient = $this->uParams['mailto']
-			? $this->uParams['mailto']
-			: $jConfig->get('mailfrom');
-
-		$recipient = explode(';', $recipient);
+		$recipient = $this->uParams['mailto'];
 
 		$subject = (isset($mail['subject']) && !empty($mail['subject']))
 			? $mail['subject']
