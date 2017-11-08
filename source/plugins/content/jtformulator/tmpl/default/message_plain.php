@@ -22,16 +22,14 @@ foreach ($fieldsets->fieldset as $fieldset)
 	{
 		if (isset($fieldsetLabel) && strlen($legend = trim(JText::_($fieldsetLabel))))
 		{
-			echo "====================" . "\n";
-			echo $legend . "\n";
+			echo "====================" . "\r\n";
+			echo $legend . "\r\n";
 		}
 
 		if ($fileFieldSet)
 		{
-			echo $fileTimeOut . "\n";
+			echo $fileTimeOut . "\r\n";
 		}
-
-		echo "====================" . "\n";
 
 		foreach ($fieldset->field as $field)
 		{
@@ -88,7 +86,7 @@ foreach ($fieldsets->fieldset as $fieldset)
 				echo $value ? strip_tags($value) : '--';
 			}
 
-			echo "\n\r";
+			echo "\r\n";
 
 			if (!empty($value))
 			{
@@ -104,7 +102,7 @@ foreach ($fieldsets->fieldset as $fieldset)
 					{
 						if ($valuesKey >= 1)
 						{
-							echo "---------------------------\n\r";
+							echo "---------------------------\r\n";
 						}
 						$subForm = $form::getInstance(
 							'subform.' . $fieldname . $valuesKey,
@@ -130,7 +128,7 @@ foreach ($fieldsets->fieldset as $fieldset)
 
 							echo strip_tags(JText::_($subFormLabel)) . ": ";
 							echo $subFormValue ? strip_tags(JText::_($subFormValue)) : '--';
-							echo "\n\r";
+							echo "\r\n";
 						}
 					}
 				}
@@ -138,3 +136,5 @@ foreach ($fieldsets->fieldset as $fieldset)
 		}
 	}
 }
+
+echo "====================" . "\r\n";
