@@ -71,7 +71,7 @@ jQuery(function ($) {
 //				 console.log('$setter', $setter);
 //				 console.log('setterVal', setterVal);
 //				 console.log('isCheckbox', isCheckbox);
-				 console.log('isSelect', isSelect);
+//				 console.log('isSelect', isSelect);
 //				 console.log('isRadio', isRadio);
 
 		if (isRadio) {
@@ -86,16 +86,20 @@ jQuery(function ($) {
 			setterVal = 0;
 		}
 
-		console.log('setterVal', setterVal);
-
 		$elm.find('input').setNovalidate();
 		$elm.find('select').setNovalidate();
 		$elm.find('textarea').setNovalidate();
 
-		console.log('PRÜFUNG', $.inArray(setterVal.toString(), dataShowonValues));
-		if ($.inArray(setterVal.toString(), dataShowonValues) != -1) {
-			if ((isCheckbox && $setter.prop('checked')) || (isSelect && $setter.prop('selected')) || isRadio) {
-				console.log('In PRÜFUNG');
+//		console.log('PRÜFUNG', $.inArray(setterVal.toString(), dataShowonValues));
+//		console.log('dataShowonValues', dataShowonValues);
+//		console.log('setterVal', setterVal);
+//		console.log('$setter.prop(selected)', $setter.prop('selected'));
+
+		if ($.inArray(setterVal.toString(), dataShowonValues) != '-1') {
+			if ((isCheckbox && $setter.prop('checked')) || (isSelect && $setter.val()) || isRadio) {
+//				console.log('In PRÜFUNG');
+//				console.log('$elm', $elm);
+//				console.log('setterVal.toString()', setterVal.toString());
 				$elm.find('input').removeNovalidate();
 				$elm.find('select').removeNovalidate();
 				$elm.find('textarea').removeNovalidate();
@@ -111,12 +115,12 @@ jQuery(function ($) {
 				setterVal = $setter.val();
 			}
 
-			console.log('setterVal', $(this).val());
+//			console.log('setterVal', $(this).val());
 
 			if (setterVal === undefined) {
 				setterVal = 0;
 			}
-			console.log('setterVal', setterVal);
+//			console.log('setterVal', setterVal);
 
 //			console.log('PRÜFUNG-CHANGE', $.inArray(setterVal.toString(), dataShowonValues));
 			if ($.inArray(setterVal.toString(), dataShowonValues) != -1) {
