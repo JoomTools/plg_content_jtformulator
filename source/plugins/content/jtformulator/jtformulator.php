@@ -608,7 +608,7 @@ class PlgContentJtformulator extends JPlugin
 				$rule = JFormHelper::loadRuleType($type);
 			}
 
-			if ($rule && !empty($value))
+			if ($rule)
 			{
 				if ($type == 'captcha')
 				{
